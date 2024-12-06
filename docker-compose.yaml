@@ -2,5 +2,12 @@ version: '3'
 
 services:
   db:
+    build: db
+    environment:
+      - POSTGRES_USER=***
+      - POSTGRES_PASSWORD=*******
+      - POSTGRES_DB=olympguide_db
+    ports:
+      - "5432:5432"
   api:
   web:
