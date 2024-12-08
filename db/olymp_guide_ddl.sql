@@ -1,246 +1,278 @@
 CREATE SCHEMA olympguide;
 
-ALTER DATABASE olympguide_db SET search_path TO olympguide;
+SET search_path TO olympguide;
 
-create table if not exists subject
+
+CREATE TABLE IF NOT EXISTS email_code
 (
-    subject_id serial not null primary key,
-    name text not null
+	email TEXT PRIMARY KEY,
+	code INTEGER NOT NULL DEFAULT TRUNC(RANDOM() * 899999 + 100000),
+	requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-create table if not exists olympiad
+ALTER TABLE email_code ADD CONSTRAINT email_checker CHECK (email SIMILAR TO '%@%\.%');
+
+ALTER TABLE email_code ADD CONSTRAINT code_verifier CHECK (code > 99999 AND code < 1000000);
+
+
+CREATE TABLE IF NOT EXISTS region
 (
-    olympiad_id serial
-        primary key,
-    name        text     not null,
-    description text,
-    level       smallint not null
-        constraint olympiad_level_check
-            check (level = ANY (ARRAY [1, 2, 3])),
-    profile     text     not null,
-    link        text
+    region_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL
 );
 
-create table if not exists olymp_stage
+
+CREATE TABLE IF NOT EXISTS subject
 (
-    olympiad_id serial
-        primary key,
-    start_date  date,
-    number      smallint not null,
-    description text,
-    is_final    boolean  not null,
-    is_online   boolean
+    subject_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL
 );
 
-create table if not exists region
+
+CREATE TABLE IF NOT EXISTS group_of_fields
 (
-    region_id serial
-        primary key,
-    name      text
+    group_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    code CHAR(8) NOT NULL UNIQUE
 );
 
-create table if not exists university
+ALTER TABLE group_of_fields ADD CONSTRAINT group_of_fields_verifier CHECK (code SIMILAR TO '\d\d\.00\.00');
+
+
+CREATE TABLE IF NOT EXISTS olympiad
 (
-    university_id serial
-        primary key,
-    name          text              not null,
-    logo          bytea,
-    description   text,
-    region_id     integer           not null
-        references region,
-    popularity    integer default 0 not null,
-    link          text              not null
+    olympiad_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    level SMALLINT NOT NULL,
+    profile TEXT NOT NULL,
+    link TEXT
 );
 
-create table if not exists faculty
+ALTER TABLE olympiad ADD CONSTRAINT olympiad_level_checker CHECK (level = ANY(ARRAY[1, 2, 3]));
+
+
+CREATE TABLE IF NOT EXISTS "user"
 (
-    faculty_id    serial
-        primary key,
-    university_id integer not null
-        references university
-            on delete cascade,
-    name          text    not null,
-    description   text
+    user_id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    second_name TEXT,
+    birthday DATE NOT NULL,
+    password_hash TEXT NOT NULL,
+    region_id INTEGER
 );
 
-create table if not exists "user"
+ALTER TABLE "user" ADD FOREIGN KEY (region_id) REFERENCES region(region_id) ON DELETE SET NULL;
+
+
+CREATE TABLE university
 (
-    user_id       serial
-        primary key,
-    email         text not null
-        unique,
-    first_name    text not null,
-    last_name     text not null,
-    second_name   text,
-    birthday      date not null,
-    password_hash text not null,
-    region_id     integer
-                       references region
-                           on delete set null
+    university_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    logo BYTEA,
+    description TEXT,
+    region_id INTEGER NOT NULL,
+    popularity INTEGER NOT NULL DEFAULT 0,
+    link TEXT
 );
 
-create table if not exists email_code
+ALTER TABLE university ADD FOREIGN KEY (region_id) REFERENCES region (region_id) ON DELETE CASCADE;
+
+ALTER TABLE university ADD CONSTRAINT university_popularity_checker CHECK (popularity >= 0);
+
+
+CREATE TABLE IF NOT EXISTS field_of_study
 (
-    email      text                                not null
-        primary key,
-    code       integer                             not null,
-    created_at timestamp default CURRENT_TIMESTAMP not null
+    field_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    code CHAR(8) NOT NULL UNIQUE,
+    degree TEXT NOT NULL,
+    group_id INTEGER NOT NULL
 );
 
-create table if not exists group_of_fields
+ALTER TABLE field_of_study ADD FOREIGN KEY (group_id) REFERENCES group_of_fields(group_id) ON DELETE CASCADE;
+
+ALTER TABLE field_of_study ADD CONSTRAINT field_of_study_verifier CHECK (code SIMILAR TO '\d\d\.\d\d\.\d\d');
+
+
+CREATE TABLE IF NOT EXISTS faculty
 (
-    group_id serial
-        primary key,
-    name     text    not null,
-    code     char(8) not null
-        unique
+    faculty_id SERIAL PRIMARY KEY,
+    university_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT
 );
 
-create table if not exists field_of_study
+ALTER TABLE faculty ADD FOREIGN KEY (university_id) REFERENCES university (university_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS admin_user
 (
-    field_id serial
-        primary key,
-    name     text    not null,
-    code     char(8) not null
-        unique,
-    degree   text    not null,
-    group_id integer not null
-        references group_of_fields
-            on delete cascade
+   user_id INTEGER PRIMARY KEY,
+   can_change_olymp BOOLEAN NOT NULL DEFAULT FALSE,
+   can_change_university BOOLEAN NOT NULL DEFAULT FALSE,
+   edit_university_id INTEGER,
+   is_founder BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-create table if not exists educational_program
+ALTER TABLE admin_user ADD FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE;
+
+ALTER TABLE admin_user ADD FOREIGN KEY (edit_university_id) REFERENCES university(university_id) ON DELETE SET NULL;
+
+
+CREATE TABLE IF NOT EXISTS olymp_stage
 (
-    program_id    serial
-        primary key,
-    university_id integer not null
-        references university
-            on delete cascade,
-    faculty_id    integer not null
-        references faculty
-            on delete cascade,
-    field_id      integer not null
-        references field_of_study
-            on delete cascade,
-    budget_places smallint,
-    paid_places   smallint,
-    cost          smallint,
-    link          text    not null
+    stage_id SERIAL PRIMARY KEY,
+    olympiad_id INTEGER NOT NULL,
+    start_date DATE,
+    number SMALLINT NOT NULL DEFAULT 1,
+    description TEXT,
+    is_final BOOLEAN NOT NULL,
+    is_online BOOLEAN
 );
 
-create table if not exists benefit
+ALTER TABLE olymp_stage ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad(olympiad_id) ON DELETE SET NULL;
+
+ALTER TABLE olymp_stage ADD CONSTRAINT olymp_stage_checker CHECK (number > 0);
+
+
+CREATE TABLE IF NOT EXISTS educational_program
 (
-    benefit_id        serial
-        primary key,
-    olympiad_id       integer  not null
-        references olympiad
-            on delete cascade,
-    program_id        integer  not null
-        references educational_program
-            on delete cascade,
-    is_bvi            boolean  not null,
-    min_diploma_level smallint not null,
-    min_class         smallint not null
+    program_id SERIAL PRIMARY KEY,
+    university_id INTEGER NOT NULL,
+    faculty_id INTEGER NOT NULL,
+    field_id INTEGER NOT NULL,
+    budget_places SMALLINT NOT NULL,
+    paid_places SMALLINT NOT NULL,
+    cost INTEGER NOT NULL,
+    link TEXT
 );
 
-create table if not exists won_olympiads
+ALTER TABLE educational_program ADD FOREIGN KEY (university_id) REFERENCES university (university_id) ON DELETE CASCADE;
+
+ALTER TABLE educational_program ADD FOREIGN KEY (faculty_id) REFERENCES faculty (faculty_id) ON DELETE CASCADE;
+
+ALTER TABLE educational_program ADD FOREIGN KEY (field_id) REFERENCES field_of_study (field_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS benefit
 (
-    user_id     integer not null
-        references "user"
-            on delete cascade,
-    olympiad_id integer not null
-        references olympiad
-            on delete cascade,
-    primary key (user_id, olympiad_id)
+    benefit_id SERIAL PRIMARY KEY,
+    olympiad_id INTEGER NOT NULL,
+    program_id INTEGER NOT NULL,
+    is_bvi BOOLEAN NOT NULL,
+    min_diploma_level SMALLINT NOT NULL,
+    min_class SMALLINT NOT NULL
 );
 
-create table if not exists liked_olympiads
+ALTER TABLE benefit ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad (olympiad_id) ON DELETE CASCADE;
+
+ALTER TABLE benefit ADD FOREIGN KEY (program_id) REFERENCES educational_program (program_id) ON DELETE CASCADE;
+
+ALTER TABLE benefit ADD CONSTRAINT benefit_diploma_level_checker CHECK (min_diploma_level > 0);
+
+ALTER TABLE benefit ADD CONSTRAINT benefit_class_checker CHECK (min_class > 0 AND min_class <= 11);
+
+
+CREATE TABLE IF NOT EXISTS won_olympiads
 (
-    user_id     integer not null
-        references "user"
-            on delete cascade,
-    olympiad_id integer not null
-        references olympiad
-            on delete cascade,
-    primary key (user_id, olympiad_id)
+    user_id INTEGER NOT NULL,
+    olympiad_id INTEGER NOT NULL,
+    class SMALLINT NOT NULL,
+    diploma_level SMALLINT NOT NULL,
+    PRIMARY KEY (user_id, olympiad_id)
 );
 
-create table if not exists liked_fields
+ALTER TABLE won_olympiads ADD FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE;
+
+ALTER TABLE won_olympiads ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad(olympiad_id) ON DELETE CASCADE;
+
+ALTER TABLE won_olympiads ADD CONSTRAINT won_olympiads_diploma_level_checker CHECK (diploma_level > 0);
+
+ALTER TABLE won_olympiads ADD CONSTRAINT won_olympiads_class_checker CHECK (class > 0 AND class <= 11);
+
+
+CREATE TABLE IF NOT EXISTS liked_fields
 (
-    user_id  integer not null
-        references "user"
-            on delete cascade,
-    field_id integer not null
-        references field_of_study
-            on delete cascade,
-    primary key (user_id, field_id)
+   user_id INTEGER NOT NULL,
+   field_id INTEGER NOT NULL,
+   PRIMARY KEY (user_id, field_id)
 );
 
-create table if not exists liked_universities
+ALTER TABLE liked_fields ADD FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON DELETE CASCADE;
+
+ALTER TABLE liked_fields ADD FOREIGN KEY (field_id) REFERENCES field_of_study(field_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS liked_universities
 (
-    user_id       integer not null
-        references "user"
-            on delete cascade,
-    university_id integer not null
-        references university
-            on delete cascade,
-    primary key (user_id, university_id)
+   user_id INTEGER NOT NULL,
+   university_id INTEGER NOT NULL,
+   PRIMARY KEY (user_id, university_id)
 );
 
-create table if not exists liked_programs
+ALTER TABLE liked_universities ADD FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON DELETE CASCADE;
+
+ALTER TABLE liked_universities ADD FOREIGN KEY (university_id) REFERENCES university(university_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS liked_programs
 (
-    user_id    integer not null
-        references "user"
-            on delete cascade,
-    program_id integer not null
-        references educational_program
-            on delete cascade,
-    primary key (user_id, program_id)
+    user_id INTEGER NOT NULL,
+    program_id INTEGER NOT NULL,
+    PRIMARY KEY (user_id, program_id)
 );
 
-create table if not exists program_subjects
+ALTER TABLE liked_programs ADD FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON DELETE CASCADE;
+
+ALTER TABLE liked_programs ADD FOREIGN KEY (program_id) REFERENCES educational_program(program_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS liked_olympiads
 (
-    program_id integer not null
-        references educational_program
-            on delete cascade,
-    subject_id integer not null
-        references subject
-            on delete cascade,
-    primary key (program_id, subject_id)
+    user_id INTEGER NOT NULL,
+    olympiad_id INTEGER NOT NULL,
+    PRIMARY KEY (user_id, olympiad_id)
 );
 
-create table if not exists confirmation_subjects
+ALTER TABLE liked_olympiads ADD FOREIGN KEY (user_id) REFERENCES "user" (user_id) ON DELETE CASCADE;
+
+ALTER TABLE liked_olympiads ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad(olympiad_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS program_subjects
 (
-    benefit_id integer not null
-        references benefit
-            on delete cascade,
-    subject_id integer not null
-        references subject
-            on delete cascade,
-    primary key (benefit_id, subject_id)
+    program_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    PRIMARY KEY (program_id, subject_id)
 );
 
-create table if not exists fullscore_subjects
+ALTER TABLE program_subjects ADD FOREIGN KEY (program_id) REFERENCES educational_program(program_id) ON DELETE CASCADE;
+
+ALTER TABLE program_subjects ADD FOREIGN KEY (subject_id) REFERENCES subject(subject_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS confirmation_subjects
 (
-    benefit_id integer not null
-        references benefit
-            on delete cascade,
-    subject_id integer not null
-        references subject
-            on delete cascade,
-    primary key (benefit_id, subject_id)
+    benefit_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    PRIMARY KEY (benefit_id, subject_id)
 );
 
-create table if not exists admin_users
+ALTER TABLE confirmation_subjects ADD FOREIGN KEY (benefit_id) REFERENCES benefit(benefit_id) ON DELETE CASCADE;
+
+ALTER TABLE confirmation_subjects ADD FOREIGN KEY (subject_id) REFERENCES subject(subject_id) ON DELETE CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS fullscore_subjects
 (
-    user_id               integer               not null
-        primary key
-        references "user"
-            on delete cascade,
-    can_change_olymp      boolean               not null,
-    can_change_university boolean               not null,
-    edit_university_id    integer
-                                                references university
-                                                    on delete set null,
-    is_founder            boolean default false not null
+    benefit_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    PRIMARY KEY (benefit_id, subject_id)
 );
+
+ALTER TABLE fullscore_subjects ADD FOREIGN KEY (benefit_id) REFERENCES benefit (benefit_id) ON DELETE CASCADE;
+
+ALTER TABLE fullscore_subjects ADD FOREIGN KEY (subject_id) REFERENCES subject (subject_id) ON DELETE CASCADE;
