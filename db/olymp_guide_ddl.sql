@@ -141,6 +141,7 @@ ALTER TABLE olymp_stage ADD CONSTRAINT olymp_stage_checker CHECK (number > 0);
 CREATE TABLE IF NOT EXISTS educational_program
 (
     program_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
     university_id INTEGER NOT NULL,
     faculty_id INTEGER NOT NULL,
     field_id INTEGER NOT NULL,
