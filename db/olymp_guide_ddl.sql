@@ -172,9 +172,9 @@ ALTER TABLE benefit ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad (olympiad_
 
 ALTER TABLE benefit ADD FOREIGN KEY (program_id) REFERENCES educational_program (program_id) ON DELETE CASCADE;
 
-ALTER TABLE benefit ADD CONSTRAINT benefit_diploma_level_checker CHECK (min_diploma_level > 0);
+ALTER TABLE benefit ADD CONSTRAINT benefit_diploma_level_checker CHECK (min_diploma_level = ANY(ARRAY[1, 2, 3]));
 
-ALTER TABLE benefit ADD CONSTRAINT benefit_class_checker CHECK (min_class > 0 AND min_class <= 11);
+ALTER TABLE benefit ADD CONSTRAINT benefit_class_checker CHECK (min_class = ANY(ARRAY[9, 10, 11]));
 
 
 CREATE TABLE IF NOT EXISTS won_olympiads
@@ -190,9 +190,9 @@ ALTER TABLE won_olympiads ADD FOREIGN KEY (user_id) REFERENCES "user"(user_id) O
 
 ALTER TABLE won_olympiads ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad(olympiad_id) ON DELETE CASCADE;
 
-ALTER TABLE won_olympiads ADD CONSTRAINT won_olympiads_diploma_level_checker CHECK (diploma_level > 0);
+ALTER TABLE won_olympiads ADD CONSTRAINT won_olympiads_diploma_level_checker CHECK (diploma_level = ANY(ARRAY[1, 2, 3]));
 
-ALTER TABLE won_olympiads ADD CONSTRAINT won_olympiads_class_checker CHECK (class > 0 AND class <= 11);
+ALTER TABLE won_olympiads ADD CONSTRAINT won_olympiads_class_checker CHECK (class = ANY(ARRAY[9, 10, 11]));
 
 
 CREATE TABLE IF NOT EXISTS liked_fields
