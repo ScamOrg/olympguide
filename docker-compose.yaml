@@ -3,36 +3,16 @@ name: olympguide
 services:
   db:
     build: db
-    container_name: postgres_db
     restart: always
     image: postgres:latest
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-      PGDATA: /var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=***
+      - POSTGRES_PASSWORD=*******
+      - POSTGRES_DB=olympguide_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
-      - ${DB_PORT}:${DB_PORT}
+      - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-  api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: go_api
-    ports:
-      - ${API_PORT}:${API_PORT}
-    environment:
-      - DB_HOST=db
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - API_PORT=${API_PORT}
-    depends_on:
-      - db
-    restart: on-failure
-
-networks:
-  default:
-    name: olympguide_network
+  # api:
+  # web:
