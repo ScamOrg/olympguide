@@ -2,8 +2,8 @@ name: olympguide
 
 services:
   db:
-    container_name: postgres_db
     build: db
+    container_name: postgres_db
     restart: always
     image: postgres:latest
     environment:
@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
   api:
