@@ -8,7 +8,6 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	r.GET("/users", controllers.GetUsers)
-	r.POST("/users", controllers.CreateUser)
+	r.GET("/olympiads", controllers.GetOlympiads)
 	return r
 }
