@@ -1,1 +1,3 @@
-/postgres-data
+postgres-data/
+.env
+.idea/
