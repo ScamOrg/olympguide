@@ -1,3 +1,81 @@
+# PostgreSQL
 postgres-data/
+
+# Environment files
 .env
+
+# IDE-specific files
 .idea/
+
+# macOS system files
+.DS_Store
+*.DS_Store
+
+# Xcode
+DerivedData/
+*.xcworkspace/
+*.xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Build artifacts
+build/
+*.app
+*.ipa
+*.dSYM
+*.xcarchive
+
+# CocoaPods
+Pods/
+*.lock
+!.gitignore
+*.xcconfig
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# Temporary files
+*.swp
+*.tmp
+*.bak
+*.orig
+*.save
+
+# Code signing
+*.mobileprovision
+*.cer
+*.p12
+*.p8
+*.keychain
+
+# Testing-related files
+test-output/
+*.gcda
+*.gcno
+*.gcov
+
+# Archives
+*.zip
+*.tar.gz
+*.tgz
+*.dmg
+*.iso
+*.pkg
+*.xz
+
+# Logs
+*.log
+
+# Documentation
+*.docset
