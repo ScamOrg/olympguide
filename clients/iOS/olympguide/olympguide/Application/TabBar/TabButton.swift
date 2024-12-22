@@ -9,34 +9,55 @@ import UIKit
 
 class TabButton: UIView {
     
+    // MARK: - Constants
+    private enum Constants {
+        // Sizes
+        static let buttonWidth: CGFloat = 64
+        static let buttonHeight: CGFloat = 34
+        static let iconPointSize: CGFloat = 20
+        static let titleFontSize: CGFloat = 10
+        
+        // Colors
+        static let defaultTintColor = UIColor(hex: "#4F4F4F") ?? .gray
+        static let filledTintColor = UIColor.black
+        
+        static let fillSuffix = ".fill"
+    }
+    
     // MARK: - Properties
     private var button: UIButton = UIButton()
     private var titleView: UILabel = UILabel()
     
     // MARK: - Initialization
-    init(title: String, icon: String, tag: Int, action: UIAction, tintColor: UIColor = UIColor(hex: "#4F4F4F") ?? .gray) {
+    init(title: String, icon: String, tag: Int, action: UIAction, tintColor: UIColor = Constants.defaultTintColor) {
         super.init(frame: .zero)
         
+        // Button setting
         button = UIButton(primaryAction: action)
         button.tag = tag
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        
+        // Symbol configuration
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: Constants.iconPointSize, weight: .regular)
         var iconImage = UIImage(systemName: icon, withConfiguration: symbolConfig)
-
-        if tintColor == .black {
-            iconImage = UIImage(systemName: icon + ".fill", withConfiguration: symbolConfig)
+        
+        if tintColor == Constants.filledTintColor {
+            iconImage = UIImage(systemName: icon + Constants.fillSuffix, withConfiguration: symbolConfig)
         }
-
-        // Устанавливаем accessibilityIdentifier
-        iconImage?.accessibilityIdentifier = tintColor == .black ? icon + ".fill" : icon
-
+        
+        // Set accessibilityIdentifier
+        iconImage?.accessibilityIdentifier = tintColor == Constants.filledTintColor ? icon + Constants.fillSuffix : icon
+        
+        // Button setting
         button.setImage(iconImage, for: .normal)
         button.tintColor = tintColor
-        button.setWidth(64)
-        button.setHeight(34)
+        button.setWidth(Constants.buttonWidth)
+        button.setHeight(Constants.buttonHeight)
         
+        // Customising the header
         titleView.text = title
-        titleView.font = .systemFont(ofSize: 10)
+        titleView.font = .systemFont(ofSize: Constants.titleFontSize)
         titleView.textColor = tintColor
+        
         configureUI()
     }
     
@@ -54,22 +75,24 @@ class TabButton: UIView {
         titleView.pinCenterX(to: self)
         titleView.pinTop(to: button.bottomAnchor)
         titleView.pinBottom(to: self.bottomAnchor)
-        
     }
     
+    // MARK: - Icon Management
     func fillIcon() {
         guard let currentImage = button.image(for: .normal),
               let currentSymbolName = currentImage.accessibilityIdentifier else {
             return
         }
         
-        let newSymbolName = currentSymbolName.replacingOccurrences(of: ".fill", with: "") + ".fill"
+        // Form a new symbol name
+        let newSymbolName = currentSymbolName.replacingOccurrences(of: Constants.fillSuffix, with: "") + Constants.fillSuffix
         
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        // Customising the icon
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: Constants.iconPointSize, weight: .regular)
         let newIconImage = UIImage(systemName: newSymbolName, withConfiguration: symbolConfig)
         button.setImage(newIconImage, for: .normal)
-        button.tintColor = .black
-        titleView.textColor = .black
+        button.tintColor = Constants.filledTintColor
+        titleView.textColor = Constants.filledTintColor
         newIconImage?.accessibilityIdentifier = newSymbolName
     }
     
@@ -79,17 +102,17 @@ class TabButton: UIView {
             return
         }
         
-        let newSymbolName = currentSymbolName.replacingOccurrences(of: ".fill", with: "")
+        let newSymbolName = currentSymbolName.replacingOccurrences(of: Constants.fillSuffix, with: "")
         
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: Constants.iconPointSize, weight: .regular)
         let newIconImage = UIImage(systemName: newSymbolName, withConfiguration: symbolConfig)
         button.setImage(newIconImage, for: .normal)
-        button.tintColor = UIColor(hex: "#4F4F4F") ?? .gray
-        titleView.textColor = UIColor(hex: "#4F4F4F") ?? .gray
-        
+        button.tintColor = Constants.defaultTintColor
+        titleView.textColor = Constants.defaultTintColor
         newIconImage?.accessibilityIdentifier = newSymbolName
     }
     
+    // MARK: - Utility
     func getTag() -> Int {
         return button.tag
     }
