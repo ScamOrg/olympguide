@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class BottomSheetViewController: UIViewController {
+final class OptionsViewController: UIViewController {
     
     private let items: [String]
     
@@ -257,7 +257,7 @@ final class BottomSheetViewController: UIViewController {
 }
 
 
-extension BottomSheetViewController: UITableViewDataSource, UITableViewDelegate {
+extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     // Функция для расчёта высоты таблицы
     private func calculateTableHeight() -> CGFloat {
         let rowHeight: CGFloat = 45 // Стандартная высота строки
