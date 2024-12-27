@@ -167,7 +167,7 @@ final class OptionsViewController: UIViewController {
         // Покрасим вью, чтобы визуально увидеть границы
         containerView.backgroundColor = .white
         
-
+        
     }
     
     // MARK: - Показать шторку (анимация)
@@ -268,37 +268,37 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     // MARK: - UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       return items.count
+        return items.count
     }
-       
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-       guard let cell = tableView.dequeueReusableCell(withIdentifier: CustomTableViewCell.identifier, for: indexPath) as? CustomTableViewCell else {
-           return UITableViewCell()
-       }
-       
-       let item = items[indexPath.row]
-       cell.titleLabel.text = item
-       
-       // Настраиваем кнопку в зависимости от выбора
-       if isMultipleChoice {
-           let imageName = selectedIndices.contains(indexPath.row) ? "inset.filled.square" : "square"
-           cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
-       } else {
-           let imageName = selectedIndex == indexPath.row ? "inset.filled.circle" : "circle"
-           cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
-       }
-       
-       // Обработка нажатия кнопки
-       cell.buttonAction = { [weak self] in
-           self?.handleButtonTap(at: indexPath)
-       }
-       
-       // Скрываем сепаратор у последней ячейки
-       let isLastCell = indexPath.row == items.count - 1
-       cell.hideSeparator(isLastCell)
-       
-       return cell
+        
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CustomTableViewCell.identifier, for: indexPath) as? CustomTableViewCell else {
+            return UITableViewCell()
+        }
+        
+        let item = items[indexPath.row]
+        cell.titleLabel.text = item
+        
+        // Настраиваем кнопку в зависимости от выбора
+        if isMultipleChoice {
+            let imageName = selectedIndices.contains(indexPath.row) ? "inset.filled.square" : "square"
+            cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
+        } else {
+            let imageName = selectedIndex == indexPath.row ? "inset.filled.circle" : "circle"
+            cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
+        }
+        
+        // Обработка нажатия кнопки
+        cell.buttonAction = { [weak self] in
+            self?.handleButtonTap(at: indexPath)
+        }
+        
+        // Скрываем сепаратор у последней ячейки
+        let isLastCell = indexPath.row == items.count - 1
+        cell.hideSeparator(isLastCell)
+        
+        return cell
     }
     
     // MARK: - UITableViewDelegate
