@@ -47,7 +47,7 @@ final class OptionsViewController: UIViewController {
         return $0
     }(UIButton())
     
-    private var isMultipleChoice: Bool = true
+    private var isMultipleChoice: Bool
     private var selectedIndices: Set<Int> = []
     private var selectedIndex: Int? = nil
     
@@ -59,9 +59,10 @@ final class OptionsViewController: UIViewController {
         return table
     }()
     
-    init(items: [String], title: String) {
+    init(items: [String], title: String, isMultipleChoice: Bool) {
         self.items = items
         self.titleLabel.text = title
+        self.isMultipleChoice = isMultipleChoice
         super.init(nibName: nil, bundle: nil)
     }
     
