@@ -39,9 +39,13 @@ final class TabBarViewController: UITabBarController {
     }
     
     // MARK: - Properties
+    let presenter = UniversitiesPresenter()
+    let interactor = UniversitiesInteractor()
+    let router = UniversitiesRouter()
+    
     private let universitiesVC = UniversitiesViewController()
-    private let olympiadsVC = UIViewController()
-    private let destinationVC = UIViewController()
+    private let olympiadsVC = ViewController()
+    private let destinationVC = SpecialViewController()
     private let profileVC = UIViewController()
     
     private lazy var universitiesBtn: TabButton = {
@@ -112,6 +116,12 @@ final class TabBarViewController: UITabBarController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        universitiesVC.interactor = interactor
+        universitiesVC.router = router
+        interactor.presenter = presenter
+        presenter.viewController = universitiesVC
+        router.viewController = universitiesVC
+        //        router.dataStore = interactor
         
         setViewControllers([universitiesVC, olympiadsVC, destinationVC, profileVC], animated: true)
         configureTabBar()
@@ -151,5 +161,47 @@ final class TabBarViewController: UITabBarController {
                 button.fillIcon()
             }
         }
+    }
+}
+
+
+class ViewController: UIViewController {
+    
+    
+    private let showSheetButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Показать шторку", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        button.setTitleColor(.systemBlue, for: .normal)
+        return button
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemGray5
+        
+        setupButton()
+    }
+    
+    private func setupButton() {
+        view.addSubview(showSheetButton)
+        showSheetButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            showSheetButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            showSheetButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        // Добавляем таргет
+        showSheetButton.addTarget(self, action: #selector(showBottomSheetButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc private func showBottomSheetButtonTapped() {
+        let items = ["I уровень", "II уровень", "III уровень"]
+        let sheetVC = BottomSheetViewController(items: items, titleLabel: "Уровень олимпиады")
+            sheetVC.modalPresentationStyle = .overFullScreen
+            present(sheetVC, animated: false) {
+                sheetVC.animateShow()
+            }
     }
 }
