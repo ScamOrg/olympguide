@@ -67,7 +67,7 @@ final class OptionsViewController: UIViewController {
         return table
     }()
     
-    init(items: [String], titleLabel: String) {
+    init(items: [String], title: String) {
         self.items = items
         self.titleLabel.text = titleLabel
         super.init(nibName: nil, bundle: nil)
