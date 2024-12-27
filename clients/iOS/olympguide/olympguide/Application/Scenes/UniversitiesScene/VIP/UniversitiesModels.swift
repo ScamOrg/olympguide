@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
-// MARK: - Главный экран: Университеты
+// MARK: - Main screen: Universities
 enum Universities {
     
     // MARK: - Use Cases
@@ -17,22 +17,22 @@ enum Universities {
         }
         
         struct Response {
-            let universities: [University]
+            let universities: [UniversityModel]
         }
         
         struct ViewModel {
             struct UniversityViewModel {
                 let name: String
                 let logoURL: String
-                let description: String
+                let region: String
                 let popularity: String
             }
             
-            let universities: [UniversityViewModel] 
+            let universities: [UniversityViewModel]
         }
     }
     
-    // MARK: - Опции сортировки
+    // MARK: - Sorting options
     enum SortOption: String {
         case name
         case popularity
@@ -40,19 +40,15 @@ enum Universities {
 }
 
 
-struct University: Codable {
+struct UniversityModel: Codable {
     let universityID: Int
     let name: String
     let logo: String
-    let description: String
-    let regionID: Int
+    let region: String
     let popularity: Int
-    let link: String
 
     enum CodingKeys: String, CodingKey {
         case universityID = "university_id"
-        case name, logo, description
-        case regionID = "region_id"
-        case popularity, link
+        case name, logo, region, popularity
     }
 }
