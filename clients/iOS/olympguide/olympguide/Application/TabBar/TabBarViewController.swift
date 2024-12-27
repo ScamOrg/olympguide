@@ -198,7 +198,7 @@ class ViewController: UIViewController {
     
     @objc private func showBottomSheetButtonTapped() {
         let items = ["I уровень", "II уровень", "III уровень"]
-        let sheetVC = OptionsViewController(items: items, titleLabel: "Уровень олимпиады")
+        let sheetVC = OptionsViewController(items: items, title: "Уровень олимпиады")
             sheetVC.modalPresentationStyle = .overFullScreen
             present(sheetVC, animated: false) {
                 sheetVC.animateShow()
