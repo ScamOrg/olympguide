@@ -22,5 +22,9 @@ protocol UniversitiesDisplayLogic: AnyObject {
 }
 
 protocol UniversitiesRoutingLogic {
-    func routeToDetails(for university: University)
+    func routeToDetails(for university: UniversityModel)
+}
+
+protocol UniversitiesDataStore {
+    var universities: [UniversityModel] { get set }
 }
