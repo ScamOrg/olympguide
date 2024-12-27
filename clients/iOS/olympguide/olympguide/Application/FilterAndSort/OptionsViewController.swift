@@ -62,7 +62,7 @@ final class OptionsViewController: UIViewController {
     let tableView: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
-        table.register(CustomTableViewCell.self, forCellReuseIdentifier: CustomTableViewCell.identifier)
+        table.register(OptionsTableViewCell.self, forCellReuseIdentifier: OptionsTableViewCell.identifier)
         table.separatorStyle = .none // Отключаем стандартные сепараторы
         return table
     }()
@@ -273,7 +273,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: CustomTableViewCell.identifier, for: indexPath) as? CustomTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: OptionsTableViewCell.identifier, for: indexPath) as? OptionsTableViewCell else {
             return UITableViewCell()
         }
         

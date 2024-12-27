@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CustomTableViewCell: UITableViewCell {
+class OptionsTableViewCell: UITableViewCell {
     
     static let identifier = "CustomTableViewCell"
     
