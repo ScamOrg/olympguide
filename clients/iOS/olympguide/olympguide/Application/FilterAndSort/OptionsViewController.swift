@@ -47,11 +47,11 @@ final class OptionsViewController: UIViewController {
         return $0
     }(UIButton())
     
-    var isMultipleChoice: Bool = true
-    var selectedIndices: Set<Int> = []
-    var selectedIndex: Int? = nil
+    private var isMultipleChoice: Bool = true
+    private var selectedIndices: Set<Int> = []
+    private var selectedIndex: Int? = nil
     
-    let tableView: UITableView = {
+    private let tableView: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
         table.register(OptionsTableViewCell.self, forCellReuseIdentifier: OptionsTableViewCell.identifier)
