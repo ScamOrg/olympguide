@@ -9,244 +9,214 @@ import UIKit
 
 final class OptionsViewController: UIViewController {
     
+    // MARK: - Properties
     private let items: [String]
     
-    // Полупрозрачная вью (фон)
     private let dimmingView = UIView()
-    
-    // Контейнер шторки
     private let containerView = UIView()
-    
-    // Pan-жест, чтобы тянуть шторку вниз
     private var panGesture: UIPanGestureRecognizer!
-    
-    // Позиция, куда шторка «приедет» (верх контейнера)
     private var finalY: CGFloat = 0
     
     private let peak: UIView = {
-        $0.backgroundColor = UIColor(hex: "#D9D9D9")
-        $0.layer.cornerRadius = 1
+        $0.backgroundColor = Constants.Colors.peakColor
+        $0.layer.cornerRadius = Constants.Dimensions.peakCornerRadius
         return $0
     }(UIView())
     
     private let titleLabel: UILabel = {
-        $0.font = UIFont(name: "MontserratAlternates-Regular", size: 26)
-        $0.textColor = .black
+        $0.font = Constants.Fonts.titleLabelFont
+        $0.textColor = Constants.Colors.titleLabelTextColor
         return $0
     }(UILabel())
     
-    private let cancleButton: UIButton = {
-        $0.setTitle("Отменить", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
-        $0.backgroundColor = UIColor(hex: "#E7E7E7")
-        $0.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
-        $0.layer.cornerRadius = 14
+    private let cancelButton: UIButton = {
+        $0.setTitle(Constants.Strings.cancel, for: .normal)
+        $0.setTitleColor(Constants.Colors.cancelButtonTextColor, for: .normal)
+        $0.backgroundColor = Constants.Colors.cancelButtonBackgroundColor
+        $0.titleLabel?.font = Constants.Fonts.buttonFont
+        $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
         return $0
     }(UIButton())
     
     private let saveButton: UIButton = {
-        $0.setTitle("Применить", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
-        $0.backgroundColor = UIColor(hex: "#E0E8FE")
-        $0.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
-        $0.layer.cornerRadius = 14
+        $0.setTitle(Constants.Strings.apply, for: .normal)
+        $0.setTitleColor(Constants.Colors.saveButtonTextColor, for: .normal)
+        $0.backgroundColor = Constants.Colors.saveButtonBackgroundColor
+        $0.titleLabel?.font = Constants.Fonts.buttonFont
+        $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
         return $0
     }(UIButton())
     
     var isMultipleChoice: Bool = true
-    
-    // Хранение выбранных индексов
     var selectedIndices: Set<Int> = []
-    var selectedIndex: Int? = nil // Для одиночного выбора
+    var selectedIndex: Int? = nil
     
     let tableView: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
         table.register(OptionsTableViewCell.self, forCellReuseIdentifier: OptionsTableViewCell.identifier)
-        table.separatorStyle = .none // Отключаем стандартные сепараторы
+        table.separatorStyle = .none
         return table
     }()
     
     init(items: [String], title: String) {
         self.items = items
-        self.titleLabel.text = titleLabel
+        self.titleLabel.text = title
         super.init(nibName: nil, bundle: nil)
     }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupDimmingView()
-        setupContainerView()
-        setupGesture()
-        setupContent()
+        configureDimmingView()
+        configureContainerView()
+        configureGesture()
+        configureContent()
     }
     
-    // MARK: - Настройка полупрозрачного фона
-    private func setupDimmingView() {
-        // dimmingView занимает весь экран
-        dimmingView.frame = self.view.bounds
-        // Изначально полностью прозрачный
-        dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
+    // MARK: - Funcs
+    // MARK: - Setting a semi-transparent background
+    private func configureDimmingView() {
+        dimmingView.frame = view.bounds
+        dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewInitialAlpha)
         view.addSubview(dimmingView)
         
-        // Тап по фону — закрыть шторку
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapDimmingView))
         dimmingView.addGestureRecognizer(tapGesture)
     }
     
-    // MARK: - Настройка контейнера (самой "шторки")
-    private func setupContainerView() {
-        // Определяем, какой должна быть высота шторки
-        // Для примера берём статическую высоту 400, но можно вычислять по контенту
-        let sheetHeight: CGFloat = items.count > 5 ? view.bounds.height - 100 : 157 + 46 * CGFloat(items.count)
+    // MARK: - Configuring the container (the ‘curtain’ itself)
+    private func configureContainerView() {
+        let sheetHeight: CGFloat = items.count > Constants.Numbers.rowsLimit ? view.bounds.height - Constants.Dimensions.sheetHeightOffset : Constants.Dimensions.sheetHeightSmall + Constants.Dimensions.rowHeight * CGFloat(items.count)
         
-        // Начальная позиция: за нижней гранью экрана
         containerView.frame = CGRect(
-            x: 0,
+            x: Constants.Dimensions.containerX,
             y: view.bounds.height,
             width: view.bounds.width,
             height: sheetHeight
         )
         
-        // Скруглим верхние углы
-        containerView.backgroundColor = .white
-        containerView.layer.cornerRadius = 25
+        containerView.backgroundColor = Constants.Colors.containerBackgroundColor
+        containerView.layer.cornerRadius = Constants.Dimensions.containerCornerRadius
         containerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         containerView.clipsToBounds = true
-        
-        // Добавляем на иерархию
         view.addSubview(containerView)
         
-        // Рассчитаем целевую позицию (на сколько поднимаем)
         finalY = view.bounds.height - sheetHeight
         
         containerView.addSubview(peak)
-        peak.frame = CGRect(x: (view.frame.width - 45) / 2, y: 6, width: 45, height: 3)
+        peak.frame = CGRect(
+            x: (view.frame.width - Constants.Dimensions.peakWidth) / 2,
+            y: Constants.Dimensions.peakTopMargin,
+            width: Constants.Dimensions.peakWidth,
+            height: Constants.Dimensions.peakHeight
+        )
         
         containerView.addSubview(titleLabel)
-        titleLabel.pinTop(to: containerView.topAnchor, 21)
-        titleLabel.pinLeft(to: containerView.leadingAnchor, 20)
-        
+        titleLabel.pinTop(to: containerView.topAnchor, Constants.Dimensions.titleLabelTopMargin)
+        titleLabel.pinLeft(to: containerView.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
     
-    // MARK: - Настройка Pan-жеста (чтобы тянуть шторку вниз)
-    private func setupGesture() {
+    // MARK: - Pan gesture setting (to pull the curtain down)
+    private func configureGesture() {
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         containerView.addGestureRecognizer(panGesture)
     }
     
-    // MARK: - Пример контента (просто метка)
-    private func setupContent() {
-        containerView.addSubview(cancleButton)
-        cancleButton.pinBottom(to: containerView.bottomAnchor, 37)
-        cancleButton.setHeight(48)
-        cancleButton.pinLeft(to: containerView.leadingAnchor, 20)
-        cancleButton.pinRight(to: containerView.centerXAnchor, 2.5)
+    // MARK: - Content configuration
+    private func configureContent() {
+        containerView.addSubview(cancelButton)
+        cancelButton.pinBottom(to: containerView.bottomAnchor, Constants.Dimensions.buttonBottomMargin)
+        cancelButton.setHeight(Constants.Dimensions.buttonHeight)
+        cancelButton.pinLeft(to: containerView.leadingAnchor, Constants.Dimensions.buttonLeftRightMargin)
+        cancelButton.pinRight(to: containerView.centerXAnchor, Constants.Dimensions.buttonSpacing)
         
         containerView.addSubview(saveButton)
-        saveButton.pinBottom(to: containerView.bottomAnchor, 37)
-        saveButton.setHeight(48)
-        saveButton.pinRight(to: containerView.trailingAnchor, 20)
-        saveButton.pinLeft(to: containerView.centerXAnchor, 2.5)
+        saveButton.pinBottom(to: containerView.bottomAnchor, Constants.Dimensions.buttonBottomMargin)
+        saveButton.setHeight(Constants.Dimensions.buttonHeight)
+        saveButton.pinRight(to: containerView.trailingAnchor, Constants.Dimensions.buttonLeftRightMargin)
+        saveButton.pinLeft(to: containerView.centerXAnchor, Constants.Dimensions.buttonSpacing)
         
         containerView.addSubview(tableView)
-        tableView.pinTop(to: titleLabel.bottomAnchor, 5)
+        tableView.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
         tableView.pinLeft(to: containerView.leadingAnchor)
         tableView.pinRight(to: containerView.trailingAnchor)
         tableView.pinBottom(to: saveButton.topAnchor)
         
         tableView.delegate = self
         tableView.dataSource = self
-        // Отключаем прокрутку, если элементов меньше 6
-        tableView.isScrollEnabled = items.count >= 6
+        tableView.isScrollEnabled = items.count >= Constants.Numbers.rowsLimit
         
-        // Покрасим вью, чтобы визуально увидеть границы
-        containerView.backgroundColor = .white
-        
-        
+        containerView.backgroundColor = Constants.Colors.containerBackgroundColor
     }
     
-    // MARK: - Показать шторку (анимация)
+    // MARK: - Show curtain (animation)
     func animateShow() {
-        UIView.animate(withDuration: 0.3) {
-            // Поднимаем контейнер
+        UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
             self.containerView.frame.origin.y = self.finalY
-            // Затемняем фон до какой-то альфы (например, 0.5)
-            self.dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+            self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewFinalAlpha)
         }
     }
     
-    // MARK: - Спрятать шторку (анимация)
+    // MARK: - Hide the curtain (animation)
     func animateDismiss(completion: (() -> Void)? = nil) {
-        UIView.animate(withDuration: 0.3, animations: {
-            // Уводим контейнер вниз за экран
+        UIView.animate(withDuration: Constants.Dimensions.animateDuration, animations: {
             self.containerView.frame.origin.y = self.view.bounds.height
-            // Возвращаем фон к прозрачности
-            self.dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
+            self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewInitialAlpha)
         }, completion: { _ in
             completion?()
         })
     }
     
-    // MARK: - Обработка нажатия на фон (закрытие)
-    @objc private func didTapDimmingView() {
-        closeSheet()
-    }
-    
     private func closeSheet() {
-        // Сначала уводим шторку анимацией
         animateDismiss {
-            // Затем закрываем модальный экран
             self.dismiss(animated: false)
         }
     }
     
-    // MARK: - Обработка жеста перетаскивания
-    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+    @objc
+    private func didTapDimmingView() {
+        closeSheet()
+    }
+    
+    // MARK: - Drag gesture processing
+    @objc
+    private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
         let velocity = gesture.velocity(in: view)
         
         switch gesture.state {
         case .changed:
-            // Текущая позиция
             let newY = containerView.frame.origin.y + translation.y
-            
-            // Не даём уехать выше, чем finalY
             if newY >= finalY {
                 containerView.frame.origin.y = newY
                 gesture.setTranslation(.zero, in: view)
                 
-                // Меняем альфу dimmingView в зависимости от того, насколько сдвинули
                 let totalDistance = view.bounds.height - finalY
                 let currentDistance = containerView.frame.origin.y - finalY
-                let progress = currentDistance / totalDistance // от 0 до 1
-                // Альфа от 0.5 до 0.0
-                let newAlpha = 0.5 * (1 - progress)
-                dimmingView.backgroundColor = UIColor.black.withAlphaComponent(newAlpha)
+                let progress = currentDistance / totalDistance
+                let newAlpha = Constants.Alphas.dimmingViewFinalAlpha * (1 - progress)
+                dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(newAlpha)
             }
             
         case .ended, .cancelled:
-            // Если «дёргаем» вниз с большой скоростью — закрыть
-            if velocity.y > 600
-            {
+            if velocity.y > Constants.Velocities.maxPanVelocity {
                 closeSheet()
             } else {
-                // Смотрим, прошли ли 50% пути вниз
                 let distanceMoved = containerView.frame.origin.y - finalY
                 let totalDistance = view.bounds.height - finalY
                 
-                if distanceMoved > totalDistance * 0.5 {
-                    // Закрываем
+                if distanceMoved > totalDistance * Constants.Fractions.dismissThreshold {
                     closeSheet()
                 } else {
-                    // Возвращаем обратно
-                    UIView.animate(withDuration: 0.3) {
+                    UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
                         self.containerView.frame.origin.y = self.finalY
-                        self.dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+                        self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewFinalAlpha)
                     }
                 }
             }
@@ -256,23 +226,19 @@ final class OptionsViewController: UIViewController {
     }
 }
 
-
 extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
-    // Функция для расчёта высоты таблицы
+    
     private func calculateTableHeight() -> CGFloat {
-        let rowHeight: CGFloat = 45 // Стандартная высота строки
-        let numberOfRows = min(items.count, 6)
-        return CGFloat(numberOfRows) * rowHeight
+        return CGFloat(min(items.count, Constants.Numbers.rowsLimit)) * Constants.Dimensions.rowHeight
     }
     
     // MARK: - UITableViewDataSource
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         guard let cell = tableView.dequeueReusableCell(withIdentifier: OptionsTableViewCell.identifier, for: indexPath) as? OptionsTableViewCell else {
             return UITableViewCell()
         }
@@ -280,21 +246,18 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
         let item = items[indexPath.row]
         cell.titleLabel.text = item
         
-        // Настраиваем кнопку в зависимости от выбора
         if isMultipleChoice {
-            let imageName = selectedIndices.contains(indexPath.row) ? "inset.filled.square" : "square"
+            let imageName = selectedIndices.contains(indexPath.row) ? Constants.Images.filledSquare : Constants.Images.square
             cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
         } else {
-            let imageName = selectedIndex == indexPath.row ? "inset.filled.circle" : "circle"
+            let imageName = selectedIndex == indexPath.row ? Constants.Images.filledCircle : Constants.Images.circle
             cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
         }
         
-        // Обработка нажатия кнопки
         cell.buttonAction = { [weak self] in
             self?.handleButtonTap(at: indexPath)
         }
         
-        // Скрываем сепаратор у последней ячейки
         let isLastCell = indexPath.row == items.count - 1
         cell.hideSeparator(isLastCell)
         
@@ -302,13 +265,11 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // MARK: - UITableViewDelegate
-    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         handleButtonTap(at: indexPath)
     }
     
-    // MARK: - Обработка нажатий
-    
+    // MARK: - Press processing
     private func handleButtonTap(at indexPath: IndexPath) {
         if isMultipleChoice {
             if selectedIndices.contains(indexPath.row) {
@@ -330,5 +291,84 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             }
             tableView.reloadRows(at: indexPathsToReload, with: .automatic)
         }
+    }
+}
+
+// MARK: - Constants
+fileprivate enum Constants {
+    // MARK: - Colors
+    enum Colors {
+        static let dimmingViewColor = UIColor.black
+        static let peakColor = UIColor(hex: "#D9D9D9")
+        static let cancelButtonBackgroundColor = UIColor(hex: "#E7E7E7")
+        static let saveButtonBackgroundColor = UIColor(hex: "#E0E8FE")
+        static let titleLabelTextColor = UIColor.black
+        static let cancelButtonTextColor = UIColor.black
+        static let saveButtonTextColor = UIColor.black
+        static let containerBackgroundColor = UIColor.white
+    }
+    
+    // MARK: - Fonts
+    enum Fonts {
+        static let titleLabelFont = UIFont(name: "MontserratAlternates-Regular", size: 26)!
+        static let buttonFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+    }
+    
+    // MARK: - Dimensions
+    enum Dimensions {
+        static let peakCornerRadius: CGFloat = 1.0
+        static let containerCornerRadius: CGFloat = 25.0
+        static let peakWidth: CGFloat = 45.0
+        static let peakHeight: CGFloat = 3.0
+        static let peakTopMargin: CGFloat = 6.0
+        static let titleLabelTopMargin: CGFloat = 21.0
+        static let titleLabelLeftMargin: CGFloat = 20.0
+        static let buttonHeight: CGFloat = 48.0
+        static let buttonBottomMargin: CGFloat = 37.0
+        static let buttonLeftRightMargin: CGFloat = 20.0
+        static let buttonSpacing: CGFloat = 2.5
+        static let tableViewTopMargin: CGFloat = 5.0
+        static let animateDuration: TimeInterval = 0.3
+        static let containerX: CGFloat = 0.0
+        static let containerCornerRadiusValue: CGFloat = 25.0
+        static let sheetHeightOffset: CGFloat = 100.0
+        static let sheetHeightSmall: CGFloat = 157.0
+        static let rowHeight: CGFloat = 46.0
+        static let buttonCornerRadius: CGFloat = 14.0
+    }
+    
+    // MARK: - Alphas
+    enum Alphas {
+        static let dimmingViewInitialAlpha: CGFloat = 0.0
+        static let dimmingViewFinalAlpha: CGFloat = 0.5
+    }
+    
+    // MARK: - Numbers
+    enum Numbers {
+        static let rowsLimit: Int = 6
+    }
+    
+    // MARK: - Velocities
+    enum Velocities {
+        static let maxPanVelocity: CGFloat = 600.0
+    }
+    
+    // MARK: - Fractions
+    enum Fractions {
+        static let dismissThreshold: CGFloat = 0.5
+    }
+    
+    // MARK: - Images
+    enum Images {
+        static let filledSquare = "inset.filled.square"
+        static let square = "square"
+        static let filledCircle = "inset.filled.circle"
+        static let circle = "circle"
+    }
+    
+    // MARK: - Strings
+    enum Strings {
+        static let cancel = "Отменить"
+        static let apply = "Применить"
     }
 }
