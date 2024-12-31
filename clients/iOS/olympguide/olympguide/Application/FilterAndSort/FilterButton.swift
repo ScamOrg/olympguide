@@ -10,6 +10,11 @@ import UIKit
 class FilterButton: UIButton {
     private var title: UILabel = UILabel()
     let arrowImageView: UIImageView = UIImageView(image: UIImage(systemName: "chevron.down"))
+    
+    var filterTitle: String {
+        return title.text ?? ""
+    }
+    
     // MARK: - Initialization
     init(title: String) {
         super.init(frame: .zero)
@@ -45,10 +50,10 @@ class FilterButton: UIButton {
     }
     
     // MARK: - Обработка нажатий
-        override var isHighlighted: Bool {
-            didSet {
-                // При нажатии изменяем прозрачность для эффекта "нажатия"
-                self.alpha = isHighlighted ? 0.7 : 1.0
-            }
+    override var isHighlighted: Bool {
+        didSet {
+            // При нажатии изменяем прозрачность для эффекта "нажатия"
+            self.alpha = isHighlighted ? 0.7 : 1.0
         }
+    }
 }

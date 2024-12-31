@@ -7,10 +7,19 @@
 
 import UIKit
 
+protocol FilterSortViewDelegate: AnyObject {
+    /// Вызывается, когда пользователь нажал на кнопку сортировки
+    func filterSortViewDidTapSortButton(_ view: FilterSortView)
+    
+    /// Вызывается, когда пользователь нажал на конкретный фильтр
+    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String)
+}
+
 /// Кастомная вью для отображения сортировки и фильтров в одной горизонтальной строке
 final class FilterSortView: UIView {
     
     // MARK: - UI
+    weak var delegate: FilterSortViewDelegate?
     
     /// Горизонтальный скролл, в котором лежат иконка сортировки и фильтры
     private lazy var horizontalScrollView: UIScrollView = {
@@ -124,13 +133,15 @@ final class FilterSortView: UIView {
     
     // MARK: - Обработчики нажатий
     
-    @objc private func sortButtonTapped() {
-        print("Sort button tapped. Пока заглушка.")
+    @objc
+    private func sortButtonTapped() {
+        delegate?.filterSortViewDidTapSortButton(self)
     }
     
-    @objc private func filterButtonTapped(_ sender: UIButton) {
-        print("Filter button tapped. Пока заглушка.")
-        guard let title = sender.title(for: .normal) else { return }
-        print("Выбран фильтр: \(title)")
+    @objc
+    private func filterButtonTapped(_ sender: UIButton) {
+        guard let filterButton = sender as? FilterButton else { return }
+        let title = filterButton.filterTitle
+        delegate?.filterSortView(self, didTapFilterWithTitle: title)
     }
 }
