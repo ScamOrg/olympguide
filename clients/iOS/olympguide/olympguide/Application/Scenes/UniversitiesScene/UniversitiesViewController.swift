@@ -19,6 +19,15 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
+    private lazy var filterSortView: FilterSortView = {
+        let view = FilterSortView(
+            sortingOptions: ["Сортировка A", "Сортировка B"],
+            filteringOptions: ["Регион"]  
+        )
+        // Важно: не забудьте установить делегат
+        view.delegate = self
+        return view
+    }()
     
     private var universities: [Universities.Load.ViewModel.UniversityViewModel] = []
     
@@ -26,11 +35,14 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         super.viewDidLoad()
         setup()
         configureLabel()
+        configureFilterSortView()
         configureTableView()
         interactor?.loadUniversities(
             Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
         )
     }
+    
+    
     
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
@@ -69,6 +81,13 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 25)
         titleLabel.pinLeft(to: view.leadingAnchor, 20)
     }
+    
+    private func configureFilterSortView() {
+        view.addSubview(filterSortView)
+        filterSortView.pinTop(to: titleLabel.bottomAnchor, 13)
+        filterSortView.pinLeft(to: view.leadingAnchor, 20)
+        filterSortView.pinRight(to: view.trailingAnchor)
+    }
 }
 
 
@@ -84,7 +103,7 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
     private func configureTableView() {
         view.addSubview(tableView)
         
-        tableView.pinTop(to: titleLabel.bottomAnchor)
+        tableView.pinTop(to: filterSortView.bottomAnchor)
         tableView.pinLeft(to: view.leadingAnchor)
         tableView.pinRight(to: view.trailingAnchor)
         tableView.pinBottom(to: view.bottomAnchor)
@@ -138,6 +157,41 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
                 Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
             )
             self.refreshControl.endRefreshing() // Останавливаем анимацию
+        }
+    }
+}
+
+// MARK: - FilterSortViewDelegate
+extension UniversitiesViewController: FilterSortViewDelegate {
+    
+    func filterSortViewDidTapSortButton(_ view: FilterSortView) {
+        // Показываем OptionsViewController с вариантами сортировки
+        let items = ["По возрастанию", "По убыванию"]
+        let sheetVC = OptionsViewController(items: items,
+                                            title: "Сортировка",
+                                            isMultipleChoice: false) // или true
+        
+        sheetVC.modalPresentationStyle = .overFullScreen
+        present(sheetVC, animated: false) {
+            sheetVC.animateShow()
+        }
+    }
+    
+    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
+        switch title {
+        case "Регион":
+            // Показываем выбор уровня (как в вашем примере)
+            let items = ["Москва", "Санкт-Петербург", "Долгопрудный"]
+            let sheetVC = OptionsViewController(items: items,
+                                                title: "Регион",
+                                                isMultipleChoice: true)
+            sheetVC.modalPresentationStyle = .overFullScreen
+            present(sheetVC, animated: false) {
+                sheetVC.animateShow()
+            }
+            
+        default:
+            break
         }
     }
 }
