@@ -35,6 +35,11 @@ final class OptionsViewController: UIViewController {
         $0.backgroundColor = Constants.Colors.cancelButtonBackgroundColor
         $0.titleLabel?.font = Constants.Fonts.buttonFont
         $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
+        
+        // Добавляем обработчики для анимации «нажатия»
+        $0.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)
+        $0.addTarget(nil, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchDragExit, .touchCancel])
+        
         return $0
     }(UIButton())
     
@@ -44,12 +49,17 @@ final class OptionsViewController: UIViewController {
         $0.backgroundColor = Constants.Colors.saveButtonBackgroundColor
         $0.titleLabel?.font = Constants.Fonts.buttonFont
         $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
+        
+        // Аналогично и для «Продолжить»
+        $0.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)
+        $0.addTarget(nil, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchDragExit, .touchCancel])
+        
         return $0
     }(UIButton())
     
     private var isMultipleChoice: Bool
-    private var selectedIndices: Set<Int> = []
-    private var selectedIndex: Int? = nil
+    var selectedIndices: Set<Int> = []
+    var selectedIndex: Int? = nil
     
     private let tableView: UITableView = {
         let table = UITableView()
@@ -73,7 +83,7 @@ final class OptionsViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.modalPresentationStyle = .overFullScreen
         configureDimmingView()
         configureContainerView()
         configureGesture()
@@ -169,7 +179,7 @@ final class OptionsViewController: UIViewController {
         UIView.animate(withDuration: Constants.Dimensions.animateDuration, animations: {
             self.containerView.frame.origin.y = self.view.bounds.height
             self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewInitialAlpha)
-        }, completion: { _ in
+        }, completion: {_ in
             completion?()
         })
     }
@@ -239,7 +249,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        
         guard let cell = tableView.dequeueReusableCell(withIdentifier: OptionsTableViewCell.identifier, for: indexPath) as? OptionsTableViewCell else {
             return UITableViewCell()
         }
@@ -291,6 +301,26 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
                 indexPathsToReload.append(indexPath)
             }
             tableView.reloadRows(at: indexPathsToReload, with: .automatic)
+        }
+    }
+    
+    @objc
+    private func buttonTouchDown(_ sender: UIButton) {
+        // Анимируем небольшой «скейл»
+        UIView.animate(withDuration: 0.1,
+                       delay: 0,
+                       options: [.curveEaseIn, .allowUserInteraction]) {
+            sender.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+        }
+    }
+    
+    @objc
+    private func buttonTouchUp(_ sender: UIButton) {
+        // Возвращаем обратно
+        UIView.animate(withDuration: 0.1,
+                       delay: 0,
+                       options: [.curveEaseOut, .allowUserInteraction]) {
+            sender.transform = .identity
         }
     }
 }
