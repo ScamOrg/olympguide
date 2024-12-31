@@ -45,7 +45,7 @@ final class TabBarViewController: UITabBarController {
     
     private let universitiesVC = UniversitiesViewController()
     private let olympiadsVC = ViewController()
-    private let destinationVC = UIViewController()
+    private let destinationVC = MainViewController()
     private let profileVC = UIViewController()
     
     private lazy var universitiesBtn: TabButton = {
@@ -175,12 +175,15 @@ class ViewController: UIViewController {
         button.setTitleColor(.systemBlue, for: .normal)
         return button
     }()
-    
+    let fsView = FilterSortView(sortingOptions: ["Популярность", "Первый уровень"], filteringOptions: ["Уровень", "Профиль"])
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGray5
-        
+        view.addSubview(fsView)
+        view.backgroundColor = .white
         setupButton()
+        fsView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
+        fsView.pinLeft(to: view.leadingAnchor, 20)
+        fsView.pinRight(to: view.trailingAnchor)
     }
     
     private func setupButton() {
@@ -196,12 +199,84 @@ class ViewController: UIViewController {
         showSheetButton.addTarget(self, action: #selector(showBottomSheetButtonTapped), for: .touchUpInside)
     }
     
-    @objc private func showBottomSheetButtonTapped() {
+    @objc
+    private func showBottomSheetButtonTapped() {
         let items = ["I уровень", "II уровень", "III уровень"]
-        let sheetVC = OptionsViewController(items: items, title: "Уровень олимпиады")
+        let sheetVC = OptionsViewController(items: items, title: "Уровень олимпиады", isMultipleChoice: true)
+        sheetVC.modalPresentationStyle = .overFullScreen
+        present(sheetVC, animated: false) {
+            sheetVC.animateShow()
+        }
+    }
+}
+
+
+class MainViewController: UIViewController {
+    
+    private lazy var filterSortView: FilterSortView = {
+        let view = FilterSortView(
+            sortingOptions: ["Сортировка A", "Сортировка B"],
+            filteringOptions: ["Уровень", "Профиль"]  // Можно что-то другое подставить
+        )
+        // Важно: не забудьте установить делегат
+        view.delegate = self
+        return view
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.addSubview(filterSortView)
+        view.backgroundColor = .white
+        filterSortView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
+        filterSortView.pinLeft(to: view.leadingAnchor, 20)
+        filterSortView.pinRight(to: view.trailingAnchor)
+    }
+}
+
+// MARK: - FilterSortViewDelegate
+extension MainViewController: FilterSortViewDelegate {
+    
+    func filterSortViewDidTapSortButton(_ view: FilterSortView) {
+        // Показываем OptionsViewController с вариантами сортировки
+        let items = ["По возрастанию", "По убыванию"]
+        let sheetVC = OptionsViewController(items: items,
+                                            title: "Сортировка",
+                                            isMultipleChoice: false) // или true
+        
+        sheetVC.modalPresentationStyle = .overFullScreen
+        present(sheetVC, animated: false) {
+            sheetVC.animateShow()
+        }
+    }
+    
+    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
+        // title — это тот текст, который вы поставили в FilterButton (например, "Уровень" / "Профиль")
+        // А вот дальше вы сами решаете, что именно показывать:
+        switch title {
+        case "Уровень":
+            // Показываем выбор уровня (как в вашем примере)
+            let items = ["I уровень", "II уровень", "III уровень"]
+            let sheetVC = OptionsViewController(items: items,
+                                                title: "Уровень олимпиады",
+                                                isMultipleChoice: true)
             sheetVC.modalPresentationStyle = .overFullScreen
             present(sheetVC, animated: false) {
                 sheetVC.animateShow()
             }
+            
+        case "Профиль":
+            // Показываем выбор профиля
+            let items = ["Математика", "Физика", "Информатика"]
+            let sheetVC = OptionsViewController(items: items,
+                                                title: "Выберите профиль",
+                                                isMultipleChoice: true)
+            sheetVC.modalPresentationStyle = .overFullScreen
+            present(sheetVC, animated: false) {
+                sheetVC.animateShow()
+            }
+            
+        default:
+            break
+        }
     }
 }
