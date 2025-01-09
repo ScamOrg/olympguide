@@ -25,7 +25,6 @@ final class FilterSortView: UIView {
     private lazy var horizontalScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsHorizontalScrollIndicator = false
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
@@ -35,7 +34,6 @@ final class FilterSortView: UIView {
         stackView.axis = .horizontal
         stackView.spacing = 5 // Расстояние между кнопками
         stackView.alignment = .center
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
     
@@ -70,22 +68,17 @@ final class FilterSortView: UIView {
         horizontalScrollView.addSubview(horizontalStackView)
         
         // Констрейним scrollView к границам самой вью:
-        NSLayoutConstraint.activate([
-            horizontalScrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            horizontalScrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            horizontalScrollView.topAnchor.constraint(equalTo: topAnchor),
-            horizontalScrollView.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
         
-        // А stackView констрейним к внутренним краям scrollView
-        NSLayoutConstraint.activate([
-            horizontalStackView.leadingAnchor.constraint(equalTo: horizontalScrollView.leadingAnchor, constant: 8),
-            horizontalStackView.trailingAnchor.constraint(equalTo: horizontalScrollView.trailingAnchor, constant: -8),
-            horizontalStackView.topAnchor.constraint(equalTo: horizontalScrollView.topAnchor),
-            horizontalStackView.bottomAnchor.constraint(equalTo: horizontalScrollView.bottomAnchor),
-            // Фиксируем высоту, чтобы определить contentSize scrollView
-            horizontalStackView.heightAnchor.constraint(equalTo: horizontalScrollView.heightAnchor)
-        ])
+        horizontalScrollView.pinLeft(to: leadingAnchor)
+        horizontalScrollView.pinRight(to: trailingAnchor)
+        horizontalScrollView.pinTop(to: topAnchor)
+        horizontalScrollView.pinBottom(to: bottomAnchor)
+        
+        horizontalStackView.pinLeft(to: horizontalScrollView.leadingAnchor, 8)
+        horizontalStackView.pinRight(to: horizontalScrollView.trailingAnchor, 8)
+        horizontalStackView.pinTop(to: horizontalScrollView.topAnchor)
+        horizontalStackView.pinBottom(to: horizontalScrollView.bottomAnchor)
+        horizontalStackView.pinHeight(to: horizontalScrollView)
     }
     
     /// Заполняем вью элементами
@@ -109,19 +102,13 @@ final class FilterSortView: UIView {
     }
     
     // MARK: - Создание кнопок
-    
-    /// Создаёт кнопку сортировки
     private func createSortButton() -> UIButton {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "arrow.up.arrow.down"), for: .normal)
         button.tintColor = .black
         
-        // Установка размеров кнопки сортировки (28x28)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 28),
-            button.heightAnchor.constraint(equalToConstant: 28)
-        ])
+        button.setWidth(28)
+        button.setHeight(28)
         
         button.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
         return button
