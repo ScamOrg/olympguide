@@ -94,6 +94,10 @@ final class FilterSortView: UIView {
         horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         // Добавляем кнопку сортировки
+        let space = UIView()
+        space.setWidth(7)
+        horizontalStackView.addArrangedSubview(space)
+        
         let sortButton = createSortButton()
         horizontalStackView.addArrangedSubview(sortButton)
         
