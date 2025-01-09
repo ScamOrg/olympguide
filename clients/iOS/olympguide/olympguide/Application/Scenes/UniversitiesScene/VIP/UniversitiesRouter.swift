@@ -15,4 +15,10 @@ final class UniversitiesRouter: UniversitiesRoutingLogic {
 //        detailsViewController.university = university
         viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
     }
+    
+    func routeToSearch() {
+        let searchVC = SearchViewController(searchType: .universities)
+        searchVC.modalPresentationStyle = .overFullScreen
+        viewController?.navigationController?.pushViewController(searchVC, animated: true)
+    }
 }

@@ -23,6 +23,7 @@ protocol UniversitiesDisplayLogic: AnyObject {
 
 protocol UniversitiesRoutingLogic {
     func routeToDetails(for university: UniversityModel)
+    func routeToSearch()
 }
 
 protocol UniversitiesDataStore {
