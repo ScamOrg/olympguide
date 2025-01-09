@@ -24,6 +24,13 @@ class UniversityTableViewCell: UITableViewCell {
         return button
     }()
     
+    private let separatorLine: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(hex: "#E7E7E7")
+        return view
+    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
@@ -38,7 +45,8 @@ class UniversityTableViewCell: UITableViewCell {
         contentView.addSubview(nameLabel)
         contentView.addSubview(regionLabel)
         contentView.addSubview(favoriteButton)
-        
+        contentView.addSubview(separatorLine)
+
         // Настройки для logoImageView
         logoImageView.contentMode = .scaleAspectFit
         
@@ -72,6 +80,11 @@ class UniversityTableViewCell: UITableViewCell {
         favoriteButton.pinRight(to: contentView.trailingAnchor, 15)
         favoriteButton.setWidth(22)
         favoriteButton.setHeight(22)
+        
+        separatorLine.pinLeft(to: contentView.leadingAnchor, 20)
+        separatorLine.pinRight(to: contentView.trailingAnchor, 20)
+        separatorLine.pinBottom(to: contentView.bottomAnchor)
+        separatorLine.setHeight(1)
     }
     
     func configure(with viewModel: Universities.Load.ViewModel.UniversityViewModel) {
