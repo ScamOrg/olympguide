@@ -14,6 +14,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 20) {
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: customFont,
+                .foregroundColor: UIColor.black  // или другой цвет по желанию
+            ]
+            UINavigationBar.appearance().titleTextAttributes = attributes
+        }
+        
+        if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 17) {
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: customFont,
+                .foregroundColor: UIColor.systemBlue // или другой цвет
+            ]
+            UIBarButtonItem.appearance().setTitleTextAttributes(attributes, for: .normal)
+            UIBarButtonItem.appearance().setTitleTextAttributes(attributes, for: .highlighted)
+        }
+        
+        
         return true
     }
     
