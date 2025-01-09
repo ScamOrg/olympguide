@@ -123,8 +123,9 @@ final class TabBarViewController: UITabBarController {
         router.viewController = universitiesVC
         //        router.dataStore = interactor
         
+        let universitiesNavVC = UINavigationController(rootViewController: universitiesVC)
         let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
-        setViewControllers([universitiesVC, olympiadsNavVC, destinationVC, profileVC], animated: true)
+        setViewControllers([universitiesNavVC, olympiadsNavVC, destinationVC, profileVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
@@ -176,14 +177,14 @@ class ViewController: UIViewController {
         button.setTitleColor(.systemBlue, for: .normal)
         return button
     }()
-    let fsView = FilterSortView(sortingOptions: ["Популярность", "Первый уровень"], filteringOptions: ["Уровень", "Профиль"])
+    let fsView = FilterSortView(sortingOptions: ["Популярность", "Первый уровень"], filteringOptions: ["Уровень", "Профиль", "Уровень", "Профиль"])
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(fsView)
         view.backgroundColor = .white
         setupButton()
         fsView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
-        fsView.pinLeft(to: view.leadingAnchor, 20)
+        fsView.pinLeft(to: view.leadingAnchor)
         fsView.pinRight(to: view.trailingAnchor)
 
         let backItem = UIBarButtonItem(title: "ВУЗы", style: .plain, target: nil, action: nil)
@@ -206,7 +207,6 @@ class ViewController: UIViewController {
     @objc
     func showSearchForUniversities() {
         let searchVC = SearchViewController(searchType: .universities)
-        // Теперь push сработает, потому что ViewController "сидит" в nav1
         navigationController?.pushViewController(searchVC, animated: true)
     }
     
