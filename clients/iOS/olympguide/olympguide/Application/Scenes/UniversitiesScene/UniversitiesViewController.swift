@@ -19,6 +19,20 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
+    
+    private let searchButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal) // Пустой значок
+        button.tintColor = .black
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        return button
+    }()
+    
+    private var tableViewTopConstraint: NSLayoutConstraint!
+
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
             sortingOptions: ["Сортировка A", "Сортировка B"],
@@ -84,7 +98,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
     
     private func configureFilterSortView() {
         view.addSubview(filterSortView)
-        filterSortView.pinTop(to: titleLabel.bottomAnchor, 13)
+//        filterSortView.pinTop(to: titleLabel.bottomAnchor, 20)
         filterSortView.pinLeft(to: view.leadingAnchor, 20)
         filterSortView.pinRight(to: view.trailingAnchor)
     }
@@ -102,20 +116,54 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
     
     private func configureTableView() {
         view.addSubview(tableView)
+//        tableView.pinTop(to: titleLabel.bottomAnchor, 13)
+//        tableView.pinLeft(to: view.leadingAnchor)
+//        tableView.pinRight(to: view.trailingAnchor)
+//        tableView.pinBottom(to: view.bottomAnchor)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
-        tableView.pinTop(to: filterSortView.bottomAnchor)
-        tableView.pinLeft(to: view.leadingAnchor)
-        tableView.pinRight(to: view.trailingAnchor)
-        tableView.pinBottom(to: view.bottomAnchor)
+        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13)
         
-        tableView.register(UniversityTableViewCell.self, forCellReuseIdentifier: Constants.universityCellIdentifier)
+        NSLayoutConstraint.activate([
+            tableViewTopConstraint,
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        tableView.register(UniversityTableViewCell.self,
+                           forCellReuseIdentifier: Constants.universityCellIdentifier)
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = Constants.tableViewBackgroundColor
         tableView.separatorStyle = .singleLine
-        
         tableView.refreshControl = refreshControl
         tableView.showsVerticalScrollIndicator = false
+        
+        // 1. Создаём контейнер под шапку
+        let headerContainer = UIView()
+        headerContainer.backgroundColor = .clear
+        
+        // 2. Добавляем filterSortView внутрь контейнера
+        headerContainer.addSubview(filterSortView)
+        // Задаём нужные констрейнты внутри контейнера
+        filterSortView.pinTop(to: headerContainer.topAnchor)
+        filterSortView.pinLeft(to: headerContainer.leadingAnchor, 20)
+        filterSortView.pinRight(to: headerContainer.trailingAnchor, 20)
+        filterSortView.pinBottom(to: headerContainer.bottomAnchor)
+        
+        // 3. Говорим лейауту посчитать размеры
+        headerContainer.layoutIfNeeded()
+        
+        // 4. Считаем минимально необходимый размер
+        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let height = headerContainer.systemLayoutSizeFitting(targetSize).height
+        
+        // 5. Задаём фрейм контейнера
+        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        
+        // 6. Присваиваем контейнер таблице как header
+        tableView.tableHeaderView = headerContainer
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -140,13 +188,30 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offset = scrollView.contentOffset.y
-        
+            
         let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
-        
+            
+        // Применяем масштабирование к titleLabel
         titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        
+            
+        let maxYTranslated: CGFloat = 30
+        let k = -maxYTranslated / (1 - 0.75)
+        let b = -k
+        let YTranslated = k * scaleFactor + b
+            
         let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
-        titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
+        if scaleFactor <= 1 {
+            // Смещаем titleLabel
+            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
+                
+            // Обновляем константу уже существующего ограничения
+            tableViewTopConstraint.constant = 13 - YTranslated
+                
+            // Обновляем layout
+            view.layoutIfNeeded()
+        } else {
+            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
+        }
     }
     
     @objc
