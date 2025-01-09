@@ -123,7 +123,8 @@ final class TabBarViewController: UITabBarController {
         router.viewController = universitiesVC
         //        router.dataStore = interactor
         
-        setViewControllers([universitiesVC, olympiadsVC, destinationVC, profileVC], animated: true)
+        let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
+        setViewControllers([universitiesVC, olympiadsNavVC, destinationVC, profileVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
@@ -170,7 +171,7 @@ class ViewController: UIViewController {
     
     private let showSheetButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Показать шторку", for: .normal)
+        button.setTitle("Поиск", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
         button.setTitleColor(.systemBlue, for: .normal)
         return button
@@ -184,6 +185,9 @@ class ViewController: UIViewController {
         fsView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
         fsView.pinLeft(to: view.leadingAnchor, 20)
         fsView.pinRight(to: view.trailingAnchor)
+
+        let backItem = UIBarButtonItem(title: "ВУЗы", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
     }
     
     private func setupButton() {
@@ -196,7 +200,14 @@ class ViewController: UIViewController {
         ])
         
         // Добавляем таргет
-        showSheetButton.addTarget(self, action: #selector(showBottomSheetButtonTapped), for: .touchUpInside)
+        showSheetButton.addTarget(self, action: #selector(showSearchForUniversities), for: .touchUpInside)
+    }
+    
+    @objc
+    func showSearchForUniversities() {
+        let searchVC = SearchViewController(searchType: .universities)
+        // Теперь push сработает, потому что ViewController "сидит" в nav1
+        navigationController?.pushViewController(searchVC, animated: true)
     }
     
     @objc
@@ -209,74 +220,41 @@ class ViewController: UIViewController {
         }
     }
 }
-
+//final class ViewController: UIViewController {
+//    
+//    private let customSearchBar = CustomSearchBar(title: "Найти")
+//
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        view.backgroundColor = .white
+//        
+//        // Допустим, хотим разместить на экране
+//        customSearchBar.frame = CGRect(
+//            x: 20,
+//            y: 100,
+//            width: UIScreen.main.bounds.width - 40,
+//            height: 48
+//        )
+//        view.addSubview(customSearchBar)
+//    }
+//}
 
 class MainViewController: UIViewController {
     
-    private lazy var filterSortView: FilterSortView = {
-        let view = FilterSortView(
-            sortingOptions: ["Сортировка A", "Сортировка B"],
-            filteringOptions: ["Уровень", "Профиль"]  // Можно что-то другое подставить
-        )
-        // Важно: не забудьте установить делегат
-        view.delegate = self
-        return view
-    }()
+    //
+        private let customSearchBar = CustomSearchBar(title: "Найти")
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.addSubview(filterSortView)
-        view.backgroundColor = .white
-        filterSortView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
-        filterSortView.pinLeft(to: view.leadingAnchor, 20)
-        filterSortView.pinRight(to: view.trailingAnchor)
-    }
-}
-
-// MARK: - FilterSortViewDelegate
-extension MainViewController: FilterSortViewDelegate {
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            view.backgroundColor = .white
     
-    func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-        // Показываем OptionsViewController с вариантами сортировки
-        let items = ["По возрастанию", "По убыванию"]
-        let sheetVC = OptionsViewController(items: items,
-                                            title: "Сортировка",
-                                            isMultipleChoice: false) // или true
-        
-        sheetVC.modalPresentationStyle = .overFullScreen
-        present(sheetVC, animated: false) {
-            sheetVC.animateShow()
+            // Допустим, хотим разместить на экране
+            customSearchBar.frame = CGRect(
+                x: 20,
+                y: 100,
+                width: UIScreen.main.bounds.width - 40,
+                height: 50
+            )
+            view.addSubview(customSearchBar)
         }
-    }
-    
-    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
-        // title — это тот текст, который вы поставили в FilterButton (например, "Уровень" / "Профиль")
-        // А вот дальше вы сами решаете, что именно показывать:
-        switch title {
-        case "Уровень":
-            // Показываем выбор уровня (как в вашем примере)
-            let items = ["I уровень", "II уровень", "III уровень"]
-            let sheetVC = OptionsViewController(items: items,
-                                                title: "Уровень олимпиады",
-                                                isMultipleChoice: true)
-            sheetVC.modalPresentationStyle = .overFullScreen
-            present(sheetVC, animated: false) {
-                sheetVC.animateShow()
-            }
-            
-        case "Профиль":
-            // Показываем выбор профиля
-            let items = ["Математика", "Физика", "Информатика"]
-            let sheetVC = OptionsViewController(items: items,
-                                                title: "Выберите профиль",
-                                                isMultipleChoice: true)
-            sheetVC.modalPresentationStyle = .overFullScreen
-            present(sheetVC, animated: false) {
-                sheetVC.animateShow()
-            }
-            
-        default:
-            break
-        }
-    }
 }
