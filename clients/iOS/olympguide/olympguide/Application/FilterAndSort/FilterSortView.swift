@@ -7,39 +7,49 @@
 
 import UIKit
 
-protocol FilterSortViewDelegate: AnyObject {
-    /// Вызывается, когда пользователь нажал на кнопку сортировки
-    func filterSortViewDidTapSortButton(_ view: FilterSortView)
+// MARK: - Constants
+fileprivate enum Constants {
+    enum Images {
+        static let sortIcon = "arrow.up.arrow.down"
+    }
     
-    /// Вызывается, когда пользователь нажал на конкретный фильтр
+    enum Colors {
+        static let tintColor = UIColor.black
+    }
+    
+    enum Dimensions {
+        static let stackViewSpacing: CGFloat = 5
+        static let scrollViewInset: CGFloat = 8
+        static let spaceWidth: CGFloat = 7
+        static let sortButtonSize: CGFloat = 28
+    }
+}
+
+protocol FilterSortViewDelegate: AnyObject {
+    func filterSortViewDidTapSortButton(_ view: FilterSortView)
     func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String)
 }
 
-/// Кастомная вью для отображения сортировки и фильтров в одной горизонтальной строке
 final class FilterSortView: UIView {
     
-    // MARK: - UI
+    // MARK: - Variables
     weak var delegate: FilterSortViewDelegate?
     
-    /// Горизонтальный скролл, в котором лежат иконка сортировки и фильтры
     private lazy var horizontalScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
     
-    /// Горизонтальный stackView, куда добавляем sortButton + фильтры
     private lazy var horizontalStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.spacing = 5 // Расстояние между кнопками
+        stackView.spacing = Constants.Dimensions.stackViewSpacing
         stackView.alignment = .center
         return stackView
     }()
     
-    // MARK: - Инициализация
-    
-    /// Инициализатор, принимающий опции сортировки и фильтрации
+    // MARK: - Lifecycle
     init(sortingOptions: [String], filteringOptions: [String]) {
         super.init(frame: .zero)
         setupUI()
@@ -56,74 +66,57 @@ final class FilterSortView: UIView {
         setupUI()
     }
     
-    // MARK: - Настройка интерфейса
-    
+    // MARK: - Methods
     private func setupUI() {
         backgroundColor = .clear
-        
-        // Добавляем UIScrollView
         addSubview(horizontalScrollView)
-        
-        // Внутрь scrollView добавляем stackView
         horizontalScrollView.addSubview(horizontalStackView)
-        
-        // Констрейним scrollView к границам самой вью:
         
         horizontalScrollView.pinLeft(to: leadingAnchor)
         horizontalScrollView.pinRight(to: trailingAnchor)
         horizontalScrollView.pinTop(to: topAnchor)
         horizontalScrollView.pinBottom(to: bottomAnchor)
         
-        horizontalStackView.pinLeft(to: horizontalScrollView.leadingAnchor, 8)
-        horizontalStackView.pinRight(to: horizontalScrollView.trailingAnchor, 8)
+        horizontalStackView.pinLeft(to: horizontalScrollView.leadingAnchor, Constants.Dimensions.scrollViewInset)
+        horizontalStackView.pinRight(to: horizontalScrollView.trailingAnchor, Constants.Dimensions.scrollViewInset)
         horizontalStackView.pinTop(to: horizontalScrollView.topAnchor)
         horizontalStackView.pinBottom(to: horizontalScrollView.bottomAnchor)
         horizontalStackView.pinHeight(to: horizontalScrollView)
     }
     
-    /// Заполняем вью элементами
     private func configure(sortingOptions: [String], filteringOptions: [String]) {
-        // Очищаем stackView
         horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        // Добавляем кнопку сортировки
         let space = UIView()
-        space.setWidth(7)
+        space.setWidth(Constants.Dimensions.spaceWidth)
         horizontalStackView.addArrangedSubview(space)
         
         let sortButton = createSortButton()
         horizontalStackView.addArrangedSubview(sortButton)
         
-        // Добавляем кнопки фильтров
         for filter in filteringOptions {
             let filterButton = createFilterButton(with: filter)
             horizontalStackView.addArrangedSubview(filterButton)
         }
     }
     
-    // MARK: - Создание кнопок
     private func createSortButton() -> UIButton {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "arrow.up.arrow.down"), for: .normal)
-        button.tintColor = .black
-        
-        button.setWidth(28)
-        button.setHeight(28)
-        
+        button.setImage(UIImage(systemName: Constants.Images.sortIcon), for: .normal)
+        button.tintColor = Constants.Colors.tintColor
+        button.setWidth(Constants.Dimensions.sortButtonSize)
+        button.setHeight(Constants.Dimensions.sortButtonSize)
         button.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
         return button
     }
     
-    /// Создаёт кнопку фильтрации
     private func createFilterButton(with title: String) -> UIButton {
         let button = FilterButton(title: title)
-        
         button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         return button
     }
     
-    // MARK: - Обработчики нажатий
-    
+    // MARK: - Objc funcs
     @objc
     private func sortButtonTapped() {
         delegate?.filterSortViewDidTapSortButton(self)
