@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		F37DB2382D315AB6005E5508 /* olympguide.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = olympguide.xcodeproj; path = olympguide/Application/FilterAndSort/olympguide.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F3D861E62D17851800809C5A /* olympguide.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = olympguide.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -42,6 +43,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F37DB23B2D315AB6005E5508 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F3D861DD2D17851800809C5A = {
 			isa = PBXGroup;
 			children = (
@@ -110,6 +118,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F3D861E72D17851800809C5A /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F37DB23B2D315AB6005E5508 /* Products */;
+					ProjectRef = F37DB2382D315AB6005E5508 /* olympguide.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				F3D861E52D17851800809C5A /* olympguide */,
