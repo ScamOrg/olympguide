@@ -7,15 +7,49 @@
 
 import UIKit
 
+// MARK: - Constants
+fileprivate enum Constants {
+    enum Colors {
+        static let refreshTint = UIColor.systemCyan
+        static let searchButtonTint = UIColor.black
+        static let tableViewBackground = UIColor.white
+        static let titleLabelTextColor = UIColor.black
+    }
+    
+    enum Fonts {
+        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28)!
+    }
+    
+    enum Dimensions {
+        static let titleLabelTopMargin: CGFloat = 25
+        static let titleLabelLeftMargin: CGFloat = 20
+        static let searchButtonSize: CGFloat = 33
+        static let searchButtonRightMargin: CGFloat = 20
+        static let tableViewTopMargin: CGFloat = 13
+    }
+    
+    enum Strings {
+        static let universitiesTitle = "ВУЗы"
+        static let backButtonTitle = "ВУЗы"
+    }
+    
+    enum Images {
+        static let searchIcon: String =  "magnifyingglass"
+    }
+}
+
 class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
+    
+    // MARK: - VIP
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
     var router: UniversitiesRoutingLogic?
     
+    // MARK: - Variables
     private let tableView = UITableView()
     private let titleLabel: UILabel = UILabel()
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.tintColor = .systemCyan
+        refreshControl.tintColor = Constants.Colors.refreshTint
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
@@ -23,8 +57,8 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
     private let searchButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal) // Пустой значок
-        button.tintColor = .black
+        button.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
+        button.tintColor = Constants.Colors.searchButtonTint
         button.contentHorizontalAlignment = .fill
         button.contentVerticalAlignment = .fill
         button.imageView?.contentMode = .scaleAspectFit
@@ -38,13 +72,13 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
             sortingOptions: ["Сортировка A", "Сортировка B"],
             filteringOptions: ["Регион"]
         )
-        // Важно: не забудьте установить делегат
         view.delegate = self
         return view
     }()
     
     private var universities: [Universities.Load.ViewModel.UniversityViewModel] = []
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -56,7 +90,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
             Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
         )
         
-        let backItem = UIBarButtonItem(title: "ВУЗы", style: .plain, target: nil, action: nil)
+        let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
     
@@ -70,8 +104,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
-    
-    
+    // MARK: - Methods
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
         DispatchQueue.main.async {
@@ -81,7 +114,6 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
     }
     
     func displayError(message: String) {
-        // Покажите сообщение об ошибке
         print("Error: \(message)")
     }
     
@@ -101,13 +133,13 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
     private func configureLabel() {
         view.addSubview(titleLabel)
         
-        titleLabel.font =  UIFont(name: "MontserratAlternates-Bold", size: 28)
-        
-        titleLabel.text = "ВУЗы"
+        titleLabel.font = Constants.Fonts.titleLabelFont
+        titleLabel.textColor = Constants.Colors.titleLabelTextColor
+        titleLabel.text = Constants.Strings.universitiesTitle
         titleLabel.textAlignment = .center
         
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 25)
-        titleLabel.pinLeft(to: view.leadingAnchor, 20)
+        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.titleLabelTopMargin)
+        titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
     
     private func configureFilterSortView() {
@@ -119,30 +151,15 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
     private func configureSearchButton() {
         view.addSubview(searchButton)
         
-        searchButton.setHeight(33)
-        searchButton.setWidth(33)
+        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
+        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
         searchButton.pinCenterY(to: titleLabel.centerYAnchor)
-        searchButton.pinRight(to: view.trailingAnchor, 20)
+        searchButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
         
         searchButton.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
     }
     
-    @objc
-    private func didTapSearchButton() {
-        router?.routeToSearch()
-    }
-}
-
-
-// MARK: - UITableViewDataSource & UITableViewDelegate
-extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    struct Constants {
-        static let universityCellIdentifier = "UniversityTableViewCell"
-        static let tableViewBackgroundColor: UIColor = .white
-        static let shareActionTitle = "Share"
-    }
-    
+    // MARK: - Private funcs
     private func configureTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
@@ -155,45 +172,53 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        //        tableView.pinTop(to: titleLabel.bottomAnchor, 13)
-        //        tableView.pinLeft(to: view.leadingAnchor)
-        //        tableView.pinRight(to: view.trailingAnchor)
-        //        tableView.pinBottom(to: view.bottomAnchor)
         
         tableView.register(UniversityTableViewCell.self,
-                           forCellReuseIdentifier: Constants.universityCellIdentifier)
+                           forCellReuseIdentifier: "UniversityTableViewCell")
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.backgroundColor = Constants.tableViewBackgroundColor
+        tableView.backgroundColor = Constants.Colors.tableViewBackground
         tableView.separatorStyle = .none
         tableView.refreshControl = refreshControl
         tableView.showsVerticalScrollIndicator = false
         
-        // 1. Создаём контейнер под шапку
         let headerContainer = UIView()
         headerContainer.backgroundColor = .clear
         
-        // 2. Добавляем filterSortView внутрь контейнера
         headerContainer.addSubview(filterSortView)
-        // Задаём нужные констрейнты внутри контейнера
         filterSortView.pinTop(to: headerContainer.topAnchor)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor)
         
-        // 3. Говорим лейауту посчитать размеры
         headerContainer.layoutIfNeeded()
         
-        // 4. Считаем минимально необходимый размер
         let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
         
-        // 5. Задаём фрейм контейнера
         headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
         
-        // 6. Присваиваем контейнер таблице как header
         tableView.tableHeaderView = headerContainer
     }
+    
+    @objc
+    private func didTapSearchButton() {
+        router?.routeToSearch()
+    }
+    
+    @objc
+    private func handleRefresh() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.interactor?.loadUniversities(
+                Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
+            )
+            self.refreshControl.endRefreshing()
+        }
+    }
+}
+
+// MARK: - UITableViewDataSource & UITableViewDelegate
+extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return universities.count
@@ -201,14 +226,11 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
-            withIdentifier: Constants.universityCellIdentifier,
+            withIdentifier: "UniversityTableViewCell",
             for: indexPath
         ) as! UniversityTableViewCell
         let universityViewModel = universities[indexPath.row]
         cell.configure(with: universityViewModel)
-        
-        //        let isLastCell = indexPath.row == items.count - 1
-        //        cell.hideSeparator(isLastCell)
         return cell
     }
     
@@ -223,7 +245,6 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
         
         let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
         
-        // Применяем масштабирование к titleLabel
         titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
         
         let maxYTranslated: CGFloat = 30
@@ -236,35 +257,16 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
             searchButton.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
             let searchScaledWidth = searchButton.bounds.width * (1 - scaleFactor)
             
-            // Смещаем titleLabel
             titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
             searchButton.transform = searchButton.transform.translatedBy(x: searchScaledWidth, y: -YTranslated)
-            // Обновляем константу уже существующего ограничения
-            //            tableViewTopConstraint.constant = 13 - YTranslated
-            //            tableView.transform = CGAffineTransform(translationX: 0, y: -YTranslated)
             
-            // Обновляем константу уже существующего ограничения
-            tableViewTopConstraint.constant = 13 - YTranslated
+            tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
             
-            // Обновляем layout
             view.layoutIfNeeded()
-            // Обновляем layout
             view.layoutIfNeeded()
         } else {
             searchButton.transform = CGAffineTransform(scaleX: 1, y: 1)
-            
             titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
-        }
-    }
-    
-    @objc
-    private func handleRefresh() {
-        // Имитация загрузки данных
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.interactor?.loadUniversities(
-                Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
-            )
-            self.refreshControl.endRefreshing() // Останавливаем анимацию
         }
     }
 }
@@ -273,12 +275,10 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
 extension UniversitiesViewController: FilterSortViewDelegate {
     
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-        // Показываем OptionsViewController с вариантами сортировки
         let items = ["По возрастанию", "По убыванию"]
         let sheetVC = OptionsViewController(items: items,
                                             title: "Сортировка",
-                                            isMultipleChoice: false) // или true
-        
+                                            isMultipleChoice: false)
         sheetVC.modalPresentationStyle = .overFullScreen
         present(sheetVC, animated: false) {
             sheetVC.animateShow()
@@ -288,7 +288,6 @@ extension UniversitiesViewController: FilterSortViewDelegate {
     func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
         switch title {
         case "Регион":
-            // Показываем выбор уровня (как в вашем примере)
             let items = ["Москва", "Санкт-Петербург", "Долгопрудный"]
             let sheetVC = OptionsViewController(items: items,
                                                 title: "Регион",
@@ -297,11 +296,8 @@ extension UniversitiesViewController: FilterSortViewDelegate {
             present(sheetVC, animated: false) {
                 sheetVC.animateShow()
             }
-            
         default:
             break
         }
     }
 }
-
-
