@@ -123,15 +123,16 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
             case 2:
                 cell.configure(title: "Регион", detail: "Москва")
             case 3:
-                cell.configure(title: "Личные данные")
-            case 4:
-                cell.configure(title: "Мои дипломы")
-            case 5:
-                cell.configure(title: "Ближайшие события")
-            case 6:
                 cell.configure(title: "Избранные ВУЗы")
+            case 4:
+                cell.configure(title: "Избранные направления")
+            case 5:
+                cell.configure(title: "Избранные олимпиады")
+            case 6:
+                cell.configure(title: "Настройка уведомлений")
             case 7:
                 cell.configure(title: "О нас")
+                cell.hideSeparator(true)
             default:
                 break
             }
@@ -139,10 +140,10 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
         }
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard indexPath.row > 1 else { return }
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
+    // MARK: - UITableViewDelegate
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offset = scrollView.contentOffset.y
