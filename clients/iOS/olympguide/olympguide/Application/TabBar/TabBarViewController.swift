@@ -44,7 +44,7 @@ final class TabBarViewController: UITabBarController {
     let router = UniversitiesRouter()
     
     private let universitiesVC = UniversitiesViewController()
-    private let olympiadsVC = ViewController()
+    private let olympiadsVC = OlympiadsViewController()
     private let destinationVC = MainViewController()
     private let profileVC = UIViewController()
     
@@ -116,12 +116,6 @@ final class TabBarViewController: UITabBarController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        universitiesVC.interactor = interactor
-        universitiesVC.router = router
-        interactor.presenter = presenter
-        presenter.viewController = universitiesVC
-        router.viewController = universitiesVC
-        //        router.dataStore = interactor
         
         let universitiesNavVC = UINavigationController(rootViewController: universitiesVC)
         let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
