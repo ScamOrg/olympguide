@@ -7,24 +7,31 @@
 
 import UIKit
 
+// MARK: - Constants
+fileprivate enum Constants {
+    enum Dimensions {
+        static let searchBarHeight: CGFloat = 48
+        static let searchBarHorizontalMargin: CGFloat = 20
+        static let tableViewTopMargin: CGFloat = 10
+    }
+}
+
 final class SearchViewController: UIViewController, SearchDisplayLogic {
     
     // MARK: - VIP
     var interactor: SearchBusinessLogic?
     var router: (SearchRoutingLogic & SearchDataPassing)?
     
-    // MARK: - UI
+    // MARK: - Variables
     private let customSearchBar: CustomSearchBar
     private let tableView = UITableView()
-    
     private var itemsToShow: [String] = []
     
-    // MARK: - LifeCycle
+    // MARK: - Lifecycle
     init(searchType: SearchType) {
         customSearchBar = CustomSearchBar(title: searchType.title())
         super.init(nibName: nil, bundle: nil)
         setup()
-        
         router?.dataStore?.searchType = searchType
     }
     
@@ -38,7 +45,7 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         loadScene()
     }
     
-    // MARK: - Setup VIP
+    // MARK: - Methods
     private func setup() {
         let viewController = self
         let interactor = SearchInteractor()
@@ -53,45 +60,32 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         router.dataStore = interactor
     }
     
-    // MARK: - UI
     private func setupUI() {
         view.backgroundColor = .white
         
-        // Скрываем стандартную кнопку "Назад", чтобы остался только свайп
-//        navigationItem.hidesBackButton = true
-        
-        // Создаём контейнер для кастомного поискового бара
-        
-//        // Назначаем контейнер в качестве titleView
-//        navigationItem.titleView = containerView
-        
-        // Добавляем CustomSearchBar в контейнер
         customSearchBar.delegate = self
         customSearchBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(customSearchBar)
-
-        customSearchBar.setHeight(48)
-        customSearchBar.setWidth( UIScreen.main.bounds.width - 2 * 20)
-        customSearchBar.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
-        customSearchBar.pinLeft(to: view.leadingAnchor, 20)
         
-        // Настраиваем tableView
+        customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
+        customSearchBar.setWidth(UIScreen.main.bounds.width - 2 * Constants.Dimensions.searchBarHorizontalMargin)
+        customSearchBar.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
+        customSearchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.searchBarHorizontalMargin)
+        
         tableView.dataSource = self
         tableView.delegate = self
         view.addSubview(tableView)
-        tableView.pinTop(to: customSearchBar.bottomAnchor, 10)
+        tableView.pinTop(to: customSearchBar.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
         tableView.pinLeft(to: view.leadingAnchor)
         tableView.pinRight(to: view.trailingAnchor)
         tableView.pinBottom(to: view.bottomAnchor)
     }
     
     private func loadScene() {
-        // Если searchType уже был записан извне:
         if let searchType = router?.dataStore?.searchType {
             let request = Search.Load.Request(searchType: searchType)
             interactor?.loadScene(request: request)
         } else {
-            // Дефолтное поведение
             let request = Search.Load.Request(searchType: .other)
             interactor?.loadScene(request: request)
         }
@@ -100,7 +94,6 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     // MARK: - SearchDisplayLogic
     func displayLoadScene(viewModel: Search.Load.ViewModel) {
         title = "Поиск"
-//        title = viewModel.navBarTitle
     }
     
     func displayTextDidChange(viewModel: Search.TextDidChange.ViewModel) {
@@ -123,19 +116,17 @@ extension SearchViewController: CustomSearchBarDelegate {
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
-    // Кол-во строк = кол-во элементов в массиве
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemsToShow.count
     }
     
-    // Конфигурация ячейки
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         cell.textLabel?.text = itemsToShow[indexPath.row]
         return cell
     }
     
-    // Обработка нажатия на ячейку
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let request = Search.SelectItem.Request(index: indexPath.row)
         interactor?.selectItem(request: request)
