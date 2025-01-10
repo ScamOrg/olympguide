@@ -36,7 +36,6 @@ final class OptionsViewController: UIViewController {
         $0.titleLabel?.font = Constants.Fonts.buttonFont
         $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
         
-        // Добавляем обработчики для анимации «нажатия»
         $0.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)
         $0.addTarget(nil, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchDragExit, .touchCancel])
         
@@ -50,7 +49,6 @@ final class OptionsViewController: UIViewController {
         $0.titleLabel?.font = Constants.Fonts.buttonFont
         $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
         
-        // Аналогично и для «Продолжить»
         $0.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)
         $0.addTarget(nil, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchDragExit, .touchCancel])
         
@@ -306,7 +304,6 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     @objc
     private func buttonTouchDown(_ sender: UIButton) {
-        // Анимируем небольшой «скейл»
         UIView.animate(withDuration: 0.1,
                        delay: 0,
                        options: [.curveEaseIn, .allowUserInteraction]) {
@@ -316,7 +313,6 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     @objc
     private func buttonTouchUp(_ sender: UIButton) {
-        // Возвращаем обратно
         UIView.animate(withDuration: 0.1,
                        delay: 0,
                        options: [.curveEaseOut, .allowUserInteraction]) {
