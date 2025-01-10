@@ -51,6 +51,10 @@ class ProfileButtonTableViewCell: UITableViewCell {
         
     }
     
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        actionButton.point(inside: point, with: event)
+    }
+    
     @objc
     private func buttonTouchDown(_ sender: UIButton) {
         UIView.animate(withDuration: 0.1,
