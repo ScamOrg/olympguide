@@ -20,9 +20,8 @@ fileprivate enum CellConstants {
     }
     
     enum Colors {
-        // Замените на свой метод init(hex:) или используйте готовый цвет
-        static let separatorColor = UIColor.lightGray
-        static let regionTextColor = UIColor.black.withAlphaComponent(0.53)
+        static let separatorColor = UIColor(hex: "#E7E7E7")
+        static let regionTextColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
     }
     
     enum Fonts {
