@@ -86,7 +86,7 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
             let request = Search.Load.Request(searchType: searchType)
             interactor?.loadScene(request: request)
         } else {
-            let request = Search.Load.Request(searchType: .other)
+            let request = Search.Load.Request(searchType: .fields)
             interactor?.loadScene(request: request)
         }
     }
