@@ -17,7 +17,7 @@ final class SearchWorker {
             return ["МГУ", "СПбГУ", "МФТИ", "ВШЭ", "Финансовый университет"]
         case .olympiads:
             return ["Ломоносов", "Физтех", "Высшая проба", "Инфоурок"]
-        case .other:
+        case .fields:
             return ["Item 1", "Item 2", "Item 3"]
         }
     }
