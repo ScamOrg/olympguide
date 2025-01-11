@@ -23,14 +23,7 @@ final class SearchInteractor: SearchBusinessLogic, SearchDataStore {
         self.searchType = request.searchType
         
         let titleForScene: String
-        switch request.searchType {
-        case .universities:
-            titleForScene = "Поиск ВУЗов"
-        case .olympiads:
-            titleForScene = "Поиск олимпиад"
-        case .other:
-            titleForScene = "Поиск"
-        }
+        titleForScene = "Поиск"
         
         // Презентуем заголовок
         let response = Search.Load.Response(title: titleForScene)
