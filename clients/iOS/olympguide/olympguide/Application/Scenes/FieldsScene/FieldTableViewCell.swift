@@ -7,10 +7,10 @@
 
 import UIKit
 
-// MARK: - Constants
-fileprivate enum Constants {
+// MARK: - CellConstants
+fileprivate enum CellConstants {
     enum Identifier {
-        static let cellIdentifier = "UniversityTableViewCell"
+        static let cellIdentifier = "FieldTableViewCell"
     }
     
     enum Images {
@@ -20,8 +20,9 @@ fileprivate enum Constants {
     }
     
     enum Colors {
-        static let separatorColor = UIColor(hex: "#E7E7E7")
-        static let regionTextColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.53)
+        // Замените на свой метод init(hex:) или используйте готовый цвет
+        static let separatorColor = UIColor.lightGray
+        static let regionTextColor = UIColor.black.withAlphaComponent(0.53)
     }
     
     enum Fonts {
@@ -30,26 +31,23 @@ fileprivate enum Constants {
     }
     
     enum Dimensions {
-        static let logoTopMargin: CGFloat = 30
-        static let logoLeftMargin: CGFloat = 15
-        static let logoSize: CGFloat = 80
         static let interItemSpacing: CGFloat = 15
-        static let nameLabelBottomMargin: CGFloat = 20
         static let favoriteButtonSize: CGFloat = 22
-        static let separatorHeight: CGFloat = 1
-        static let separatorHorizontalInset: CGFloat = 20
     }
 }
 
 class FieldTableViewCell: UITableViewCell {
     
     // MARK: - Variables
-    static let identifier = Constants.Identifier.cellIdentifier
+    static let identifier = CellConstants.Identifier.cellIdentifier
     
     private let information: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.alignment = .top
+        // Если нужно перенастроить отступы stackView, делаем так:
+        // stackView.spacing = 8
+        stackView.spacing = 0
         return stackView
     }()
     
@@ -59,12 +57,13 @@ class FieldTableViewCell: UITableViewCell {
         button.contentHorizontalAlignment = .fill
         button.contentVerticalAlignment = .fill
         button.imageView?.contentMode = .scaleAspectFit
-        button.setImage(UIImage(systemName: Constants.Images.bookmark), for: .normal)
+        button.setImage(UIImage(systemName: CellConstants.Images.bookmark), for: .normal)
         return button
     }()
     
     // MARK: - Lifecycle
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle,
+                  reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
@@ -79,46 +78,65 @@ class FieldTableViewCell: UITableViewCell {
         contentView.addSubview(information)
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         
+        // Расставляем констрейнты
         information.pinTop(to: contentView.topAnchor, 5)
         information.pinLeft(to: contentView.leadingAnchor, 20)
         information.pinBottom(to: contentView.bottomAnchor, 5)
         information.pinRight(to: favoriteButton.leadingAnchor, 15)
-        favoriteButton.pinTop(to: contentView.topAnchor)
-        favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        favoriteButton.setWidth(Constants.Dimensions.favoriteButtonSize)
-        favoriteButton.setHeight(Constants.Dimensions.favoriteButtonSize)
+        
+        favoriteButton.pinTop(to: contentView.topAnchor, 6)
+        favoriteButton.pinRight(to: contentView.trailingAnchor, 20)
+        favoriteButton.setWidth(CellConstants.Dimensions.favoriteButtonSize)
+        favoriteButton.setHeight(CellConstants.Dimensions.favoriteButtonSize)
     }
     
     // MARK: - Methods
     func configure(with viewModel: Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel) {
-        let code = viewModel.code
-        let title = viewModel.name
+        // Очищаем stackView, чтобы не дублировать лейблы при переиспользовании ячейки
+        information.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
         
+        // Пример, если бы нужно было выводить "code" посимвольно.
+        // Сейчас это закомментировано, при необходимости раскомментируйте:
+        
+        let code = viewModel.code
         for char in code {
             let label = UILabel()
             label.text = String(char)
-            label.font = Constants.Fonts.nameLabelFont
+            label.font = CellConstants.Fonts.nameLabelFont
             label.textColor = .black
             label.textAlignment = .center
             if char == "." {
                 label.setWidth(3)
-                label.textAlignment = .left
             } else {
                 label.setWidth(11)
             }
             information.addArrangedSubview(label)
         }
-        let spaceLabel = UILabel()
-        spaceLabel.text = " - "
-        spaceLabel.font = Constants.Fonts.nameLabelFont
-        information.addArrangedSubview(spaceLabel)
         
+        let spaceLabel1 = UILabel()
+        spaceLabel1.setWidth(4)
+        let spaceLabel2 = UILabel()
+        spaceLabel2.setWidth(2)
+        information.addArrangedSubview(spaceLabel1)
+        let dashLabel = UILabel()
+        dashLabel.text = "-"
+        dashLabel.font = CellConstants.Fonts.nameLabelFont
+        dashLabel.textColor = .black
+        dashLabel.textAlignment = .center
+        dashLabel.setWidth(11)
+        information.addArrangedSubview(dashLabel)
+        information.addArrangedSubview(spaceLabel2)
+
+        
+        
+        // Текст названия
         let nameLabel = UILabel()
-        nameLabel.text = title
-        nameLabel.font = Constants.Fonts.nameLabelFont
+        nameLabel.text = viewModel.name
+        nameLabel.font = CellConstants.Fonts.nameLabelFont
         nameLabel.textColor = .black
-        
         nameLabel.numberOfLines = 0
+        nameLabel.textAlignment = .left
         nameLabel.lineBreakMode = .byWordWrapping
         information.addArrangedSubview(nameLabel)
     }
@@ -126,9 +144,8 @@ class FieldTableViewCell: UITableViewCell {
     // MARK: - Objc funcs
     @objc
     private func favoriteButtonTapped() {
-        let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
-        let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
+        let isFavorite = (favoriteButton.image(for: .normal) == UIImage(systemName: CellConstants.Images.bookmarkFill))
+        let newImageName = isFavorite ? CellConstants.Images.bookmark : CellConstants.Images.bookmarkFill
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
 }
-

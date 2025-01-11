@@ -34,7 +34,7 @@ fileprivate enum Constants {
     }
     
     enum Images {
-        static let searchIcon: String =  "magnifyingglass"
+        static let searchIcon: String = "magnifyingglass"
     }
 }
 
@@ -86,13 +86,22 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         configureSearchButton()
         configureFilterSortView()
         configureTableView()
+        
+        // Загрузка данных
         interactor?.loadFields(
             Fields.Load.Request(searchQuery: nil, degree: nil)
         )
         
-        let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
+        // Настройка кнопки "Назад" в NavigationController
+        let backItem = UIBarButtonItem(
+            title: Constants.Strings.backButtonTitle,
+            style: .plain,
+            target: nil,
+            action: nil
+        )
         navigationItem.backBarButtonItem = backItem
         
+        // Убираем отступ между секциями в iOS 15+
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }
@@ -108,7 +117,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
-    // MARK: - Methods
+    // MARK: - Methods (FieldsDisplayLogic)
     func displayFields(viewModel: Fields.Load.ViewModel) {
         fields = viewModel.groupsOfFields
         DispatchQueue.main.async {
@@ -121,6 +130,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         print("Error: \(message)")
     }
     
+    // MARK: - Private setup
     private func setup() {
         let viewController = self
         let interactor = FieldsInteractor()
@@ -142,14 +152,9 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         titleLabel.text = Constants.Strings.fieldsTitle
         titleLabel.textAlignment = .center
         
+        // Пример использования методов pin (см. ниже расширение)
         titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.titleLabelTopMargin)
         titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
-    }
-    
-    private func configureFilterSortView() {
-        view.addSubview(filterSortView)
-        filterSortView.pinLeft(to: view.leadingAnchor)
-        filterSortView.pinRight(to: view.trailingAnchor)
     }
     
     private func configureSearchButton() {
@@ -163,12 +168,22 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         searchButton.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
     }
     
-    // MARK: - Private funcs
+    private func configureFilterSortView() {
+        view.addSubview(filterSortView)
+        filterSortView.pinLeft(to: view.leadingAnchor)
+        filterSortView.pinRight(to: view.trailingAnchor)
+        // По умолчанию высота определяется контентом (через tableHeaderView).
+        // Если нужно зафиксировать, можно добавить pinTop/pinBottom.
+    }
+    
     private func configureTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
-        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13)
+        tableViewTopConstraint = tableView.topAnchor.constraint(
+            equalTo: titleLabel.bottomAnchor,
+            constant: Constants.Dimensions.tableViewTopMargin
+        )
         
         NSLayoutConstraint.activate([
             tableViewTopConstraint,
@@ -177,8 +192,11 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        tableView.register(FieldTableViewCell.self,
-                           forCellReuseIdentifier: "FieldTableViewCell")
+        // Регистрация ячейки
+        tableView.register(
+            FieldTableViewCell.self,
+            forCellReuseIdentifier: FieldTableViewCell.identifier
+        )
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = Constants.Colors.tableViewBackground
@@ -186,6 +204,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         tableView.refreshControl = refreshControl
         tableView.showsVerticalScrollIndicator = false
         
+        // Создаём header с FilterSortView
         let headerContainer = UIView()
         headerContainer.backgroundColor = .clear
         
@@ -195,17 +214,26 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor)
         
+        // Считаем высоту header-а
         headerContainer.layoutIfNeeded()
         
-        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
-        
-        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        headerContainer.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: tableView.bounds.width,
+            height: height
+        )
         
         tableView.tableHeaderView = headerContainer
         tableView.rowHeight = UITableView.automaticDimension
     }
     
+    // MARK: - Actions
     @objc
     private func didTapSearchButton() {
         router?.routeToSearch()
@@ -233,37 +261,47 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         return fields[section].isExpanded ? fields[section].fields.count : 0
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
-            withIdentifier: "FieldTableViewCell",
+            withIdentifier: FieldTableViewCell.identifier,
             for: indexPath
         ) as! FieldTableViewCell
-        let fieldViewModel = fields[indexPath.section]
-        cell.configure(with: fieldViewModel.fields[indexPath.row])
+        
+        let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
+        cell.configure(with: fieldViewModel)
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView,
+                   didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else { return }
+        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
+            return
+        }
         router?.routeToDetails(for: fieldModel)
     }
     
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    // Высота header-а для секции
+    func tableView(_ tableView: UITableView,
+                   heightForHeaderInSection section: Int) -> CGFloat {
         return 44
     }
 
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+    // Высота footer-а (чтобы не было лишних отступов)
+    func tableView(_ tableView: UITableView,
+                   heightForFooterInSection section: Int) -> CGFloat {
         return 0.01
     }
 
-    // Создание заголовка секции с кнопкой для раскрытия/сворачивания
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    // Создание заголовка секции с кнопкой
+    func tableView(_ tableView: UITableView,
+                   viewForHeaderInSection section: Int) -> UIView? {
         let headerButton = UIButton(type: .system)
         headerButton.setTitle(fields[section].name, for: .normal)
         headerButton.tag = section
         headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
-        headerButton.backgroundColor = .lightGray // Для выделения заголовка
+        headerButton.backgroundColor = .lightGray // Для наглядности
         headerButton.setTitleColor(.black, for: .normal)
         return headerButton
     }
@@ -275,6 +313,7 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.reloadSections([section], with: .automatic)
     }
     
+    // Эффект скролла с трансформацией
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offset = scrollView.contentOffset.y
         
@@ -283,25 +322,28 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
         
         let maxYTranslated: CGFloat = 30
-        let k = -maxYTranslated / (1 - 0.75)
+        let k = -maxYTranslated / (1 - 0.75)  // коэффициент для линейной зависимости
         let b = -k
         let YTranslated = k * scaleFactor + b
         
         let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
         if scaleFactor <= 1 {
+            // Скалируем кнопку
             searchButton.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
             let searchScaledWidth = searchButton.bounds.width * (1 - scaleFactor)
             
+            // Двигаем лейбл и кнопку
             titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
             searchButton.transform = searchButton.transform.translatedBy(x: searchScaledWidth, y: -YTranslated)
             
+            // Двигаем таблицу
             tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
             
             view.layoutIfNeeded()
-            view.layoutIfNeeded()
         } else {
-            searchButton.transform = CGAffineTransform(scaleX: 1, y: 1)
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
+            // Возврат к изначальным трансформациям, если scaleFactor > 1
+            searchButton.transform = .identity
+            titleLabel.transform = .identity
         }
     }
 }
@@ -320,7 +362,8 @@ extension FieldsViewController: FilterSortViewDelegate {
         }
     }
     
-    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
+    func filterSortView(_ view: FilterSortView,
+                        didTapFilterWithTitle title: String) {
         switch title {
         case "Регион":
             let items = ["Москва", "Санкт-Петербург", "Долгопрудный"]
