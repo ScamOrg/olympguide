@@ -39,6 +39,7 @@ class OlympiadsWorker {
         }
 
         URLSession.shared.dataTask(with: url) { data, _, error in
+            print("DataTask started")
             if let error = error {
                 completion(.failure(error))
                 return
@@ -51,6 +52,7 @@ class OlympiadsWorker {
 
             do {
                 let olympiads = try self.decoder.decode([OlympiadModel].self, from: data)
+                print(olympiads)
                 completion(.success(olympiads))
             } catch {
                 print("Decoding error: \(error)")
