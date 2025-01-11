@@ -18,6 +18,8 @@ DerivedData/
 *.xcodeproj/project.xcworkspace/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
+xcdebugger/
+
 
 # Build artifacts
 build/
