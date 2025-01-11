@@ -11,13 +11,13 @@ import Foundation
 enum SearchType {
     case universities
     case olympiads
-    case other
+    case fields
     
     func title() -> String {
         switch self {
         case .universities: return "Поиск по ВУЗам"
         case .olympiads: return "Поиск по олимпиадам"
-        case .other: return "other"
+        case .fields: return "Поиск по направлениям"
         }
     }
 }
