@@ -20,6 +20,7 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 xcdebugger/
 
+
 # Build artifacts
 build/
 *.app
