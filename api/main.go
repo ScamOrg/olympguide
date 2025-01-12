@@ -6,7 +6,6 @@ import (
 
 	"api/config"
 	"api/db"
-	"api/routers"
 )
 
 func main() {
@@ -15,7 +14,7 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 	db.ConnectDB(cfg)
-	r := routes.SetupRouter()
+	r := routers.SetupRouter()
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)
 	if err := r.Run(serverAddress); err != nil {
