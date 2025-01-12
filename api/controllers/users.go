@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"math/rand"
@@ -42,14 +41,6 @@ func SendCode(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Код отправлен на " + request.Email})
-
-	session := sessions.Default(c)
-	session.Set("email", request.Email)
-	err = session.Save()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при сохранении сессии"})
-		return
-	}
 }
 
 func VerifyCode(c *gin.Context) {
