@@ -46,6 +46,7 @@ class FilterButton: UIButton {
     init(title: String) {
         super.init(frame: .zero)
         self.title.text = title
+        isUserInteractionEnabled = true
         configureUI()
     }
     
