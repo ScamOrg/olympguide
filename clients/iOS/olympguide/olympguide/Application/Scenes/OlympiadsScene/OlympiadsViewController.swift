@@ -94,15 +94,15 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         navigationItem.backBarButtonItem = backItem
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        navigationController?.setNavigationBarHidden(true, animated: animated)
+//    }
+//    
+//    override func viewWillDisappear(_ animated: Bool) {
+//        super.viewWillDisappear(animated)
+//        navigationController?.setNavigationBarHidden(false, animated: animated)
+//    }
     
     // MARK: - Methods
     func displayOlympiads(viewModel: Olympiads.Load.ViewModel) {
@@ -138,7 +138,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         titleLabel.text = Constants.Strings.olympiadsTitle
         titleLabel.textAlignment = .center
         
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.titleLabelTopMargin)
+        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor/*, Constants.Dimensions.titleLabelTopMargin*/)
         titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
     
