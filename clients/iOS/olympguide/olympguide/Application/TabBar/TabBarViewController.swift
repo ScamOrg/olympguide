@@ -45,7 +45,7 @@ final class TabBarViewController: UITabBarController {
     
     private let universitiesVC = UniversitiesViewController()
     private let olympiadsVC = OlympiadsViewController()
-    private let destinationVC = FieldsViewController()
+    private let fieldsVC = FieldsViewController()
     private let profileVC = ProfileViewController()
     
     private lazy var universitiesBtn: TabButton = {
@@ -119,7 +119,10 @@ final class TabBarViewController: UITabBarController {
         
         let universitiesNavVC = UINavigationController(rootViewController: universitiesVC)
         let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
-        setViewControllers([universitiesNavVC, olympiadsNavVC, destinationVC, profileVC], animated: true)
+        let fieldsNavVC = UINavigationController(rootViewController: fieldsVC)
+        let profileNavVC = UINavigationController(rootViewController: profileVC)
+        
+        setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
