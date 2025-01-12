@@ -14,7 +14,7 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/data
   redis:
     image: redis:latest
     container_name: redis
@@ -22,7 +22,7 @@ services:
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
     volumes:
-      - redis_data:/data
+      - ./redis_data:/data
     command: [ "redis-server", "--appendonly", "yes" ]
   api:
     build:
@@ -44,11 +44,6 @@ services:
       - db
       - redis
     restart: on-failure
-
-volumes:
-  redis_data:
-  postgres_data:
-
 networks:
   default:
     name: olympguide_network

@@ -6,6 +6,7 @@ import (
 
 	"api/config"
 	"api/db"
+	"api/routers"
 )
 
 func main() {
@@ -14,7 +15,9 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 	db.ConnectDB(cfg)
+	db.ConnectRedis(cfg)
 	r := routers.SetupRouter()
+	db.UseRedisSession(r, cfg)
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)
 	if err := r.Run(serverAddress); err != nil {
