@@ -10,7 +10,7 @@ import Foundation
 class FieldsWorker {
     
     private enum Constants {
-        static let baseURL: String = "https://bf08eca8-0612-472c-95bf-ba00f2795c75.mock.pstmn.io/fields"
+        static let baseURL: String = "http://localhost:8080/fields"
         static let invalidURLMessage: String = "Invalid URL"
         static let decodingErrorMessage: String = "Decoding error"
     }
