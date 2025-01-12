@@ -79,7 +79,7 @@ class FieldTableViewCell: UITableViewCell {
         
         // Расставляем констрейнты
         information.pinTop(to: contentView.topAnchor, 5)
-        information.pinLeft(to: contentView.leadingAnchor, 20)
+        information.pinLeft(to: contentView.leadingAnchor, 40)
         information.pinBottom(to: contentView.bottomAnchor, 5)
         information.pinRight(to: favoriteButton.leadingAnchor, 15)
         
@@ -127,8 +127,6 @@ class FieldTableViewCell: UITableViewCell {
         information.addArrangedSubview(dashLabel)
         information.addArrangedSubview(spaceLabel2)
 
-        
-        
         // Текст названия
         let nameLabel = UILabel()
         nameLabel.text = viewModel.name
