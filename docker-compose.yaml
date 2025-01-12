@@ -14,7 +14,16 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - redis_data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
   api:
     build:
       context: ./api
@@ -29,9 +38,16 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - API_PORT=${API_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - db
+      - redis
     restart: on-failure
+
+volumes:
+  redis_data:
+  postgres_data:
 
 networks:
   default:
