@@ -56,6 +56,12 @@ final class FilterSortView: UIView {
         configure(sortingOptions: sortingOptions, filteringOptions: filteringOptions)
     }
     
+    init (filteringOptions: [String]) {
+        super.init(frame: .zero)
+        setupUI()
+        configure(filteringOptions: filteringOptions)
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -93,6 +99,17 @@ final class FilterSortView: UIView {
         
         let sortButton = createSortButton()
         horizontalStackView.addArrangedSubview(sortButton)
+        
+        for filter in filteringOptions {
+            let filterButton = createFilterButton(with: filter)
+            horizontalStackView.addArrangedSubview(filterButton)
+        }
+    }
+    
+    private func configure(filteringOptions: [String]) {
+        let space = UIView()
+        space.setWidth(Constants.Dimensions.spaceWidth)
+        horizontalStackView.addArrangedSubview(space)
         
         for filter in filteringOptions {
             let filterButton = createFilterButton(with: filter)
