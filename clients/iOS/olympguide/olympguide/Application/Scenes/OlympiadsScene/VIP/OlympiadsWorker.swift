@@ -10,7 +10,7 @@ import Foundation
 class OlympiadsWorker {
     
     private enum Constants {
-        static let baseURL: String = "https://bf08eca8-0612-472c-95bf-ba00f2795c75.mock.pstmn.io/olympiads"
+        static let baseURL: String = "http://localhost:8080/olympiads"
         static let invalidURLMessage: String = "Invalid URL"
         static let decodingErrorMessage: String = "Decoding error"
     }
@@ -52,7 +52,6 @@ class OlympiadsWorker {
 
             do {
                 let olympiads = try self.decoder.decode([OlympiadModel].self, from: data)
-                print(olympiads)
                 completion(.success(olympiads))
             } catch {
                 print("Decoding error: \(error)")
