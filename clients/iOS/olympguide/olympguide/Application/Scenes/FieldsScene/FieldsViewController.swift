@@ -29,8 +29,8 @@ fileprivate enum Constants {
     }
     
     enum Strings {
-        static let fieldsTitle = "ВУЗы"
-        static let backButtonTitle = "ВУЗы"
+        static let fieldsTitle = "Направления"
+        static let backButtonTitle = "Направления"
     }
     
     enum Images {
@@ -69,8 +69,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
-            sortingOptions: ["Сортировка A", "Сортировка B"],
-            filteringOptions: ["Регион"]
+            filteringOptions: ["Формат обучения"]
         )
         view.delegate = self
         return view
@@ -212,7 +211,8 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         filterSortView.pinTop(to: headerContainer.topAnchor)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
-        filterSortView.pinBottom(to: headerContainer.bottomAnchor)
+        filterSortView.pinBottom(to: headerContainer.bottomAnchor, 21)
+        
         
         // Считаем высоту header-а
         headerContainer.layoutIfNeeded()
@@ -283,10 +283,10 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // Высота header-а для секции
-    func tableView(_ tableView: UITableView,
-                   heightForHeaderInSection section: Int) -> CGFloat {
-        return 44
-    }
+//    func tableView(_ tableView: UITableView,
+//                   heightForHeaderInSection section: Int) -> CGFloat {
+//        return 44
+//    }
 
     // Высота footer-а (чтобы не было лишних отступов)
     func tableView(_ tableView: UITableView,
@@ -297,18 +297,20 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     // Создание заголовка секции с кнопкой
     func tableView(_ tableView: UITableView,
                    viewForHeaderInSection section: Int) -> UIView? {
-        let headerButton = UIButton(type: .system)
-        headerButton.setTitle(fields[section].name, for: .normal)
+        let headerButton = FieldsTableButton(name: fields[section].name, code: fields[section].code)
         headerButton.tag = section
         headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
-        headerButton.backgroundColor = .lightGray // Для наглядности
-        headerButton.setTitleColor(.black, for: .normal)
+        
+        if fields[section].isExpanded {
+            headerButton.backgroundView.backgroundColor = UIColor(hex: "#E0E8FE")
+        }
         return headerButton
     }
 
     @objc
-    func toggleSection(sender: UIButton) {
+    func toggleSection(sender: FieldsTableButton) {
         let section = sender.tag
+        
         fields[section].isExpanded.toggle()
         tableView.reloadSections([section], with: .automatic)
     }
@@ -352,23 +354,15 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
 extension FieldsViewController: FilterSortViewDelegate {
     
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-        let items = ["По возрастанию", "По убыванию"]
-        let sheetVC = OptionsViewController(items: items,
-                                            title: "Сортировка",
-                                            isMultipleChoice: false)
-        sheetVC.modalPresentationStyle = .overFullScreen
-        present(sheetVC, animated: false) {
-            sheetVC.animateShow()
-        }
     }
     
     func filterSortView(_ view: FilterSortView,
                         didTapFilterWithTitle title: String) {
         switch title {
-        case "Регион":
-            let items = ["Москва", "Санкт-Петербург", "Долгопрудный"]
+        case "Формат обучения":
+            let items = ["Бакалавриат", "Специалитет"]
             let sheetVC = OptionsViewController(items: items,
-                                                title: "Регион",
+                                                title: title,
                                                 isMultipleChoice: true)
             sheetVC.modalPresentationStyle = .overFullScreen
             present(sheetVC, animated: false) {
