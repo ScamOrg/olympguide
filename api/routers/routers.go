@@ -14,5 +14,6 @@ func SetupRouter() *gin.Engine {
 
 	r.POST("/send_code", controllers.SendCode)
 	r.POST("/verify_code", controllers.VerifyCode)
+	r.POST("/sign_up", controllers.SignUp)
 	return r
 }
