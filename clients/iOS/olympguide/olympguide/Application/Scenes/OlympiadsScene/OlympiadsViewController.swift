@@ -82,8 +82,9 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        configureLabel()
-        configureSearchButton()
+        configureNavigationBar()
+        
+        //        configureSearchButton()
         configureFilterSortView()
         configureTableView()
         interactor?.loadOlympiads(
@@ -94,15 +95,34 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         navigationItem.backBarButtonItem = backItem
     }
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        navigationController?.setNavigationBarHidden(true, animated: animated)
-//    }
-//    
-//    override func viewWillDisappear(_ animated: Bool) {
-//        super.viewWillDisappear(animated)
-//        navigationController?.setNavigationBarHidden(false, animated: animated)
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard let navigationBar = navigationController?.navigationBar else { return }
+
+//        let customView = UIButton(type: .system)
+//        customView.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
+//        customView.tintColor = Constants.Colors.searchButtonTint
+//        customView.translatesAutoresizingMaskIntoConstraints = false
+//        customView.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
+        
+        navigationBar.addSubview(searchButton)
+        searchButton.alpha = 1.0
+        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
+        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
+        searchButton.addTarget(self, action:#selector (didTapSearchButton), for: .touchUpInside)
+        // Располагаем кнопку в правой части навигационной панели, можно настроить по желанию
+        NSLayoutConstraint.activate([
+            searchButton.trailingAnchor.constraint(equalTo: navigationBar.trailingAnchor, constant: -Constants.Dimensions.searchButtonRightMargin),
+            searchButton.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor, constant: -8), // регулируйте отступ по необходимости
+            searchButton.widthAnchor.constraint(equalToConstant: Constants.Dimensions.searchButtonSize),
+            searchButton.heightAnchor.constraint(equalToConstant: Constants.Dimensions.searchButtonSize)
+        ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        searchButton.alpha = 0.0
+    }
     
     // MARK: - Methods
     func displayOlympiads(viewModel: Olympiads.Load.ViewModel) {
@@ -130,16 +150,18 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         router.viewController = viewController
     }
     
-    private func configureLabel() {
-        view.addSubview(titleLabel)
+    private func configureNavigationBar() {
+        navigationController?.navigationBar.barTintColor = .white
+        navigationController?.navigationBar.shadowImage = UIImage()
         
-        titleLabel.font = Constants.Fonts.titleLabelFont
-        titleLabel.textColor = Constants.Colors.titleLabelTextColor
-        titleLabel.text = Constants.Strings.olympiadsTitle
-        titleLabel.textAlignment = .center
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.title = Constants.Strings.olympiadsTitle
         
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor/*, Constants.Dimensions.titleLabelTopMargin*/)
-        titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
+        
+        if let navigationController = self.navigationController as? NavigationBarViewController {
+            navigationController.setMiniSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+        }
+        
     }
     
     private func configureFilterSortView() {
