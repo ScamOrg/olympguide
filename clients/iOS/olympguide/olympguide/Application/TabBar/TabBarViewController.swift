@@ -117,10 +117,9 @@ final class TabBarViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let universitiesNavVC = UINavigationController(rootViewController: universitiesVC)
-//        let olympiadsNavVC = NavigationBarViewController("Олимпиады", rootViewController: olympiadsVC)
-        let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
-        let fieldsNavVC = UINavigationController(rootViewController: BrowseViewController())
+        let universitiesNavVC = NavigationBarViewController(rootViewController: universitiesVC)
+        let olympiadsNavVC = NavigationBarViewController(rootViewController: olympiadsVC)
+        let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = UINavigationController(rootViewController: profileVC)
         
         setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
@@ -218,24 +217,6 @@ class ViewController: UIViewController {
         }
     }
 }
-//final class ViewController: UIViewController {
-//    
-//    private let customSearchBar = CustomSearchBar(title: "Найти")
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        view.backgroundColor = .white
-//        
-//        // Допустим, хотим разместить на экране
-//        customSearchBar.frame = CGRect(
-//            x: 20,
-//            y: 100,
-//            width: UIScreen.main.bounds.width - 40,
-//            height: 48
-//        )
-//        view.addSubview(customSearchBar)
-//    }
-//}
 
 class MainViewController: UIViewController {
     
