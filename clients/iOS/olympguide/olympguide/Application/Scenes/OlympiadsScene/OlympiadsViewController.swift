@@ -240,35 +240,15 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
         router?.routeToDetails(for: olympiadModel)
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        
-        let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
-        
-        titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        
-        let maxYTranslated: CGFloat = 30
-        let k = -maxYTranslated / (1 - 0.75)
-        let b = -k
-        let YTranslated = k * scaleFactor + b
-        
-        let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
-        if scaleFactor <= 1 {
-            searchButton.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-            let searchScaledWidth = searchButton.bounds.width * (1 - scaleFactor)
-            
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
-            searchButton.transform = searchButton.transform.translatedBy(x: searchScaledWidth, y: -YTranslated)
-            
-            tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
-            
-            view.layoutIfNeeded()
-            view.layoutIfNeeded()
-        } else {
-            searchButton.transform = CGAffineTransform(scaleX: 1, y: 1)
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
-        }
-    }
+//        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//            let offset = scrollView.contentOffset.y
+////            if offset >= -113  {
+////                navigationItem.title = ""
+////            }
+////            else {
+////                navigationItem.title = "Олимпиады"
+////            }
+//        }
 }
 
 // MARK: - FilterSortViewDelegate
