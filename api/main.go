@@ -15,7 +15,8 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 	db.ConnectDB(cfg)
-	r := routes.SetupRouter()
+	db.ConnectRedis(cfg)
+	r := routers.SetupRouter(cfg)
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)
 	if err := r.Run(serverAddress); err != nil {

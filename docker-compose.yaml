@@ -15,6 +15,28 @@ services:
       - ${DB_PORT}:${DB_PORT}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - ./redis_data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
+  email_service:
+    build:
+      context: ./email_service
+      dockerfile: Dockerfile
+    container_name: email_service
+    restart: always
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    depends_on:
+      - redis
   api:
     build:
       context: ./api
@@ -29,10 +51,12 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - API_PORT=${API_PORT}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - db
+      - redis
     restart: on-failure
-
 networks:
   default:
     name: olympguide_network

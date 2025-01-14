@@ -1,5 +1,6 @@
 # PostgreSQL
 postgres-data/
+redis_data/
 
 # Environment files
 .env
