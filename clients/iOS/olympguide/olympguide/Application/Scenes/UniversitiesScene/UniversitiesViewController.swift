@@ -38,7 +38,7 @@ fileprivate enum Constants {
     }
 }
 
-class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
+class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic, MainVC {
     
     // MARK: - VIP
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
@@ -53,19 +53,6 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
-    
-    private let searchButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
-        button.tintColor = Constants.Colors.searchButtonTint
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        return button
-    }()
-    
-    private var tableViewTopConstraint: NSLayoutConstraint!
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
@@ -82,10 +69,11 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        configureLabel()
-        configureSearchButton()
+        
+        configureNavigationBar()
         configureFilterSortView()
         configureTableView()
+        
         interactor?.loadUniversities(
             Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
         )
@@ -93,16 +81,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
+
     
     // MARK: - Methods
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
@@ -130,16 +109,13 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         router.viewController = viewController
     }
     
-    private func configureLabel() {
-        view.addSubview(titleLabel)
+    private func configureNavigationBar() {
+        navigationItem.title = Constants.Strings.universitiesTitle
         
-        titleLabel.font = Constants.Fonts.titleLabelFont
-        titleLabel.textColor = Constants.Colors.titleLabelTextColor
-        titleLabel.text = Constants.Strings.universitiesTitle
-        titleLabel.textAlignment = .center
+        if let navigationController = self.navigationController as? NavigationBarViewController {
+            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+        }
         
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.titleLabelTopMargin)
-        titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
     
     private func configureFilterSortView() {
@@ -148,30 +124,11 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         filterSortView.pinRight(to: view.trailingAnchor)
     }
     
-    private func configureSearchButton() {
-        view.addSubview(searchButton)
-        
-        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
-        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
-        searchButton.pinCenterY(to: titleLabel.centerYAnchor)
-        searchButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
-        
-        searchButton.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
-    }
-    
     // MARK: - Private funcs
     private func configureTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
-        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13)
-        
-        NSLayoutConstraint.activate([
-            tableViewTopConstraint,
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        tableView.frame = view.bounds
         
         tableView.register(UniversityTableViewCell.self,
                            forCellReuseIdentifier: "UniversityTableViewCell")
@@ -186,6 +143,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic {
         headerContainer.backgroundColor = .clear
         
         headerContainer.addSubview(filterSortView)
+        
         filterSortView.pinTop(to: headerContainer.topAnchor)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
@@ -238,36 +196,6 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
         tableView.deselectRow(at: indexPath, animated: true)
         guard let universityModel = interactor?.universities[indexPath.row] else { return }
         router?.routeToDetails(for: universityModel)
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        
-        let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
-        
-        titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        
-        let maxYTranslated: CGFloat = 30
-        let k = -maxYTranslated / (1 - 0.75)
-        let b = -k
-        let YTranslated = k * scaleFactor + b
-        
-        let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
-        if scaleFactor <= 1 {
-            searchButton.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-            let searchScaledWidth = searchButton.bounds.width * (1 - scaleFactor)
-            
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
-            searchButton.transform = searchButton.transform.translatedBy(x: searchScaledWidth, y: -YTranslated)
-            
-            tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
-            
-            view.layoutIfNeeded()
-            view.layoutIfNeeded()
-        } else {
-            searchButton.transform = CGAffineTransform(scaleX: 1, y: 1)
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
-        }
     }
 }
 
