@@ -46,7 +46,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     
     // MARK: - Variables
     private let tableView = UITableView()
-    private let titleLabel: UILabel = UILabel()
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         refreshControl.tintColor = Constants.Colors.refreshTint
@@ -170,30 +169,11 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         filterSortView.pinRight(to: view.trailingAnchor)
     }
     
-    private func configureSearchButton() {
-        view.addSubview(searchButton)
-        
-        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
-        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
-        searchButton.pinCenterY(to: titleLabel.centerYAnchor)
-        searchButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
-        
-        searchButton.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
-    }
-    
     // MARK: - Private funcs
     private func configureTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
-        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13)
-        
-        NSLayoutConstraint.activate([
-            tableViewTopConstraint,
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        tableView.frame = view.bounds
         
         tableView.register(OlympiadTableViewCell.self,
                            forCellReuseIdentifier: "OlympiadTableViewCell")
@@ -208,7 +188,8 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         headerContainer.backgroundColor = .clear
         
         headerContainer.addSubview(filterSortView)
-        filterSortView.pinTop(to: headerContainer.topAnchor)
+        
+        filterSortView.pinTop(to: headerContainer.topAnchor, 13)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor)
