@@ -39,10 +39,15 @@ def process_message(topic, message):
 
 def process_redis_messages():
     logger.info("Listening for messages...")
-    while True:
-        topic, message = redis_client.brpop(constants.REDIS_TOPICS)
-        logger.info(f"Received message from {topic}: {message}")
-        process_message(topic, message)
+    pubsub = redis_client.pubsub()
+    pubsub.subscribe(constants.REDIS_TOPICS)
+
+    for message in pubsub.listen():
+        if message['type'] == 'message':
+            topic = message['channel']
+            message_data = message['data']
+            logger.info(f"Received message from {topic}: {message_data}")
+            process_message(topic, message_data)
 
 
 if __name__ == "__main__":

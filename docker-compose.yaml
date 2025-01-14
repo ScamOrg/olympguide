@@ -31,7 +31,7 @@ services:
     container_name: email_service
     restart: always
     environment:
-      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
@@ -51,7 +51,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - API_PORT=${API_PORT}
-      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - db
