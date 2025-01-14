@@ -52,14 +52,14 @@ func SendCode(c *gin.Context) {
 
 	err := db.Redis.Set(ctx, request.Email, code, constants.EMAIL_CODE_TTL*time.Minute).Err()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
 
 	msg := Message{request.Email, code}
 	err = db.Redis.Publish(ctx, "email_codes", msg).Err()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
 	log.Printf("Code %s sent to %s", code, request.Email)
