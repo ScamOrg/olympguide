@@ -202,7 +202,8 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     }
     
     @objc
-    private func didTapSearchButton() {
+    private func didTapSearchButton(sender: UIButton) {
+        guard sender.alpha == 1 else { return }
         router?.routeToSearch()
     }
     
