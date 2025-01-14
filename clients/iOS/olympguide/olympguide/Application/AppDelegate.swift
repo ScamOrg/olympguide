@@ -23,6 +23,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UINavigationBar.appearance().titleTextAttributes = attributes
         }
         
+        if let customFont = UIFont(name: "MontserratAlternates-Bold", size: 28) {
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: customFont,
+                .foregroundColor: UIColor.black
+            ]
+            UINavigationBar.appearance().largeTitleTextAttributes = attributes
+        }
+        
         if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 17) {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: customFont,
