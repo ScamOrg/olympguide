@@ -118,8 +118,9 @@ final class TabBarViewController: UITabBarController {
         super.viewDidLoad()
         
         let universitiesNavVC = UINavigationController(rootViewController: universitiesVC)
+//        let olympiadsNavVC = NavigationBarViewController("Олимпиады", rootViewController: olympiadsVC)
         let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
-        let fieldsNavVC = UINavigationController(rootViewController: fieldsVC)
+        let fieldsNavVC = UINavigationController(rootViewController: BrowseViewController())
         let profileNavVC = UINavigationController(rootViewController: profileVC)
         
         setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
@@ -133,7 +134,7 @@ final class TabBarViewController: UITabBarController {
         tabBar.shadowImage = UIImage()
         tabBar.backgroundImage = UIImage()
         tabBar.barTintColor = .white
-        tabBar.isTranslucent = false
+//        tabBar.isTranslucent = false
     }
     
     private func setupCustomTabBar() {
@@ -239,7 +240,29 @@ class ViewController: UIViewController {
 class MainViewController: UIViewController {
     
     //
-        private let customSearchBar = CustomSearchBar(title: "Найти")
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Настройка NavigationController для больших заголовков
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.title = "Browse"
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offset = scrollView.contentOffset.y
+        if offset > 20 {
+            navigationController?.navigationBar.prefersLargeTitles = false
+        } else {
+            navigationController?.navigationBar.prefersLargeTitles = true
+        }
+    }
+    
+    @objc func showNextScreen() {
+        let nextVC = ViewController()
+        navigationController?.pushViewController(nextVC, animated: true)
+    }
+}
+
+
 import UIKit
 
 class BrowseViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
