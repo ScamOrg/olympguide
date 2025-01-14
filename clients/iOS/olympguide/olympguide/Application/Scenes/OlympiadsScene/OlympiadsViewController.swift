@@ -7,6 +7,8 @@
 
 import UIKit
 
+protocol MainVC { }
+
 // MARK: - Constants
 fileprivate enum Constants {
     enum Colors {
@@ -17,14 +19,10 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28)!
+        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28)
     }
     
     enum Dimensions {
-        static let titleLabelTopMargin: CGFloat = 25
-        static let titleLabelLeftMargin: CGFloat = 20
-        static let searchButtonSize: CGFloat = 33
-        static let searchButtonRightMargin: CGFloat = 20
         static let tableViewTopMargin: CGFloat = 13
     }
     
@@ -38,7 +36,7 @@ fileprivate enum Constants {
     }
 }
 
-final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
+final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, MainVC {
     
     // MARK: - VIP
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
@@ -46,27 +44,13 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     
     // MARK: - Variables
     private let tableView = UITableView()
-    private let titleLabel: UILabel = UILabel()
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         refreshControl.tintColor = Constants.Colors.refreshTint
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
-    
-    private let searchButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
-        button.tintColor = Constants.Colors.searchButtonTint
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        return button
-    }()
-    
-    private var tableViewTopConstraint: NSLayoutConstraint!
-    
+        
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
             sortingOptions: ["Сортировка A"],
@@ -82,10 +66,11 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        configureLabel()
-        configureSearchButton()
+        
+        configureNavigationBar()
         configureFilterSortView()
         configureTableView()
+        
         interactor?.loadOlympiads(
             Olympiads.Load.Request(sortOption: nil, searchQuery: nil, levels: nil, profiles: nil)
         )
@@ -93,16 +78,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
-    
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        navigationController?.setNavigationBarHidden(true, animated: animated)
-//    }
-//    
-//    override func viewWillDisappear(_ animated: Bool) {
-//        super.viewWillDisappear(animated)
-//        navigationController?.setNavigationBarHidden(false, animated: animated)
-//    }
     
     // MARK: - Methods
     func displayOlympiads(viewModel: Olympiads.Load.ViewModel) {
@@ -130,16 +105,12 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         router.viewController = viewController
     }
     
-    private func configureLabel() {
-        view.addSubview(titleLabel)
+    private func configureNavigationBar() {
+        navigationItem.title = Constants.Strings.olympiadsTitle
         
-        titleLabel.font = Constants.Fonts.titleLabelFont
-        titleLabel.textColor = Constants.Colors.titleLabelTextColor
-        titleLabel.text = Constants.Strings.olympiadsTitle
-        titleLabel.textAlignment = .center
-        
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor/*, Constants.Dimensions.titleLabelTopMargin*/)
-        titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
+        if let navigationController = self.navigationController as? NavigationBarViewController {
+            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+        }
     }
     
     private func configureFilterSortView() {
@@ -148,30 +119,11 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         filterSortView.pinRight(to: view.trailingAnchor)
     }
     
-    private func configureSearchButton() {
-        view.addSubview(searchButton)
-        
-        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
-        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
-        searchButton.pinCenterY(to: titleLabel.centerYAnchor)
-        searchButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
-        
-        searchButton.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
-    }
-    
     // MARK: - Private funcs
     private func configureTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
-        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13)
-        
-        NSLayoutConstraint.activate([
-            tableViewTopConstraint,
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        tableView.frame = view.bounds
         
         tableView.register(OlympiadTableViewCell.self,
                            forCellReuseIdentifier: "OlympiadTableViewCell")
@@ -186,7 +138,8 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         headerContainer.backgroundColor = .clear
         
         headerContainer.addSubview(filterSortView)
-        filterSortView.pinTop(to: headerContainer.topAnchor)
+        
+        filterSortView.pinTop(to: headerContainer.topAnchor, Constants.Dimensions.tableViewTopMargin)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor)
@@ -202,7 +155,8 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     }
     
     @objc
-    private func didTapSearchButton() {
+    private func didTapSearchButton(sender: UIButton) {
+        guard sender.alpha == 1 else { return }
         router?.routeToSearch()
     }
     
@@ -238,36 +192,6 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         guard let olympiadModel = interactor?.olympiads[indexPath.row] else { return }
         router?.routeToDetails(for: olympiadModel)
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        
-        let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
-        
-        titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        
-        let maxYTranslated: CGFloat = 30
-        let k = -maxYTranslated / (1 - 0.75)
-        let b = -k
-        let YTranslated = k * scaleFactor + b
-        
-        let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
-        if scaleFactor <= 1 {
-            searchButton.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-            let searchScaledWidth = searchButton.bounds.width * (1 - scaleFactor)
-            
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
-            searchButton.transform = searchButton.transform.translatedBy(x: searchScaledWidth, y: -YTranslated)
-            
-            tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
-            
-            view.layoutIfNeeded()
-            view.layoutIfNeeded()
-        } else {
-            searchButton.transform = CGAffineTransform(scaleX: 1, y: 1)
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
-        }
     }
 }
 
