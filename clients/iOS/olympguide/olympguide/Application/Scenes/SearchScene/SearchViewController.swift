@@ -41,6 +41,7 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.largeTitleDisplayMode = .never
         setupUI()
         loadScene()
     }
