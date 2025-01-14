@@ -29,7 +29,7 @@ fileprivate enum Constants {
     }
     
     enum Strings {
-        static let olympiadsTitle = "Профиль"
+        static let profileTitle = "Профиль"
         static let backButtonTitle = "Профиль"
     }
     
@@ -41,54 +41,27 @@ fileprivate enum Constants {
 class ProfileViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     private let tableView = UITableView(frame: .zero, style: .plain)
-    private let titleLabel: UILabel = UILabel()
-    private var tableViewTopConstraint: NSLayoutConstraint!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureLabel()
-        setupTableView()
+        
+        configureNavigationBar()
+        configureTableView()
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
+    private func configureNavigationBar() {
+        navigationItem.title = Constants.Strings.profileTitle
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
-    
-    private func configureLabel() {
-        view.addSubview(titleLabel)
-        
-        titleLabel.font = Constants.Fonts.titleLabelFont
-        titleLabel.textColor = Constants.Colors.titleLabelTextColor
-        titleLabel.text = Constants.Strings.olympiadsTitle
-        titleLabel.textAlignment = .center
-        
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.titleLabelTopMargin)
-        titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
-    }
-    
-    private func setupTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+    private func configureTableView() {
         view.addSubview(tableView)
         
         tableView.separatorStyle = .none
         
-        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13)
-        
-        NSLayoutConstraint.activate([
-            tableViewTopConstraint,
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        tableView.frame = view.bounds
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -141,33 +114,8 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     
     // MARK: - UITableViewDelegate
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            tableView.deselectRow(at: indexPath, animated: true)
-        }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        
-        let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
-        
-        titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        
-        let maxYTranslated: CGFloat = 30
-        let k = -maxYTranslated / (1 - 0.75)
-        let b = -k
-        let YTranslated = k * scaleFactor + b
-        
-        let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
-        if scaleFactor <= 1 {
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
-            
-            tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
-            
-            view.layoutIfNeeded()
-            view.layoutIfNeeded()
-        } else {
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: 0)
-        }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     // MARK: - Actions
