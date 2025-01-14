@@ -16,8 +16,7 @@ func main() {
 	}
 	db.ConnectDB(cfg)
 	db.ConnectRedis(cfg)
-	r := routers.SetupRouter()
-	db.UseRedisSession(r, cfg)
+	r := routers.SetupRouter(cfg)
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)
 	if err := r.Run(serverAddress); err != nil {

@@ -75,16 +75,14 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := HashPassword(request.Password)
-	if err != nil {
-		log.Println("Can't generate password_hash")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+	var user models.User
+	if err := db.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "There is no user with this email"})
 		return
 	}
 
-	var user models.User
-	if err := db.DB.Where("email = ? AND password_hash = ?", request.Email, hashedPassword).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
 		return
 	}
 
@@ -92,7 +90,7 @@ func Login(c *gin.Context) {
 	session.Set("user_id", user.UserID)
 	if err := session.Save(); err != nil {
 		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
 		return
 	}
 

@@ -37,6 +37,12 @@ type User struct {
 	RegionID     uint
 }
 
+type Region struct {
+	RegionID uint `gorm:"primaryKey"`
+	Name     string
+}
+
+func (Region) TableName() string     { return "olympguide.region" }
 func (User) TableName() string       { return "olympguide.user" }
 func (Olympiad) TableName() string   { return "olympguide.olympiad" }
 func (GroupField) TableName() string { return "olympguide.group_of_fields" }
