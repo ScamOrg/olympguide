@@ -38,7 +38,7 @@ fileprivate enum Constants {
     }
 }
 
-class FieldsViewController: UIViewController, FieldsDisplayLogic {
+class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
     
     // MARK: - VIP
     var interactor: (FieldsDataStore & FieldsBusinessLogic)?
@@ -46,27 +46,13 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
     
     // MARK: - Variables
     private let tableView = UITableView()
-    private let titleLabel: UILabel = UILabel()
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         refreshControl.tintColor = Constants.Colors.refreshTint
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
-    
-    private let searchButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
-        button.tintColor = Constants.Colors.searchButtonTint
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        return button
-    }()
-    
-    private var tableViewTopConstraint: NSLayoutConstraint!
-    
+        
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
             filteringOptions: ["Формат обучения"]
@@ -81,17 +67,15 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        configureLabel()
-        configureSearchButton()
+        
+        configureNavigationBar()
         configureFilterSortView()
         configureTableView()
         
-        // Загрузка данных
         interactor?.loadFields(
             Fields.Load.Request(searchQuery: nil, degree: nil)
         )
         
-        // Настройка кнопки "Назад" в NavigationController
         let backItem = UIBarButtonItem(
             title: Constants.Strings.backButtonTitle,
             style: .plain,
@@ -100,20 +84,9 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         )
         navigationItem.backBarButtonItem = backItem
         
-        // Убираем отступ между секциями в iOS 15+
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
     // MARK: - Methods (FieldsDisplayLogic)
@@ -143,28 +116,12 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         router.viewController = viewController
     }
     
-    private func configureLabel() {
-        view.addSubview(titleLabel)
+    private func configureNavigationBar() {
+        navigationItem.title = Constants.Strings.fieldsTitle
         
-        titleLabel.font = Constants.Fonts.titleLabelFont
-        titleLabel.textColor = Constants.Colors.titleLabelTextColor
-        titleLabel.text = Constants.Strings.fieldsTitle
-        titleLabel.textAlignment = .center
-        
-        // Пример использования методов pin (см. ниже расширение)
-        titleLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.titleLabelTopMargin)
-        titleLabel.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
-    }
-    
-    private func configureSearchButton() {
-        view.addSubview(searchButton)
-        
-        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
-        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
-        searchButton.pinCenterY(to: titleLabel.centerYAnchor)
-        searchButton.pinRight(to: view.trailingAnchor, Constants.Dimensions.searchButtonRightMargin)
-        
-        searchButton.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
+        if let navigationController = self.navigationController as? NavigationBarViewController {
+            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+        }
     }
     
     private func configureFilterSortView() {
@@ -176,22 +133,10 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
     }
     
     private func configureTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
-        tableViewTopConstraint = tableView.topAnchor.constraint(
-            equalTo: titleLabel.bottomAnchor,
-            constant: Constants.Dimensions.tableViewTopMargin
-        )
+        tableView.frame = view.bounds
         
-        NSLayoutConstraint.activate([
-            tableViewTopConstraint,
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
-        // Регистрация ячейки
         tableView.register(
             FieldTableViewCell.self,
             forCellReuseIdentifier: FieldTableViewCell.identifier
@@ -203,7 +148,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         tableView.refreshControl = refreshControl
         tableView.showsVerticalScrollIndicator = false
         
-        // Создаём header с FilterSortView
         let headerContainer = UIView()
         headerContainer.backgroundColor = .clear
         
@@ -214,7 +158,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
         filterSortView.pinBottom(to: headerContainer.bottomAnchor, 21)
         
         
-        // Считаем высоту header-а
         headerContainer.layoutIfNeeded()
         
         let targetSize = CGSize(
@@ -222,12 +165,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic {
             height: UIView.layoutFittingCompressedSize.height
         )
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
-        headerContainer.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: tableView.bounds.width,
-            height: height
-        )
         
         tableView.tableHeaderView = headerContainer
         tableView.rowHeight = UITableView.automaticDimension
@@ -281,12 +218,6 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         router?.routeToDetails(for: fieldModel)
     }
-    
-    // Высота header-а для секции
-//    func tableView(_ tableView: UITableView,
-//                   heightForHeaderInSection section: Int) -> CGFloat {
-//        return 44
-//    }
 
     // Высота footer-а (чтобы не было лишних отступов)
     func tableView(_ tableView: UITableView,
@@ -313,40 +244,6 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         
         fields[section].isExpanded.toggle()
         tableView.reloadSections([section], with: .automatic)
-    }
-    
-    // Эффект скролла с трансформацией
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        
-        let scaleFactor = min(1.2, max(0.75, 1 - offset / 200))
-        
-        titleLabel.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        
-        let maxYTranslated: CGFloat = 30
-        let k = -maxYTranslated / (1 - 0.75)  // коэффициент для линейной зависимости
-        let b = -k
-        let YTranslated = k * scaleFactor + b
-        
-        let scaledWidth = titleLabel.bounds.width * (1 - scaleFactor)
-        if scaleFactor <= 1 {
-            // Скалируем кнопку
-            searchButton.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-            let searchScaledWidth = searchButton.bounds.width * (1 - scaleFactor)
-            
-            // Двигаем лейбл и кнопку
-            titleLabel.transform = titleLabel.transform.translatedBy(x: -scaledWidth / 2, y: -YTranslated)
-            searchButton.transform = searchButton.transform.translatedBy(x: searchScaledWidth, y: -YTranslated)
-            
-            // Двигаем таблицу
-            tableViewTopConstraint.constant = Constants.Dimensions.tableViewTopMargin - YTranslated
-            
-            view.layoutIfNeeded()
-        } else {
-            // Возврат к изначальным трансформациям, если scaleFactor > 1
-            searchButton.transform = .identity
-            titleLabel.transform = .identity
-        }
     }
 }
 
