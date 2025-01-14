@@ -7,6 +7,8 @@
 
 import UIKit
 
+protocol MainVC { }
+
 // MARK: - Constants
 fileprivate enum Constants {
     enum Colors {
@@ -17,14 +19,10 @@ fileprivate enum Constants {
     }
     
     enum Fonts {
-        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28)!
+        static let titleLabelFont = UIFont(name: "MontserratAlternates-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28)
     }
     
     enum Dimensions {
-        static let titleLabelTopMargin: CGFloat = 25
-        static let titleLabelLeftMargin: CGFloat = 20
-        static let searchButtonSize: CGFloat = 33
-        static let searchButtonRightMargin: CGFloat = 20
         static let tableViewTopMargin: CGFloat = 13
     }
     
@@ -38,7 +36,7 @@ fileprivate enum Constants {
     }
 }
 
-final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
+final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, MainVC {
     
     // MARK: - VIP
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
@@ -52,20 +50,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
-    
-    private let searchButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
-        button.tintColor = Constants.Colors.searchButtonTint
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        return button
-    }()
-    
-    private var tableViewTopConstraint: NSLayoutConstraint!
-    
+        
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
             sortingOptions: ["Сортировка A"],
@@ -81,46 +66,17 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        configureNavigationBar()
         
-        //        configureSearchButton()
+        configureNavigationBar()
         configureFilterSortView()
         configureTableView()
+        
         interactor?.loadOlympiads(
             Olympiads.Load.Request(sortOption: nil, searchQuery: nil, levels: nil, profiles: nil)
         )
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-        guard let navigationBar = navigationController?.navigationBar else { return }
-
-//        let customView = UIButton(type: .system)
-//        customView.setImage(UIImage(systemName: Constants.Images.searchIcon), for: .normal)
-//        customView.tintColor = Constants.Colors.searchButtonTint
-//        customView.translatesAutoresizingMaskIntoConstraints = false
-//        customView.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
-        
-        navigationBar.addSubview(searchButton)
-        searchButton.alpha = 1.0
-        searchButton.setWidth(Constants.Dimensions.searchButtonSize)
-        searchButton.setHeight(Constants.Dimensions.searchButtonSize)
-        searchButton.addTarget(self, action:#selector (didTapSearchButton), for: .touchUpInside)
-        // Располагаем кнопку в правой части навигационной панели, можно настроить по желанию
-        NSLayoutConstraint.activate([
-            searchButton.trailingAnchor.constraint(equalTo: navigationBar.trailingAnchor, constant: -Constants.Dimensions.searchButtonRightMargin),
-            searchButton.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor, constant: -8), // регулируйте отступ по необходимости
-            searchButton.widthAnchor.constraint(equalToConstant: Constants.Dimensions.searchButtonSize),
-            searchButton.heightAnchor.constraint(equalToConstant: Constants.Dimensions.searchButtonSize)
-        ])
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        searchButton.alpha = 0.0
     }
     
     // MARK: - Methods
@@ -150,17 +106,11 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
     }
     
     private func configureNavigationBar() {
-        navigationController?.navigationBar.barTintColor = .white
-        navigationController?.navigationBar.shadowImage = UIImage()
-        
-        navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.title = Constants.Strings.olympiadsTitle
         
-        
         if let navigationController = self.navigationController as? NavigationBarViewController {
-            navigationController.setMiniSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
         }
-        
     }
     
     private func configureFilterSortView() {
@@ -189,7 +139,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic {
         
         headerContainer.addSubview(filterSortView)
         
-        filterSortView.pinTop(to: headerContainer.topAnchor, 13)
+        filterSortView.pinTop(to: headerContainer.topAnchor, Constants.Dimensions.tableViewTopMargin)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor)
@@ -243,16 +193,6 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
         guard let olympiadModel = interactor?.olympiads[indexPath.row] else { return }
         router?.routeToDetails(for: olympiadModel)
     }
-    
-//        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//            let offset = scrollView.contentOffset.y
-////            if offset >= -113  {
-////                navigationItem.title = ""
-////            }
-////            else {
-////                navigationItem.title = "Олимпиады"
-////            }
-//        }
 }
 
 // MARK: - FilterSortViewDelegate
