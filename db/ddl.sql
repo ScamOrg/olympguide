@@ -2,32 +2,17 @@ CREATE SCHEMA olympguide;
 
 SET search_path TO olympguide;
 
-
-CREATE TABLE IF NOT EXISTS email_code
-(
-	email TEXT PRIMARY KEY,
-	code INTEGER NOT NULL DEFAULT TRUNC(RANDOM() * 899999 + 100000),
-	requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-ALTER TABLE email_code ADD CONSTRAINT email_checker CHECK (email SIMILAR TO '%@%\.%');
-
-ALTER TABLE email_code ADD CONSTRAINT code_verifier CHECK (code > 99999 AND code < 1000000);
-
-
 CREATE TABLE IF NOT EXISTS region
 (
     region_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS subject
 (
     subject_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL
 );
-
 
 CREATE TABLE IF NOT EXISTS group_of_fields
 (

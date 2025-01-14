@@ -1,4 +1,4 @@
-package controllers
+package olympiads
 
 import (
 	"api/db"
