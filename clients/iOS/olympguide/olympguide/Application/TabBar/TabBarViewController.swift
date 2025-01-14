@@ -117,9 +117,9 @@ final class TabBarViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let universitiesNavVC = UINavigationController(rootViewController: universitiesVC)
-        let olympiadsNavVC = UINavigationController(rootViewController: olympiadsVC)
-        let fieldsNavVC = UINavigationController(rootViewController: fieldsVC)
+        let universitiesNavVC = NavigationBarViewController(rootViewController: universitiesVC)
+        let olympiadsNavVC = NavigationBarViewController(rootViewController: olympiadsVC)
+        let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = UINavigationController(rootViewController: profileVC)
         
         setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
@@ -133,7 +133,7 @@ final class TabBarViewController: UITabBarController {
         tabBar.shadowImage = UIImage()
         tabBar.backgroundImage = UIImage()
         tabBar.barTintColor = .white
-        tabBar.isTranslucent = false
+//        tabBar.isTranslucent = false
     }
     
     private func setupCustomTabBar() {
@@ -217,41 +217,109 @@ class ViewController: UIViewController {
         }
     }
 }
-//final class ViewController: UIViewController {
-//    
-//    private let customSearchBar = CustomSearchBar(title: "Найти")
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        view.backgroundColor = .white
-//        
-//        // Допустим, хотим разместить на экране
-//        customSearchBar.frame = CGRect(
-//            x: 20,
-//            y: 100,
-//            width: UIScreen.main.bounds.width - 40,
-//            height: 48
-//        )
-//        view.addSubview(customSearchBar)
-//    }
-//}
 
 class MainViewController: UIViewController {
     
     //
-        private let customSearchBar = CustomSearchBar(title: "Найти")
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Настройка NavigationController для больших заголовков
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.title = "Browse"
+    }
     
-        override func viewDidLoad() {
-            super.viewDidLoad()
-            view.backgroundColor = .white
-    
-            // Допустим, хотим разместить на экране
-            customSearchBar.frame = CGRect(
-                x: 20,
-                y: 100,
-                width: UIScreen.main.bounds.width - 40,
-                height: 50
-            )
-            view.addSubview(customSearchBar)
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offset = scrollView.contentOffset.y
+        if offset > 20 {
+            navigationController?.navigationBar.prefersLargeTitles = false
+        } else {
+            navigationController?.navigationBar.prefersLargeTitles = true
         }
+    }
+    
+    @objc func showNextScreen() {
+        let nextVC = ViewController()
+        navigationController?.pushViewController(nextVC, animated: true)
+    }
+}
+
+
+import UIKit
+
+class BrowseViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    let tableView = UITableView()
+    let refreshControl = UIRefreshControl()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+//        navigationItem.largeTitleDisplayMode = .automatic
+
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.title = "Browse"
+        
+
+        
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search"
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+        
+        setupTableView()
+        setupRefreshControl()
+    }
+    
+    func setupTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.frame = view.bounds
+        tableView.refreshControl = refreshControl
+        view.addSubview(tableView)
+    }
+    
+    func setupRefreshControl() {
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        refreshControl.tintColor = .systemBlue
+    }
+    
+    @objc func refreshData() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            self?.refreshControl.endRefreshing()
+        }
+    }
+        
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 20
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
+        cell.textLabel?.text = "Item \(indexPath.row + 1)"
+        cell.accessoryType = .disclosureIndicator
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let detailVC = DetailViewController()
+        detailVC.title = "Item \(indexPath.row + 1)"
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+}
+
+class DetailViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        navigationItem.largeTitleDisplayMode = .never
+
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+//        navigationController?.navigationBar.prefersLargeTitles = false
+    }
 }
