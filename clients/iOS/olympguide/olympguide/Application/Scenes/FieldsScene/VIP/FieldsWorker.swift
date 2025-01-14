@@ -10,7 +10,7 @@ import Foundation
 class FieldsWorker {
     
     private enum Constants {
-        static let baseURL: String = "http://localhost:8080/fields"
+        static let baseURL: String = "http://5.34.212.145:8080/fields"
         static let invalidURLMessage: String = "Invalid URL"
         static let decodingErrorMessage: String = "Decoding error"
     }
