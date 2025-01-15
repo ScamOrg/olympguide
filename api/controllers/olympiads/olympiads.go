@@ -16,12 +16,12 @@ func GetOlympiads(c *gin.Context) {
 	query := db.DB.Model(&models.Olympiad{})
 
 	if levelParam := c.Query("level"); levelParam != "" {
-		levels := strings.Split(levelParam, ";")
+		levels := strings.Split(levelParam, constants.QuerySeparator)
 		query = query.Where("level IN (?)", levels)
 	}
 
 	if profileParam := c.Query("profile"); profileParam != "" {
-		levels := strings.Split(profileParam, ";")
+		levels := strings.Split(profileParam, constants.QuerySeparator)
 		query = query.Where("profile IN (?)", levels)
 	}
 
