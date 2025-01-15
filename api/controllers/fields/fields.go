@@ -8,15 +8,13 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func GetFields(c *gin.Context) {
 	var groups []models.GroupField
 	err := db.DB.Preload("Fields", func(db *gorm.DB) *gorm.DB {
-		if degreeParam := c.Query("degree"); degreeParam != "" {
-			degrees := strings.Split(degreeParam, constants.QuerySeparator)
-			return db.Where("degree IN (?)", degrees)
+		if degrees := c.QueryArray("degree"); len(degrees) > 0 {
+			return db.Where("level IN (?)", degrees)
 		}
 		return db
 	}).Find(&groups).Error
