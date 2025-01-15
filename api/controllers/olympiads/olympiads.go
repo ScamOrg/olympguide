@@ -8,28 +8,27 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
-	"strings"
 )
 
 func GetOlympiads(c *gin.Context) {
 	var olympiads []models.Olympiad
-	query := db.DB.Model(&models.Olympiad{})
+	query := db.DB.Model(&models.Olympiad{}).Debug()
 
-	if levelParam := c.Query("level"); levelParam != "" {
-		levels := strings.Split(levelParam, constants.QuerySeparator)
+	levels := c.QueryArray("level")
+	if len(levels) > 0 {
 		query = query.Where("level IN (?)", levels)
 	}
 
-	if profileParam := c.Query("profile"); profileParam != "" {
-		levels := strings.Split(profileParam, constants.QuerySeparator)
-		query = query.Where("profile IN (?)", levels)
+	profiles := c.QueryArray("profile")
+	if len(profiles) > 0 {
+		query = query.Where("profile IN (?)", profiles)
 	}
 
-	if nameLike := c.Query("name_like"); nameLike != "" {
+	if nameLike := c.Query("name"); nameLike != "" {
 		query = query.Where("name ILIKE ?", "%"+nameLike+"%")
 	}
 
-	sortBy := c.Query("sort_by")
+	sortBy := c.Query("sort")
 	order := c.Query("order")
 
 	allowedSortFields := map[string]bool{
