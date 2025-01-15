@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"api/constants"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,7 +12,7 @@ func SessionMiddleware() gin.HandlerFunc {
 		session := sessions.Default(c)
 		userID := session.Get("user_id")
 		if userID == nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": constants.Unauthorized})
 			c.Abort()
 			return
 		}

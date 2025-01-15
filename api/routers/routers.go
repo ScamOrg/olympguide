@@ -2,6 +2,7 @@ package routers
 
 import (
 	"api/config"
+	"api/controllers/fields"
 	"api/controllers/olympiads"
 	"api/controllers/users"
 	"api/db"
@@ -17,8 +18,9 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	r.Use(sessions.Sessions("session", store))
 
 	r.GET("/olympiads", olympiads.GetOlympiads)
-	r.GET("/fields", olympiads.GetFields)
-	r.GET("/field/:id", olympiads.GetFieldByID)
+
+	r.GET("/fields", fields.GetFields)
+	r.GET("/field/:id", fields.GetFieldByID)
 
 	r.POST("/send_code", users.SendCode)
 	r.POST("/verify_code", users.VerifyCode)
