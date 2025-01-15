@@ -14,7 +14,13 @@ func GetFields(c *gin.Context) {
 	var groups []models.GroupField
 	err := db.DB.Preload("Fields", func(db *gorm.DB) *gorm.DB {
 		if degrees := c.QueryArray("degree"); len(degrees) > 0 {
-			return db.Where("level IN (?)", degrees)
+			db = db.Where("degree IN (?)", degrees)
+		}
+		if name := c.Query("name"); name != "" {
+			db = db.Where("name ILIKE ?", "%"+name+"%")
+		}
+		if code := c.Query("code"); code != "" {
+			db = db.Where("code ILIKE ?", "%"+code+"%")
 		}
 		return db
 	}).Find(&groups).Error
