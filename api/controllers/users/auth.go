@@ -1,6 +1,7 @@
 package users
 
 import (
+	"api/constants"
 	"api/db"
 	"api/models"
 	"github.com/gin-contrib/sessions"
@@ -29,26 +30,26 @@ type LoginRequest struct {
 func SignUp(c *gin.Context) {
 	var request SignUpRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
 		return
 	}
 	parsedBirthday, err := time.Parse("02.01.2006", request.Birthday)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid birthday format, use DD.MM.YYYY"}) // Возвращаем ошибку, если формат неверный
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidBirthday})
 		return
 	}
 
 	var regionExists bool
 	db.DB.Raw("SELECT EXISTS(SELECT 1 FROM olympguide.region WHERE region_id = ?)", request.RegionID).Scan(&regionExists)
 	if !regionExists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Region does not exist"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.RegionNotFound})
 		return
 	}
 
 	hashedPassword, err := HashPassword(request.Password)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 	}
 	user := models.User{
 		Email:        request.Email,
@@ -62,7 +63,7 @@ func SignUp(c *gin.Context) {
 	result := db.DB.Create(&user)
 	if result.Error != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Signed up", "user_id": user.UserID})
@@ -71,18 +72,18 @@ func SignUp(c *gin.Context) {
 func Login(c *gin.Context) {
 	var request LoginRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email and password are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
 		return
 	}
 
 	var user models.User
 	if err := db.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "There is no user with this email"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": constants.UserNotFound})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": constants.InvalidPassword})
 		return
 	}
 
@@ -90,7 +91,7 @@ func Login(c *gin.Context) {
 	session.Set("user_id", user.UserID)
 	if err := session.Save(); err != nil {
 		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
 
@@ -103,7 +104,7 @@ func Logout(c *gin.Context) {
 	err := session.Save()
 	if err != nil {
 		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})

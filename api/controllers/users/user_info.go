@@ -1,6 +1,7 @@
 package users
 
 import (
+	"api/constants"
 	"api/db"
 	"api/models"
 	"errors"
@@ -16,9 +17,9 @@ func GetRegion(c *gin.Context) {
 	var user models.User
 	if err := db.DB.First(&user, userIDUint).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": constants.UserNotFound})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		}
 		return
 	}
@@ -26,9 +27,9 @@ func GetRegion(c *gin.Context) {
 	var region models.Region
 	if err := db.DB.First(&region, user.RegionID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Region not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": constants.RegionNotFound})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		}
 		return
 	}

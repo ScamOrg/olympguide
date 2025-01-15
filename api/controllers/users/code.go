@@ -34,15 +34,15 @@ type Message struct {
 func SendCode(c *gin.Context) {
 	var request SendRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
 		return
 	}
 	code := GenerateCode()
 
-	err := db.Redis.Set(ctx, request.Email, code, constants.EMAIL_CODE_TTL*time.Minute).Err()
+	err := db.Redis.Set(ctx, request.Email, code, constants.EmailCodeTtl*time.Minute).Err()
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
 
@@ -51,7 +51,7 @@ func SendCode(c *gin.Context) {
 	err = db.Redis.Publish(ctx, "email_codes", msgJSON).Err()
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
 	log.Printf("Code %s sent to %s", code, request.Email)
@@ -62,21 +62,22 @@ func SendCode(c *gin.Context) {
 func VerifyCode(c *gin.Context) {
 	var request VerifyRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		return
 	}
 
 	storedCode, err := db.Redis.Get(ctx, request.Email).Result()
 	if errors.Is(err, redis.Nil) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Code was not found or expired"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.CodeNotFoundOrExpired})
 		return
 	} else if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
 
 	if storedCode != request.Code {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid code"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidCode})
 		return
 	}
 	db.Redis.Del(ctx, request.Email)
