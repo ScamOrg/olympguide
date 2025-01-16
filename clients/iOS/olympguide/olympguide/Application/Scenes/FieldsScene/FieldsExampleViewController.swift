@@ -18,7 +18,6 @@ class FieldsExampleViewController: UIViewController, UITableViewDelegate, UITabl
     var categories: [Category] = [
         Category(title: "Математика и механика", subcategories: ["Математика", "Прикладная математика и информатика", "Механика и математическое моделирование"], isExpanded: false),
         Category(title: "Компьютерные и информационные науки", subcategories: ["Программирование", "Алгоритмы"], isExpanded: false),
-        // Добавьте остальные категории...
     ]
     
     private var tableView: UITableView!
