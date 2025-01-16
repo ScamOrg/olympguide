@@ -155,7 +155,9 @@ class FieldsTableButton: UIButton {
     @objc
     func didTap() {
         isExpanded.toggle()
+        alpha = 0.0
         UIView.animate(withDuration: 0.1) {[weak self] in
+            self?.alpha = 1.0
             self?.backgroundView.backgroundColor = ((self?.isExpanded) != nil) ? UIColor(hex: "#E0E8FE") : .white
         }
     }
