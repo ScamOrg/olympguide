@@ -147,6 +147,3 @@ class FieldTableViewCell: UITableViewCell {
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
 }
-
-
-
