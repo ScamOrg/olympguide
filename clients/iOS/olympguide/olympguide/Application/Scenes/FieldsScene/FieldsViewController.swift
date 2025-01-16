@@ -45,10 +45,11 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
     var router: FieldsRoutingLogic?
     
     // MARK: - Variables
-    private var collectionView: UICollectionView!
+    private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         refreshControl.tintColor = Constants.Colors.refreshTint
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
     
@@ -68,12 +69,11 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         setup()
         
         configureNavigationBar()
-        configureCollectionView()
-        configureRefreshControl()
+        configureTableView()
+        
         interactor?.loadFields(
             Fields.Load.Request(searchQuery: nil, degree: nil)
         )
-        
         
         let backItem = UIBarButtonItem(
             title: Constants.Strings.backButtonTitle,
@@ -81,15 +81,18 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
             target: nil,
             action: nil
         )
-        
         navigationItem.backBarButtonItem = backItem
+        
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
     }
     
     // MARK: - Methods (FieldsDisplayLogic)
     func displayFields(viewModel: Fields.Load.ViewModel) {
         fields = viewModel.groupsOfFields
         DispatchQueue.main.async {
-            self.collectionView.reloadData()
+            self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
     }
@@ -120,61 +123,55 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         }
     }
     
-    private func configureRefreshControl() {
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        collectionView.refreshControl = refreshControl
+    private func configureFilterSortView() {
+        view.addSubview(filterSortView)
+        filterSortView.pinLeft(to: view.leadingAnchor)
+        filterSortView.pinRight(to: view.trailingAnchor)
     }
     
-    private func configureCollectionView() {
-        let layout = UICollectionViewFlowLayout()
+    private func configureTableView() {
+        view.addSubview(tableView)
         
-        // Важно: именно estimatedItemSize "включает" динамическое вычисление размера,
-        // а также позволяет ячейке "раскрыться" по контенту.
-        // Можно поставить 50, 100 — любая примерная высота.
-        layout.estimatedItemSize = CGSize(width: UIScreen.main.bounds.width, height: 50)
+        tableView.frame = view.bounds
         
-        // Минимальные отступы между ячейками
-        layout.minimumInteritemSpacing = 0
-        layout.minimumLineSpacing = 0
-        // Для заголовка
-        layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 50)
-        
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        
-        // Регистрируем ячейку
-        collectionView.register(
-            FieldCollectionViewCell.self,
-            forCellWithReuseIdentifier: FieldCollectionViewCell.reuseId
+        tableView.register(
+            FieldTableViewCell.self,
+            forCellReuseIdentifier: FieldTableViewCell.identifier
         )
+        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
         
-        // Регистрируем header (не забудьте, иначе будет ошибка)
-        collectionView.register(
-            FieldsCollectionHeaderView.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: FieldsCollectionHeaderView.reuseId
-        )
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.backgroundColor = Constants.Colors.tableViewBackground
+        tableView.separatorStyle = .none
+        tableView.refreshControl = refreshControl
+        tableView.showsVerticalScrollIndicator = true
         
-        collectionView.backgroundColor = .white
-        collectionView.dataSource = self
+        let headerContainer = UIView()
+        headerContainer.backgroundColor = .clear
         
-        // Если нужно, чтобы работал sizeForItemAt (не всегда требуется),
-        // укажите делегата:
-        // collectionView.delegate = self
-
-        view.addSubview(collectionView)
-
-        // Привязываем коллекцию ко всем краям
-        collectionView.pinTop(to: view.topAnchor)
-        collectionView.pinLeft(to: view.leadingAnchor)
-        collectionView.pinRight(to: view.trailingAnchor)
-        collectionView.pinBottom(to: view.bottomAnchor)
+        headerContainer.addSubview(filterSortView)
+        
+        filterSortView.pinTop(to: headerContainer.topAnchor, Constants.Dimensions.tableViewTopMargin)
+        filterSortView.pinLeft(to: headerContainer.leadingAnchor)
+        filterSortView.pinRight(to: headerContainer.trailingAnchor)
+        filterSortView.pinBottom(to: headerContainer.bottomAnchor, 21)
+        
+        
+        headerContainer.layoutIfNeeded()
+        
+        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let height = headerContainer.systemLayoutSizeFitting(targetSize).height
+        
+        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        
+        tableView.tableHeaderView = headerContainer
     }
     
     // MARK: - Actions
     @objc
     private func didTapSearchButton() {
-        print(collectionView.contentOffset.y)
-        //        router?.routeToSearch()
+        router?.routeToSearch()
     }
     
     @objc
@@ -186,69 +183,69 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
             self.refreshControl.endRefreshing()
         }
     }
-    var openedSections: [Int] = []
-
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
-extension FieldsViewController: UICollectionViewDataSource {
+extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return fields.count
     }
     
-    func collectionView(_ collectionView: UICollectionView,
-                        numberOfItemsInSection section: Int) -> Int {
-        // Если секция раскрыта, возвращаем реальное число элементов
-        // Если свернута, возвращаем 0
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return fields[section].isExpanded ? fields[section].fields.count : 0
     }
     
-    func collectionView(_ collectionView: UICollectionView,
-                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: FieldCollectionViewCell.reuseId,
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: FieldTableViewCell.identifier,
             for: indexPath
-        ) as! FieldCollectionViewCell
-//        cell.setWidth(100)
-        let fieldVM = fields[indexPath.section].fields[indexPath.row]
-        cell.configure(with: fieldVM, width: view.bounds.width)
+        ) as! FieldTableViewCell
+        
+        let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
+        cell.configure(with: fieldViewModel)
         return cell
     }
     
-    // Заголовок секции (Header)
-    func collectionView(_ collectionView: UICollectionView,
-                        viewForSupplementaryElementOfKind kind: String,
-                        at indexPath: IndexPath) -> UICollectionReusableView {
-        guard kind == UICollectionView.elementKindSectionHeader else {
-            return UICollectionReusableView()
+    func tableView(_ tableView: UITableView,
+                   didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
+            return
         }
-        let header = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            withReuseIdentifier: FieldsCollectionHeaderView.reuseId,
-            for: indexPath
-        ) as! FieldsCollectionHeaderView
-        
-        let group = fields[indexPath.section]
-        header.configure(title: group.name,
-                         code: group.code,
-                         isExpanded: group.isExpanded,
-                         section: indexPath.section,
-                         delegate: self)
-        return header
+        router?.routeToDetails(for: fieldModel)
     }
-}
-
-extension FieldsViewController: FieldsCollectionHeaderViewDelegate {
-    func didTapSectionHeader(section: Int) {
-        // Сворачиваем/раскрываем
-        fields[section].isExpanded.toggle()
-
-        // Без анимации
-        UIView.performWithoutAnimation {
-            collectionView.reloadSections(IndexSet(integer: section))
-            collectionView.collectionViewLayout.invalidateLayout()
+    
+    func tableView(_ tableView: UITableView,
+                   viewForHeaderInSection section: Int) -> UIView? {
+        let headerButton = FieldsTableButton(name: fields[section].name, code: fields[section].code)
+        headerButton.tag = section
+        headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
+        
+        if fields[section].isExpanded {
+            headerButton.backgroundView.backgroundColor = UIColor(hex: "#E0E8FE")
         }
+        return headerButton
+    }
+    
+    @objc func toggleSection(_ sender: UIButton) {
+        let section = sender.tag
+        
+        var currentOffset = tableView.contentOffset
+        let headerRectBefore = tableView.rectForHeader(inSection: section)
+        
+        fields[section].isExpanded.toggle()
+        
+        UIView.performWithoutAnimation {
+            tableView.reloadSections(IndexSet(integer: section), with: .none)
+            tableView.layoutIfNeeded()
+        }
+        let headerRectAfter = tableView.rectForHeader(inSection: section)
+        
+        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+        currentOffset.y += deltaY
+        tableView.setContentOffset(currentOffset, animated: false)
     }
 }
 
@@ -273,5 +270,13 @@ extension FieldsViewController: FilterSortViewDelegate {
         default:
             break
         }
+    }
+}
+
+
+class ReusableHeader: UITableViewHeaderFooterView {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        print("Header is about to be reused!")
     }
 }
