@@ -136,6 +136,7 @@ class FieldTableViewCell: UITableViewCell {
         nameLabel.textAlignment = .left
         nameLabel.lineBreakMode = .byWordWrapping
         information.addArrangedSubview(nameLabel)
+//        contentView.setHeight(28)
     }
     
     // MARK: - Objc funcs
@@ -146,3 +147,6 @@ class FieldTableViewCell: UITableViewCell {
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
 }
+
+
+
