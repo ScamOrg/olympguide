@@ -68,7 +68,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
         setup()
         
         configureNavigationBar()
-        configureFilterSortView()
         configureTableView()
         
         interactor?.loadOlympiads(
@@ -111,12 +110,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
         if let navigationController = self.navigationController as? NavigationBarViewController {
             navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
         }
-    }
-    
-    private func configureFilterSortView() {
-        view.addSubview(filterSortView)
-        filterSortView.pinLeft(to: view.leadingAnchor)
-        filterSortView.pinRight(to: view.trailingAnchor)
     }
     
     // MARK: - Private funcs
