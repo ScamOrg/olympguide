@@ -118,7 +118,7 @@ final class TabBarViewController: UITabBarController {
         super.viewDidLoad()
         
 //        let universitiesNavVC = NavigationBarViewController(rootViewController: universitiesVC)
-        let universitiesNavVC = UINavigationController(rootViewController: CollapsibleCollectionViewController())
+        let universitiesNavVC = NavigationBarViewController(rootViewController: universitiesVC)
         let olympiadsNavVC = NavigationBarViewController(rootViewController: olympiadsVC)
         let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
@@ -198,7 +198,6 @@ class ViewController: UIViewController {
             showSheetButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
-        // Добавляем таргет
         showSheetButton.addTarget(self, action: #selector(showSearchForUniversities), for: .touchUpInside)
     }
     
