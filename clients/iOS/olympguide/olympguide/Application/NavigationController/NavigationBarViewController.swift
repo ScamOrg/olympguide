@@ -53,6 +53,7 @@ class NavigationBarViewController: UINavigationController {
         navigationBar.barTintColor = .white
         navigationBar.shadowImage = UIImage()
         navigationBar.prefersLargeTitles = true
+//        navigationBar.isTranslucent = false
     }
     
     func setSearchButtonAction(target: AnyObject, action: Selector) {
