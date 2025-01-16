@@ -117,10 +117,11 @@ final class TabBarViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        let universitiesNavVC = NavigationBarViewController(rootViewController: universitiesVC)
         let universitiesNavVC = NavigationBarViewController(rootViewController: universitiesVC)
         let olympiadsNavVC = NavigationBarViewController(rootViewController: olympiadsVC)
         let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
-        let profileNavVC = UINavigationController(rootViewController: profileVC)
+        let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
         
         setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
         configureTabBar()
@@ -197,7 +198,6 @@ class ViewController: UIViewController {
             showSheetButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
-        // Добавляем таргет
         showSheetButton.addTarget(self, action: #selector(showSearchForUniversities), for: .touchUpInside)
     }
     

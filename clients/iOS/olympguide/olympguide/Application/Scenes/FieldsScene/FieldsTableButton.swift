@@ -76,10 +76,9 @@ class FieldsTableButton: UIButton {
         addSubview(information)
         self.backgroundColor = .clear
         
-//        addSubview(arrowImageView)
         information.arrangedSubviews.forEach { $0.removeFromSuperview() }
         information.isUserInteractionEnabled = false
-            // Если необходимо, отключите взаимодействие и для arrowImageView
+ 
         arrowImageView.isUserInteractionEnabled = false
         backgroundView.isUserInteractionEnabled = false
         
@@ -97,7 +96,6 @@ class FieldsTableButton: UIButton {
         
         arrowImageView.contentMode = .scaleAspectFit
         arrowImageView.tintColor = .black
-//        arrowImageView.setHeight(14)
         arrowImageView.setWidth(17)
         
         arrowImageView.pinTop(to: self.topAnchor, 3)
@@ -145,12 +143,7 @@ class FieldsTableButton: UIButton {
         nameLabel.lineBreakMode = .byWordWrapping
         information.addArrangedSubview(nameLabel)
         
-//        backgroundColor = .white
-//        layer.cornerRadius = 20
-//        clipsToBounds = true
-//        setHeight(Constants.Dimensions.buttonHeight)
-
-//        self.backgroundColor = .red
+        
         self.addTarget(self, action: #selector(didTap), for: .touchUpInside)
     }
     
@@ -162,13 +155,10 @@ class FieldsTableButton: UIButton {
     @objc
     func didTap() {
         isExpanded.toggle()
-        backgroundView.backgroundColor = isExpanded ? UIColor(hex: "#E0E8FE") : .white
+        alpha = 0.0
+        UIView.animate(withDuration: 0.1) {[weak self] in
+            self?.alpha = 1.0
+            self?.backgroundView.backgroundColor = ((self?.isExpanded) != nil) ? UIColor(hex: "#E0E8FE") : .white
+        }
     }
-    
-//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        super.touchesBegan(touches, with: event)
-////        didTap()
-//        print("Touches began")
-//    }
-    
 }

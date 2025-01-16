@@ -52,7 +52,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         return refreshControl
     }()
-        
+    
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
             filteringOptions: ["Формат обучения"]
@@ -69,7 +69,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         setup()
         
         configureNavigationBar()
-        configureFilterSortView()
         configureTableView()
         
         interactor?.loadFields(
@@ -128,8 +127,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         view.addSubview(filterSortView)
         filterSortView.pinLeft(to: view.leadingAnchor)
         filterSortView.pinRight(to: view.trailingAnchor)
-        // По умолчанию высота определяется контентом (через tableHeaderView).
-        // Если нужно зафиксировать, можно добавить pinTop/pinBottom.
     }
     
     private func configureTableView() {
@@ -141,18 +138,21 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
             FieldTableViewCell.self,
             forCellReuseIdentifier: FieldTableViewCell.identifier
         )
+        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
+        
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = Constants.Colors.tableViewBackground
         tableView.separatorStyle = .none
         tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
+        tableView.showsVerticalScrollIndicator = true
         
         let headerContainer = UIView()
         headerContainer.backgroundColor = .clear
         
         headerContainer.addSubview(filterSortView)
-        filterSortView.pinTop(to: headerContainer.topAnchor)
+        
+        filterSortView.pinTop(to: headerContainer.topAnchor, Constants.Dimensions.tableViewTopMargin)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor, 21)
@@ -160,14 +160,12 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         
         headerContainer.layoutIfNeeded()
         
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
+        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
         let height = headerContainer.systemLayoutSizeFitting(targetSize).height
         
+        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        
         tableView.tableHeaderView = headerContainer
-        tableView.rowHeight = UITableView.automaticDimension
     }
     
     // MARK: - Actions
@@ -218,14 +216,7 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         router?.routeToDetails(for: fieldModel)
     }
-
-    // Высота footer-а (чтобы не было лишних отступов)
-    func tableView(_ tableView: UITableView,
-                   heightForFooterInSection section: Int) -> CGFloat {
-        return 0.01
-    }
-
-    // Создание заголовка секции с кнопкой
+    
     func tableView(_ tableView: UITableView,
                    viewForHeaderInSection section: Int) -> UIView? {
         let headerButton = FieldsTableButton(name: fields[section].name, code: fields[section].code)
@@ -237,13 +228,24 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         return headerButton
     }
-
-    @objc
-    func toggleSection(sender: FieldsTableButton) {
+    
+    @objc func toggleSection(_ sender: UIButton) {
         let section = sender.tag
         
+        var currentOffset = tableView.contentOffset
+        let headerRectBefore = tableView.rectForHeader(inSection: section)
+        
         fields[section].isExpanded.toggle()
-        tableView.reloadSections([section], with: .automatic)
+        
+        UIView.performWithoutAnimation {
+            tableView.reloadSections(IndexSet(integer: section), with: .none)
+            tableView.layoutIfNeeded()
+        }
+        let headerRectAfter = tableView.rectForHeader(inSection: section)
+        
+        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+        currentOffset.y += deltaY
+        tableView.setContentOffset(currentOffset, animated: false)
     }
 }
 
@@ -268,5 +270,13 @@ extension FieldsViewController: FilterSortViewDelegate {
         default:
             break
         }
+    }
+}
+
+
+class ReusableHeader: UITableViewHeaderFooterView {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        print("Header is about to be reused!")
     }
 }
