@@ -120,6 +120,18 @@ class OlympiadTableViewCell: UITableViewCell {
     func configure(with viewModel: Olympiads.Load.ViewModel.OlympiadViewModel) {
         nameLabel.text = viewModel.name
         levelAndProfileLabel.text = "\(viewModel.level) уровень | \(viewModel.profile)"
+    private func hideAll() {
+        separatorLine.isHidden = true
+        favoriteButton.isHidden = true
+        nameLabel.isHidden = true
+        levelAndProfileLabel.isHidden = true
+    }
+    
+    private func showAll() {
+        separatorLine.isHidden = false
+        favoriteButton.isHidden = false
+        nameLabel.isHidden = false
+        levelAndProfileLabel.isHidden = false
     }
     
     // MARK: - Objc funcs
