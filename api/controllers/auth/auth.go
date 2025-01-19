@@ -1,4 +1,4 @@
-package users
+package auth
 
 import (
 	"api/constants"
@@ -48,7 +48,6 @@ func SignUp(c *gin.Context) {
 
 	hashedPassword, err := HashPassword(request.Password)
 	if err != nil {
-		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 	}
 	user := models.User{
@@ -62,7 +61,7 @@ func SignUp(c *gin.Context) {
 	}
 	result := db.DB.Create(&user)
 	if result.Error != nil {
-		log.Println(err)
+		log.Println(result.Error.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
