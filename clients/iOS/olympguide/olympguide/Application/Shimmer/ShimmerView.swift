@@ -71,4 +71,8 @@ final class ShimmerView: UIView {
         }
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        startAnimating()
+    }
 }
