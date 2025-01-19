@@ -11,7 +11,7 @@ import (
 
 func GetSessionStore(cfg *config.Config) sessions.Store {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
-	store, err := redis.NewStore(constants.MAX_SESSION_CONN, "tcp", redisAddress, "", []byte("og_secret"))
+	store, err := redis.NewStore(constants.MaxSessionConn, "tcp", redisAddress, "", []byte("og_secret"))
 	if err != nil {
 		log.Fatal(err)
 	}
