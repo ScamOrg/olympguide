@@ -65,7 +65,6 @@ class UniversityTableViewCell: UITableViewCell {
     
     private let separatorLine: UIView = {
         let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = Constants.Colors.separatorColor
         return view
     }()
