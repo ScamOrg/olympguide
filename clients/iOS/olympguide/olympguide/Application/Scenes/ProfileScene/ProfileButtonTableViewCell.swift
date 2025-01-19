@@ -17,6 +17,7 @@ class ProfileButtonTableViewCell: UITableViewCell {
         button.layer.cornerRadius = 13
         button.layer.borderWidth = 2
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.titleLabel?.tintColor = .black
         return button
     }()
     
@@ -52,7 +53,8 @@ class ProfileButtonTableViewCell: UITableViewCell {
     }
     
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        actionButton.point(inside: point, with: event)
+        let convertedPoint = actionButton.convert(point, from: self)
+        return actionButton.point(inside: convertedPoint, with: event)
     }
     
     @objc
