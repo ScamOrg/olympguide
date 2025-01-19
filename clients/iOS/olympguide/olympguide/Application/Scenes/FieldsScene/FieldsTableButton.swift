@@ -37,9 +37,9 @@ class FieldsTableButton: UIButton {
     // MARK: - Variables
     private var name: String = ""
     private var code: String = ""
+    private var isExpanded: Bool = false
     let backgroundView: UIView = UIView()
     let arrowImageView: UIImageView = UIImageView(image: UIImage(systemName: Constants.Images.arrowImageName))
-    var isExpanded: Bool = false
     
     private let information: UIStackView = {
         let stackView = UIStackView()
@@ -100,10 +100,6 @@ class FieldsTableButton: UIButton {
         
         arrowImageView.pinTop(to: self.topAnchor, 3)
         arrowImageView.pinLeft(to: self.leadingAnchor, 20)
-        
-        let spaceLabel = UILabel()
-        spaceLabel.setWidth(2)
-        information.addArrangedSubview(spaceLabel)
         
         for char in code {
             let label = UILabel()
