@@ -35,7 +35,6 @@ final class ShimmerView: UIView {
         let gradientLayer = CAGradientLayer()
         
         gradientLayer.frame = self.bounds
-        print(gradientLayer.frame)
         gradientLayer.startPoint = Constants.startPoint
         gradientLayer.endPoint = Constants.endPoint
         gradientLayer.colors = [gradientColorOne, gradientColorTwo, gradientColorOne]
@@ -61,4 +60,15 @@ final class ShimmerView: UIView {
         
         gradientLayer.add(animation, forKey: animation.keyPath)
     }
+    
+    func stopAnimating() {
+        guard let sublayers = self.layer.sublayers else { return }
+        for layer in sublayers {
+            if let gradientLayer = layer as? CAGradientLayer {
+                gradientLayer.removeAllAnimations()
+                gradientLayer.removeFromSuperlayer()
+            }
+        }
+    }
+    
 }
