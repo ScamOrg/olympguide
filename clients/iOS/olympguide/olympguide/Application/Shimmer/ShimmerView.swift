@@ -75,4 +75,12 @@ final class ShimmerView: UIView {
         super.layoutSubviews()
         startAnimating()
     }
+    
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        
+        if window != nil {
+            startAnimating()
+        }
+    }
 }
