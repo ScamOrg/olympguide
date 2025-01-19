@@ -67,6 +67,8 @@ class OlympiadTableViewCell: UITableViewCell {
         return view
     }()
     
+    private let shimmerLayer: ShimmerView = ShimmerView()
+    
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -83,6 +85,7 @@ class OlympiadTableViewCell: UITableViewCell {
         contentView.addSubview(levelAndProfileLabel)
         contentView.addSubview(favoriteButton)
         contentView.addSubview(separatorLine)
+        contentView.addSubview(shimmerLayer)
         
 
         // Configure nameLabel
@@ -114,12 +117,34 @@ class OlympiadTableViewCell: UITableViewCell {
         separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
         separatorLine.setHeight(Constants.Dimensions.separatorHeight)
+        
+        shimmerLayer.pinTop(to: contentView.topAnchor, 10)
+        shimmerLayer.pinLeft(to: contentView.leadingAnchor, 20)
+        shimmerLayer.pinRight(to: contentView.trailingAnchor, 20)
+        shimmerLayer.pinBottom(to: contentView.bottomAnchor, 10)
+        shimmerLayer.setHeight(75)
+        shimmerLayer.layer.cornerRadius = 13
     }
     
     // MARK: - Methods
     func configure(with viewModel: Olympiads.Load.ViewModel.OlympiadViewModel) {
         nameLabel.text = viewModel.name
         levelAndProfileLabel.text = "\(viewModel.level) уровень | \(viewModel.profile)"
+        shimmerLayer.isHidden = true
+        shimmerLayer.stopAnimating()
+        shimmerLayer.removeAllConstraints()
+        isUserInteractionEnabled = true
+
+        showAll()
+    }
+    
+    func configureShimmer() {
+        shimmerLayer.isHidden = false
+        hideAll()
+        shimmerLayer.startAnimating()
+        isUserInteractionEnabled = false
+    }
+    
     private func hideAll() {
         separatorLine.isHidden = true
         favoriteButton.isHidden = true
