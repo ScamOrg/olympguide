@@ -65,7 +65,7 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Signed up", "user_id": user.UserID})
+	c.JSON(http.StatusCreated, gin.H{"message": "Signed up"})
 }
 
 func Login(c *gin.Context) {

@@ -11,18 +11,13 @@ import (
 	"net/http"
 )
 
-type CreateUniversityRequest struct {
+type UniversityRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Logo        string `json:"logo"`
 	Email       string `json:"email"`
 	Site        string `json:"site"`
 	Description string `json:"description"`
 	RegionID    uint   `json:"region_id" binding:"required"`
-}
-
-type UpdateUniversityRequest struct {
-	UniversityID uint `json:"university_id" binding:"required"`
-	CreateUniversityRequest
 }
 
 type UniversityShortResponse struct {
@@ -43,6 +38,7 @@ type UniversityResponse struct {
 func GetUniversities(c *gin.Context) {
 	var universities []models.University
 	if err := db.DB.Preload("Region").Find(&universities).Error; err != nil {
+		log.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
@@ -94,7 +90,7 @@ func GetUniversityByID(c *gin.Context) {
 	response := UniversityResponse{
 		Email:       university.Email,
 		Site:        university.Site,
-		Description: university.Name,
+		Description: university.Description,
 		UniversityShortResponse: UniversityShortResponse{
 			UniversityID: university.UniversityID,
 			Name:         university.Name,
@@ -107,8 +103,9 @@ func GetUniversityByID(c *gin.Context) {
 }
 
 func CreateUniversity(c *gin.Context) {
-	var request CreateUniversityRequest
+	var request UniversityRequest
 	if err := c.ShouldBind(&request); err != nil {
+		log.Println(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
 		return
 	}
@@ -123,7 +120,7 @@ func CreateUniversity(c *gin.Context) {
 	university := models.University{
 		Name:        request.Name,
 		Logo:        request.Logo,
-		Site:        request.Logo,
+		Site:        request.Site,
 		Email:       request.Email,
 		Description: request.Description,
 		RegionID:    request.RegionID,
@@ -135,7 +132,7 @@ func CreateUniversity(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"university_id": university.UniversityID})
+	c.JSON(http.StatusCreated, gin.H{"university_id": university.UniversityID})
 }
 
 func DeleteUniversityByID(c *gin.Context) {
@@ -158,14 +155,15 @@ func DeleteUniversityByID(c *gin.Context) {
 }
 
 func UpdateUniversityByID(c *gin.Context) {
-	var request UpdateUniversityRequest
+	universityID := c.Param("id")
+	var request UniversityRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
 		return
 	}
 
 	var university models.University
-	if err := db.DB.First(&university, request.UniversityID).Error; err != nil {
+	if err := db.DB.First(&university, universityID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": constants.DataNotFound})
 		} else {
