@@ -16,8 +16,8 @@ func GetLikedUniversities(c *gin.Context) {
 
 	var universities []models.University
 	if err := db.DB.
-		Joins("JOIN liked_universities ON universities.university_id = liked_universities.university_id").
-		Where("liked_universities.user_id = ?", userID).
+		Joins("JOIN olympguide.liked_universities AS lu ON university.university_id = lu.university_id").
+		Where("lu.user_id = ?", userID).
 		Preload("Region").
 		Find(&universities).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})

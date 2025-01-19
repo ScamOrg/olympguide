@@ -61,7 +61,7 @@ func setupUniversityRoutes(r *gin.Engine) {
 		universitySecurityGroup.Use(middleware.AuthMiddleware(), middleware.UniversityMiddleware())
 		{
 			universitySecurityGroup.POST("/", universities.CreateUniversity)
-			universitySecurityGroup.PATCH("/:id", universities.UpdateUniversityByID)
+			universitySecurityGroup.PUT("/:id", universities.UpdateUniversityByID)
 			universitySecurityGroup.DELETE("/:id", universities.DeleteUniversityByID)
 		}
 	}
@@ -74,8 +74,8 @@ func setupUserRoutes(r *gin.Engine) {
 		favouriteGroup := userGroup.Group("/favourite")
 		{
 			favouriteGroup.GET("/universities", likes.GetLikedUniversities)
-			favouriteGroup.POST("/universities/:id", likes.LikeUniversity)
-			favouriteGroup.DELETE("/universities/:id", likes.UnlikeUniversity)
+			favouriteGroup.POST("/university/:id", likes.LikeUniversity)
+			favouriteGroup.DELETE("/university/:id", likes.UnlikeUniversity)
 		}
 	}
 }

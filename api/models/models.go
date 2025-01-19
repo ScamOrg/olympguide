@@ -53,7 +53,7 @@ type University struct {
 	Description  string
 	RegionID     uint
 	Popularity   int
-	Region       Region `gorm:"foreignKey:GroupID"`
+	Region       Region `gorm:"foreignKey:RegionID;references:RegionID"`
 }
 
 type Region struct {
