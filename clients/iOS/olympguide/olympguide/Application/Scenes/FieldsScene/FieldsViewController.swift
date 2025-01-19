@@ -229,7 +229,8 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
         return headerButton
     }
     
-    @objc func toggleSection(_ sender: UIButton) {
+    @objc
+    func toggleSection(_ sender: UIButton) {
         let section = sender.tag
         
         var currentOffset = tableView.contentOffset
