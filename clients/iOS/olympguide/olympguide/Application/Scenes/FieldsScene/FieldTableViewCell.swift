@@ -81,7 +81,7 @@ class FieldTableViewCell: UITableViewCell {
         information.pinTop(to: contentView.topAnchor, 5)
         information.pinLeft(to: contentView.leadingAnchor, 40)
         information.pinBottom(to: contentView.bottomAnchor, 5)
-        information.pinRight(to: favoriteButton.leadingAnchor, 15)
+        information.pinRight(to: contentView.trailingAnchor, 57)
         
         favoriteButton.pinTop(to: contentView.topAnchor, 6)
         favoriteButton.pinRight(to: contentView.trailingAnchor, 20)
@@ -136,7 +136,6 @@ class FieldTableViewCell: UITableViewCell {
         nameLabel.textAlignment = .left
         nameLabel.lineBreakMode = .byWordWrapping
         information.addArrangedSubview(nameLabel)
-//        contentView.setHeight(28)
     }
     
     // MARK: - Objc funcs
