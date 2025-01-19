@@ -12,15 +12,13 @@ import (
 
 func GetFields(c *gin.Context) {
 	var groups []models.GroupField
+
 	err := db.DB.Preload("Fields", func(db *gorm.DB) *gorm.DB {
 		if degrees := c.QueryArray("degree"); len(degrees) > 0 {
 			db = db.Where("degree IN (?)", degrees)
 		}
-		if name := c.Query("name"); name != "" {
-			db = db.Where("name ILIKE ?", "%"+name+"%")
-		}
-		if code := c.Query("code"); code != "" {
-			db = db.Where("code ILIKE ?", "%"+code+"%")
+		if name := c.Query("search"); name != "" {
+			db = db.Where("name ILIKE ? OR code ILIKE ?", "%"+name+"%", "%"+name+"%")
 		}
 		return db
 	}).Find(&groups).Error
@@ -29,7 +27,15 @@ func GetFields(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
 		return
 	}
-	c.JSON(http.StatusOK, groups)
+
+	var filteredGroups []models.GroupField
+	for _, group := range groups {
+		if len(group.Fields) > 0 {
+			filteredGroups = append(filteredGroups, group)
+		}
+	}
+
+	c.JSON(http.StatusOK, filteredGroups)
 }
 
 func GetFieldByID(c *gin.Context) {
