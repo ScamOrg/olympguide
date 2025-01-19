@@ -24,4 +24,3 @@ final class UniversitiesInteractor: UniversitiesBusinessLogic, UniversitiesDataS
         }
     }
 }
-

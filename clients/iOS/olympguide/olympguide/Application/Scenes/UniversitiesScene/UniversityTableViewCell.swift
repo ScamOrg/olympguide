@@ -61,9 +61,10 @@ class UniversityTableViewCell: UITableViewCell {
         return button
     }()
     
+    private let shimmerLayer: ShimmerView = ShimmerView()
+    
     private let separatorLine: UIView = {
         let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = Constants.Colors.separatorColor
         return view
     }()
@@ -85,6 +86,8 @@ class UniversityTableViewCell: UITableViewCell {
         contentView.addSubview(regionLabel)
         contentView.addSubview(favoriteButton)
         contentView.addSubview(separatorLine)
+        contentView.addSubview(shimmerLayer)
+        
         
         // Configure logoImageView
         logoImageView.contentMode = .scaleAspectFit
@@ -123,6 +126,13 @@ class UniversityTableViewCell: UITableViewCell {
         separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
         separatorLine.setHeight(Constants.Dimensions.separatorHeight)
+        
+        shimmerLayer.pinTop(to: contentView.topAnchor, 10)
+        shimmerLayer.pinLeft(to: contentView.leadingAnchor, 20)
+        shimmerLayer.pinRight(to: contentView.trailingAnchor, 20)
+        shimmerLayer.pinBottom(to: contentView.bottomAnchor, 10)
+        shimmerLayer.setHeight(75)
+        shimmerLayer.layer.cornerRadius = 13
     }
     
     // MARK: - Methods
@@ -146,6 +156,36 @@ class UniversityTableViewCell: UITableViewCell {
         } else {
             logoImageView.image = UIImage(systemName: Constants.Images.placeholder)
         }
+        
+        shimmerLayer.isHidden = true
+        shimmerLayer.stopAnimating()
+        shimmerLayer.removeAllConstraints()
+        isUserInteractionEnabled = true
+
+        showAll()
+    }
+    
+    func configureShimmer() {
+        shimmerLayer.isHidden = false
+        hideAll()
+        shimmerLayer.startAnimating()
+        isUserInteractionEnabled = false
+    }
+    
+    private func hideAll() {
+        separatorLine.isHidden = true
+        favoriteButton.isHidden = true
+        nameLabel.isHidden = true
+        regionLabel.isHidden = true
+        logoImageView.isHidden = true
+    }
+    
+    private func showAll() {
+        separatorLine.isHidden = false
+        favoriteButton.isHidden = false
+        nameLabel.isHidden = false
+        regionLabel.isHidden = false
+        logoImageView.isHidden = false
     }
     
     // MARK: - Objc funcs

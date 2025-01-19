@@ -16,7 +16,7 @@ class ProfileButtonTableViewCell: UITableViewCell {
         button.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
         button.layer.cornerRadius = 13
         button.layer.borderWidth = 2
-        button.translatesAutoresizingMaskIntoConstraints = false
+        button.titleLabel?.tintColor = .black
         return button
     }()
     
@@ -32,13 +32,11 @@ class ProfileButtonTableViewCell: UITableViewCell {
     private func setupUI() {
         contentView.addSubview(actionButton)
         
-        NSLayoutConstraint.activate([
-            actionButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            actionButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-            actionButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            actionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            actionButton.heightAnchor.constraint(equalToConstant: 54)
-        ])
+        actionButton.pinTop(to: contentView.topAnchor, 8)
+        actionButton.pinBottom(to: contentView.bottomAnchor, 8)
+        actionButton.pinLeft(to: contentView.leadingAnchor, 16)
+        actionButton.pinRight(to: contentView.trailingAnchor, 16)
+        actionButton.setHeight(54)
     }
     
     func configure(title: String, borderColor: UIColor, textColor: UIColor) {
@@ -52,7 +50,8 @@ class ProfileButtonTableViewCell: UITableViewCell {
     }
     
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        actionButton.point(inside: point, with: event)
+        let convertedPoint = actionButton.convert(point, from: self)
+        return actionButton.point(inside: convertedPoint, with: event)
     }
     
     @objc

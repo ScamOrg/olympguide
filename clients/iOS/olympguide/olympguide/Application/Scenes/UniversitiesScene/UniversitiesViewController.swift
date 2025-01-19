@@ -81,7 +81,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic, Ma
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
     }
-
+    
     
     // MARK: - Methods
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
@@ -179,7 +179,7 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic, Ma
 extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return universities.count
+        return (universities.count != 0) ? universities.count : 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -187,8 +187,13 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
             withIdentifier: "UniversityTableViewCell",
             for: indexPath
         ) as! UniversityTableViewCell
-        let universityViewModel = universities[indexPath.row]
-        cell.configure(with: universityViewModel)
+        
+        if universities.count != 0 {
+            let universityViewModel = universities[indexPath.row]
+            cell.configure(with: universityViewModel)
+        } else {
+            cell.configureShimmer()
+        }
         return cell
     }
     
