@@ -168,7 +168,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
 extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return olympiads.count
+        return (olympiads.count != 0) ? olympiads.count : 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -176,8 +176,13 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
             withIdentifier: "OlympiadTableViewCell",
             for: indexPath
         ) as! OlympiadTableViewCell
-        let olympiadViewModel = olympiads[indexPath.row]
-        cell.configure(with: olympiadViewModel)
+        
+        if olympiads.count != 0 {
+            let olympiadViewModel = olympiads[indexPath.row]
+            cell.configure(with: olympiadViewModel)
+        } else {
+            cell.configureShimmer()
+        }
         return cell
     }
     
