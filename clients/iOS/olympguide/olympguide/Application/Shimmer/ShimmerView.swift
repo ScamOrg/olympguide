@@ -39,6 +39,7 @@ final class ShimmerView: UIView {
         gradientLayer.endPoint = Constants.endPoint
         gradientLayer.colors = [gradientColorOne, gradientColorTwo, gradientColorOne]
         gradientLayer.locations = Constants.gradientLayerLocations
+        gradientLayer.cornerRadius = self.layer.cornerRadius
         self.layer.addSublayer(gradientLayer)
         
         return gradientLayer
