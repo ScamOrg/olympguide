@@ -146,6 +146,20 @@ class UniversityTableViewCell: UITableViewCell {
         } else {
             logoImageView.image = UIImage(systemName: Constants.Images.placeholder)
         }
+    private func hideAll() {
+        separatorLine.isHidden = true
+        favoriteButton.isHidden = true
+        nameLabel.isHidden = true
+        regionLabel.isHidden = true
+        logoImageView.isHidden = true
+    }
+    
+    private func showAll() {
+        separatorLine.isHidden = false
+        favoriteButton.isHidden = false
+        nameLabel.isHidden = false
+        regionLabel.isHidden = false
+        logoImageView.isHidden = false
     }
     
     // MARK: - Objc funcs
