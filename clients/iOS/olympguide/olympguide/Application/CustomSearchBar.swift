@@ -121,11 +121,6 @@ final class CustomSearchBar: UIView {
         textField.inputAccessoryView = toolbar
     }
     
-    func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
-        textField.keyboardType = keyboardType
-        textField.textContentType = textContentType
-    }
-    
     private func commonInit() {
         backgroundColor = Constants.Colors.backgroundColor
         layer.cornerRadius = Constants.Dimensions.cornerRadius
@@ -207,6 +202,11 @@ final class CustomSearchBar: UIView {
                 size: self.intrinsicContentSize
             )
         }
+    }
+    
+    func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
+        textField.keyboardType = keyboardType
+        textField.textContentType = textContentType
     }
     
     // MARK: - Objc funcs
