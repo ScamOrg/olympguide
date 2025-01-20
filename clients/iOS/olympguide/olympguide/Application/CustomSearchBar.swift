@@ -64,6 +64,8 @@ final class CustomSearchBar: UIView {
         return tf
     }()
     
+    private var isKeyboardVisible = false
+    
     private let deleteButton: UIButton = {
         let button = UIButton()
         button.tintColor = .black
@@ -81,11 +83,28 @@ final class CustomSearchBar: UIView {
         super.init(frame: .zero)
         titleLabel.text = title
         commonInit()
+        setupKeyboardObservers()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonInit()
+        setupKeyboardObservers()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
     }
     
     // MARK: - Private funcs
@@ -122,15 +141,13 @@ final class CustomSearchBar: UIView {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchBar))
         addGestureRecognizer(tapGesture)
+        
     }
     
     // MARK: - Layout
     override func layoutSubviews() {
         super.layoutSubviews()
-        let indices = getCursorPosition()
-        let (startIndex, endIndex) = (indices[0], indices[1])
-        
-//        guard startIndex == endIndex else { return }
+        titleLabel.transform = .identity
         
         let padding: CGFloat = Constants.Dimensions.padding
         let labelSize = titleLabel.intrinsicContentSize
@@ -144,18 +161,13 @@ final class CustomSearchBar: UIView {
             height: labelSize.height
         )
         
-        
         if isActive {
             let scaledWidth = titleLabel.bounds.width * (1 - Constants.Dimensions.titleScale)
             let scaleTransform = CGAffineTransform(translationX: -scaledWidth / 2, y: Constants.Dimensions.titleTranslateY)
                 .scaledBy(x: Constants.Dimensions.titleScale, y: Constants.Dimensions.titleScale)
-            print(titleLabel.frame)
-//            (10.0, 14.833333333333334, 131.33333333333334, 18.333333333333332)
-//            (10.0, 14.833333333333336, 131.33333333333334, 18.333333333333336)
-
             titleLabel.transform = scaleTransform
+            
             let textFieldY = titleLabel.frame.maxY - Constants.Dimensions.titleTranslateY
-            guard textFieldY + (Constants.Dimensions.titleTranslateY - 3) < 20 else { return }
             textField.frame = CGRect(
                 x: padding,
                 y: textFieldY + (Constants.Dimensions.titleTranslateY - 3),
@@ -169,7 +181,6 @@ final class CustomSearchBar: UIView {
                 width: 24,
                 height: 24
             )
-            print(textField.layer.frame.minY)
             
         } else {
             let labelX = padding
@@ -182,20 +193,26 @@ final class CustomSearchBar: UIView {
         }
     }
     
-    private func getCursorPosition() -> [Int] {
-        if let selectedTextRange = textField.selectedTextRange {
-            let startPosition = selectedTextRange.start
-            let endPosition = selectedTextRange.end
-            let startIndex = textField.offset(from: textField.beginningOfDocument, to: startPosition)
-            let endIndex = textField.offset(from: textField.beginningOfDocument, to: endPosition)
-            return [startIndex, endIndex]
+    override var intrinsicContentSize: CGSize {
+        return CGSize(
+            width: UIScreen.main.bounds.width - 40,
+            height: 48
+        )
+    }
+    
+    override var frame: CGRect {
+        get { return super.frame }
+        set {
+            super.frame = CGRect(
+                origin: newValue.origin,
+                size: self.intrinsicContentSize
+            )
         }
-        return [-1, -1]
     }
     
     // MARK: - Objc funcs
     @objc
-    private func didTapSearchBar() {
+    func didTapSearchBar() {
         let isThereText = !(self.textField.text?.isEmpty ?? true)
         guard !isThereText else { return }
         
@@ -233,6 +250,10 @@ final class CustomSearchBar: UIView {
     private func textFieldDidChange(_ textField: UITextField) {
         deleteButton.isHidden = (textField.text ?? "").isEmpty ? true : false
         delegate?.customSearchBar(self, textDidChange: textField.text ?? "")
+        
+        if deleteButton.isHidden && !isKeyboardVisible {
+            didTapSearchBar()
+        }
     }
     
     @objc
@@ -245,5 +266,13 @@ final class CustomSearchBar: UIView {
     private func closeKeyboard() {
         textField.resignFirstResponder()
         didTapSearchBar()
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        isKeyboardVisible = true
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        isKeyboardVisible = false
     }
 }
