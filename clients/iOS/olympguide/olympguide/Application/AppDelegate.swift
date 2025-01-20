@@ -40,7 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UIBarButtonItem.appearance().setTitleTextAttributes(attributes, for: .highlighted)
         }
         
-        
         return true
     }
     
