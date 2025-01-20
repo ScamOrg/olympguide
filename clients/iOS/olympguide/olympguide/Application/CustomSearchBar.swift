@@ -122,8 +122,8 @@ final class CustomSearchBar: UIView {
     }
     
     func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
-        textField.keyboardType = .numberPad
-        textField.textContentType = .telephoneNumber
+        textField.keyboardType = keyboardType
+        textField.textContentType = textContentType
     }
     
     private func commonInit() {
