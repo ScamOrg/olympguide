@@ -52,7 +52,6 @@ class UniversityTableViewCell: UITableViewCell {
     
     private let favoriteButton: UIButton = {
         let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.tintColor = .black
         button.contentHorizontalAlignment = .fill
         button.contentVerticalAlignment = .fill
