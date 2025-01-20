@@ -122,8 +122,8 @@ final class CustomSearchBar: UIView {
     }
     
     func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
-        textField.keyboardType = keyboardType
-        textField.textContentType = textContentType
+        textField.keyboardType = .numberPad
+        textField.textContentType = .telephoneNumber
     }
     
     private func commonInit() {
@@ -141,7 +141,6 @@ final class CustomSearchBar: UIView {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchBar))
         addGestureRecognizer(tapGesture)
-        
     }
     
     // MARK: - Layout
