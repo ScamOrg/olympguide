@@ -46,6 +46,10 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         loadScene()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
     // MARK: - Methods
     private func setup() {
         let viewController = self
@@ -65,7 +69,6 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         view.backgroundColor = .white
         
         customSearchBar.delegate = self
-        customSearchBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(customSearchBar)
         
         customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
