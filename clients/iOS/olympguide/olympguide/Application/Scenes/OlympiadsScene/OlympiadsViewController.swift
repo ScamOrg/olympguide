@@ -180,8 +180,10 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
         if olympiads.count != 0 {
             let olympiadViewModel = olympiads[indexPath.row]
             cell.configure(with: olympiadViewModel)
+            tableView.isUserInteractionEnabled = true
         } else {
             cell.configureShimmer()
+            tableView.isUserInteractionEnabled = false
         }
         return cell
     }
