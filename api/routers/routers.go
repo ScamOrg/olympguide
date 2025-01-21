@@ -55,14 +55,14 @@ func setupUniversityRoutes(r *gin.Engine) {
 
 	universityGroup := r.Group("/university")
 	{
-		universityGroup.GET("/:id", universities.GetUniversityByID)
+		universityGroup.GET("/:id", universities.GetUniversity)
 
 		universitySecurityGroup := universityGroup.Group("/")
 		universitySecurityGroup.Use(middleware.AuthMiddleware(), middleware.UniversityMiddleware())
 		{
 			universitySecurityGroup.POST("/", universities.CreateUniversity)
-			universitySecurityGroup.PUT("/:id", universities.UpdateUniversityByID)
-			universitySecurityGroup.DELETE("/:id", universities.DeleteUniversityByID)
+			universitySecurityGroup.PUT("/:id", universities.UpdateUniversity)
+			universitySecurityGroup.DELETE("/:id", universities.DeleteUniversity)
 		}
 	}
 }

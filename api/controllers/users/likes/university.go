@@ -2,7 +2,7 @@ package likes
 
 import (
 	"api/constants"
-	universities2 "api/controllers/universities"
+	universities2 "api/controllers/universities/api"
 	"api/db"
 	"api/models"
 	"errors"
