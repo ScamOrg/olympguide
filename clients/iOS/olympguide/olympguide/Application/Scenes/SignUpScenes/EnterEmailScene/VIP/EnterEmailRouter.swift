@@ -16,7 +16,7 @@ final class EnterEmailRouter: EnterEmailRoutingLogic, EnterEmailDataPassing {
         // Предположим, у нас есть класс InputCodeViewController
         // (можете создать по аналогии свой VIP-модуль или обычный контроллер)
         let email = dataStore?.email
-        let inputCodeVC = VerificateEmailViewController(email: email ?? "")
+        let inputCodeVC = VerifyEmailViewController(email: email ?? "")
         
         // Если нужно передать email в следующий экран:
         // inputCodeVC.email = dataStore?.email
