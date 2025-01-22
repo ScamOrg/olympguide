@@ -23,13 +23,14 @@ func SendCode(c *gin.Context) {
 		return
 	}
 
-	alreadySent, err := logic.IsCodeAlreadySent(ctx, request.Email)
+	isSent, time, err := logic.IsCodeAlreadySent(ctx, request.Email)
 	if err != nil {
 		handlers.HandleError(c, err)
 		return
 	}
-	if alreadySent {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.PreviousCodeNotExpired)
+	if isSent {
+		details := map[string]interface{}{"time": time.Seconds()}
+		handlers.HandleErrorWithDetails(c, http.StatusBadRequest, constants.PreviousCodeNotExpired, details)
 		return
 	}
 	code := GenerateCode()
