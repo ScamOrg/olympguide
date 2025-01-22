@@ -13,12 +13,20 @@ type Message struct {
 	Code  string `json:"code"`
 }
 
-func IsCodeAlreadySent(ctx context.Context, email string) (bool, error) {
+func IsCodeAlreadySent(ctx context.Context, email string) (bool, time.Duration, error) {
 	exists, err := utils.Redis.Exists(ctx, email).Result()
 	if err != nil {
-		return false, err
+		return false, 0, err
 	}
-	return exists == 1, nil
+
+	var ttl time.Duration
+	if exists == 1 {
+		ttl, err = utils.Redis.TTL(ctx, email).Result()
+		if err != nil {
+			return false, 0, err
+		}
+	}
+	return exists == 1, ttl, nil
 }
 
 func SaveCodeToRedis(ctx context.Context, email, code string) error {
