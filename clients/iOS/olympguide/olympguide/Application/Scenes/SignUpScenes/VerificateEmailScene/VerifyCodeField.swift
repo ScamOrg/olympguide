@@ -106,8 +106,11 @@ final class VerifyCodeField: UIView, UIKeyInput {
         hiddenTextField.becomeFirstResponder()
     }
     
-    // MARK: - Обновление UI (отображение цифр)
+    func setFocusToFirstField() {
+        handleTap()
+    }
     
+    // MARK: - Обновление UI (отображение цифр)
     private func updateLabels() {
         for i in 0..<digitCount {
             if i < digits.count {
@@ -127,7 +130,6 @@ final class VerifyCodeField: UIView, UIKeyInput {
     }
     
     // MARK: - UIKeyInput
-    
     /// Говорит, есть ли у нас текст (используется для backspace и т.д.)
     var hasText: Bool {
         !digits.isEmpty
