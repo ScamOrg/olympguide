@@ -5,11 +5,11 @@ import (
 	"api/controllers/auth"
 	"api/controllers/fields"
 	"api/controllers/olympiads"
+	"api/controllers/regions"
 	"api/controllers/universities"
 	"api/controllers/users"
-	"api/controllers/users/likes"
-	"api/db"
 	"api/middleware"
+	"api/utils"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +17,7 @@ import (
 func SetupRouter(cfg *config.Config) *gin.Engine {
 	r := gin.Default()
 
-	store := db.GetSessionStore(cfg)
+	store := utils.CreateSessionStore(cfg)
 	r.Use(sessions.Sessions("session", store))
 	r.Use(middleware.SessionMiddleware())
 
@@ -25,6 +25,7 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	setupFieldRoutes(r)
 	setupAuthRoutes(r)
 	setupUniversityRoutes(r)
+	setupRegionRoutes(r)
 	setupUserRoutes(r)
 
 	return r
@@ -32,6 +33,10 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 
 func setupOlympiadRoutes(r *gin.Engine) {
 	r.GET("/olympiads", olympiads.GetOlympiads)
+}
+
+func setupRegionRoutes(r *gin.Engine) {
+	r.GET("/regions", regions.GetRegions)
 }
 
 func setupFieldRoutes(r *gin.Engine) {
@@ -55,14 +60,14 @@ func setupUniversityRoutes(r *gin.Engine) {
 
 	universityGroup := r.Group("/university")
 	{
-		universityGroup.GET("/:id", universities.GetUniversityByID)
+		universityGroup.GET("/:id", universities.GetUniversity)
 
 		universitySecurityGroup := universityGroup.Group("/")
 		universitySecurityGroup.Use(middleware.AuthMiddleware(), middleware.UniversityMiddleware())
 		{
 			universitySecurityGroup.POST("/", universities.CreateUniversity)
-			universitySecurityGroup.PUT("/:id", universities.UpdateUniversityByID)
-			universitySecurityGroup.DELETE("/:id", universities.DeleteUniversityByID)
+			universitySecurityGroup.PUT("/:id", universities.UpdateUniversity)
+			universitySecurityGroup.DELETE("/:id", universities.DeleteUniversity)
 		}
 	}
 }
@@ -73,9 +78,9 @@ func setupUserRoutes(r *gin.Engine) {
 		userGroup.GET("/region", users.GetRegion)
 		favouriteGroup := userGroup.Group("/favourite")
 		{
-			favouriteGroup.GET("/universities", likes.GetLikedUniversities)
-			favouriteGroup.POST("/university/:id", likes.LikeUniversity)
-			favouriteGroup.DELETE("/university/:id", likes.UnlikeUniversity)
+			favouriteGroup.GET("/universities", universities.GetLikedUniversities)
+			favouriteGroup.POST("/university/:id", users.LikeUniversity)
+			favouriteGroup.DELETE("/university/:id", users.UnlikeUniversity)
 		}
 	}
 }

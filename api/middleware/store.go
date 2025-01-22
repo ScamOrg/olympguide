@@ -10,7 +10,10 @@ func SessionMiddleware() gin.HandlerFunc {
 		session := sessions.Default(c)
 		userID := session.Get("user_id")
 		if userID != nil {
-			c.Set("user_id", userID)
+			uintUserID, ok := userID.(uint)
+			if ok {
+				c.Set("user_id", uintUserID)
+			}
 		}
 		c.Next()
 	}
