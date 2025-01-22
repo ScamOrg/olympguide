@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"api/constants"
-	"api/db"
 	"api/models"
+	"api/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,7 +13,7 @@ func UniversityMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, _ := c.Get("user_id")
 		var adminUser models.AdminUser
-		if err := db.DB.Where("user_id = ?", userID).First(&adminUser).Error; err != nil {
+		if err := utils.DB.Where("user_id = ?", userID).First(&adminUser).Error; err != nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": constants.UserNotAdmin})
 			return
 		}

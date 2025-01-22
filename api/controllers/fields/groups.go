@@ -1,9 +1,9 @@
 package fields
 
 import (
-	"api/constants"
-	"api/db"
+	"api/controllers/handlers"
 	"api/models"
+	"api/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -23,7 +23,7 @@ type GroupResponse struct {
 
 func GetFields(c *gin.Context) {
 	var groups []models.GroupField
-	err := db.DB.Preload("Fields", func(db *gorm.DB) *gorm.DB {
+	err := utils.DB.Preload("Fields", func(db *gorm.DB) *gorm.DB {
 		if degrees := c.QueryArray("degree"); len(degrees) > 0 {
 			db = db.Where("degree IN (?)", degrees)
 		}
@@ -34,7 +34,7 @@ func GetFields(c *gin.Context) {
 	}).Find(&groups).Error
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
 		return
 	}
 	var response []GroupResponse

@@ -1,38 +1,49 @@
 package universities
 
 import (
-	"api/constants"
+	"api/controllers/handlers"
 	"api/controllers/universities/api"
 	"api/logic"
-	"errors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
 func GetUniversity(c *gin.Context) {
 	universityID := c.Param("id")
+	userID, _ := c.Get("user_id")
+
 	university, err := logic.GetUniversityByID(universityID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": constants.DataNotFound})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
-		}
+		handlers.HandleError(c, err)
 		return
 	}
-	logic.IncrementUniversityPopularity(university)
-	response := api.CreateUniversityResponse(c, university)
+
+	response := api.CreateUniversityResponse(university, userID)
 	c.JSON(http.StatusOK, response)
 }
 
 func GetUniversities(c *gin.Context) {
-	universities, err := logic.GetUniversities(c)
+	regionIDs := c.QueryArray("region_id")
+	fromMyRegion := c.Query("from_my_region") == "true"
+	search := c.Query("search")
+	userID, _ := c.Get("user_id")
+
+	universities, err := logic.GetUniversities(userID, regionIDs, fromMyRegion, search)
+	handlers.HandleError(c, err)
+
+	response := api.CreateUniversitiesResponse(universities, userID)
+	c.JSON(http.StatusOK, response)
+}
+
+func GetLikedUniversities(c *gin.Context) {
+	userID, _ := c.MustGet("user_id").(uint)
+
+	universities, err := logic.GetLikedUniversities(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
 		return
 	}
 
-	response := api.CreateUniversitiesResponse(c, universities)
+	response := api.CreateLikedUniversitiesResponse(universities)
 	c.JSON(http.StatusOK, response)
 }

@@ -3,8 +3,6 @@ package api
 import (
 	"api/logic"
 	"api/models"
-	"fmt"
-	"github.com/gin-gonic/gin"
 )
 
 type UniversityShortResponse struct {
@@ -22,8 +20,8 @@ type UniversityResponse struct {
 	UniversityShortResponse
 }
 
-func CreateUniversityResponse(c *gin.Context, university *models.University) UniversityResponse {
-	like := logic.IsUserLikedUniversity(c, fmt.Sprintf("%d", university.UniversityID))
+func CreateUniversityResponse(university *models.University, userID any) UniversityResponse {
+	like := logic.IsUserLikedUniversity(userID, university.UniversityID)
 
 	return UniversityResponse{
 		Email:       university.Email,
@@ -39,11 +37,11 @@ func CreateUniversityResponse(c *gin.Context, university *models.University) Uni
 	}
 }
 
-func CreateUniversitiesResponse(c *gin.Context, universities []models.University) []UniversityShortResponse {
+func CreateUniversitiesResponse(universities []models.University, userID any) []UniversityShortResponse {
 	var response []UniversityShortResponse
 
 	for _, university := range universities {
-		like := logic.IsUserLikedUniversity(c, fmt.Sprintf("%d", university.UniversityID))
+		like := logic.IsUserLikedUniversity(userID, university.UniversityID)
 		response = append(response, UniversityShortResponse{
 			UniversityID: university.UniversityID,
 			Name:         university.Name,
@@ -53,5 +51,19 @@ func CreateUniversitiesResponse(c *gin.Context, universities []models.University
 		})
 	}
 
+	return response
+}
+
+func CreateLikedUniversitiesResponse(universities []models.University) []UniversityShortResponse {
+	var response []UniversityShortResponse
+	for _, university := range universities {
+		response = append(response, UniversityShortResponse{
+			UniversityID: university.UniversityID,
+			Name:         university.Name,
+			Logo:         university.Logo,
+			Region:       university.Region.Name,
+			Like:         true,
+		})
+	}
 	return response
 }

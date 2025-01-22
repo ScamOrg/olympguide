@@ -2,6 +2,7 @@ package universities
 
 import (
 	"api/constants"
+	"api/controllers/handlers"
 	"api/controllers/universities/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
@@ -11,19 +12,19 @@ import (
 func CreateUniversity(c *gin.Context) {
 	request, err := api.BindUniversityRequest(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
 		return
 	}
 
 	if !logic.IsRegionExists(request.RegionID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.RegionNotFound})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.RegionNotFound)
 		return
 	}
 
 	university := api.CreateUniversityFromRequest(request)
 	id, err := logic.CreateUniversity(&university)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
 		return
 	}
 

@@ -2,25 +2,15 @@ package auth
 
 import (
 	"api/constants"
-	"api/db"
-	"api/models"
+	"api/controllers/auth/api"
+	"api/controllers/handlers"
+	"api/logic"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"net/http"
 	"time"
 )
-
-type SignUpRequest struct {
-	Email      string `json:"email" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-	FirstName  string `json:"first_name" binding:"required"`
-	LastName   string `json:"last_name" binding:"required"`
-	SecondName string `json:"second_name" binding:"omitempty,min=1"`
-	Birthday   string `json:"birthday" binding:"required"`
-	RegionID   uint   `json:"region_id" binding:"required"`
-}
 
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required"`
@@ -28,41 +18,32 @@ type LoginRequest struct {
 }
 
 func SignUp(c *gin.Context) {
-	var request SignUpRequest
+	var request api.SignUpRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
 		return
 	}
 	parsedBirthday, err := time.Parse("02.01.2006", request.Birthday)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidBirthday})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidBirthday)
 		return
 	}
 
-	var regionExists bool
-	db.DB.Raw("SELECT EXISTS(SELECT 1 FROM olympguide.region WHERE region_id = ?)", request.RegionID).Scan(&regionExists)
+	regionExists := logic.IsRegionExists(request.RegionID)
 	if !regionExists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.RegionNotFound})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.RegionNotFound)
 		return
 	}
 
-	hashedPassword, err := HashPassword(request.Password)
+	hashedPassword, err := hashPassword(request.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
+		return
 	}
-	user := models.User{
-		Email:        request.Email,
-		FirstName:    request.FirstName,
-		LastName:     request.LastName,
-		SecondName:   request.SecondName,
-		Birthday:     parsedBirthday,
-		PasswordHash: hashedPassword,
-		RegionID:     request.RegionID,
-	}
-	result := db.DB.Create(&user)
-	if result.Error != nil {
-		log.Println(result.Error.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+	user := api.CreateUserFromRequest(request, parsedBirthday, hashedPassword)
+	_, err = logic.CreateUser(&user)
+	if err != nil {
+		handlers.HandleError(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Signed up"})
@@ -71,29 +52,27 @@ func SignUp(c *gin.Context) {
 func Login(c *gin.Context) {
 	var request LoginRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
 		return
 	}
 
-	var user models.User
-	if err := db.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": constants.UserNotFound})
+	user, err := logic.GetUserByEmail(request.Email)
+	if err != nil {
+		handlers.HandleErrorWithCode(c, http.StatusUnauthorized, constants.UserNotFound)
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": constants.InvalidPassword})
+		handlers.HandleErrorWithCode(c, http.StatusUnauthorized, constants.InvalidPassword)
 		return
 	}
 
 	session := sessions.Default(c)
 	session.Set("user_id", user.UserID)
 	if err := session.Save(); err != nil {
-		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "Logged in", "user_id": user.UserID})
 }
 
@@ -102,14 +81,13 @@ func Logout(c *gin.Context) {
 	session.Clear()
 	err := session.Save()
 	if err != nil {
-		log.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }
 
-func HashPassword(password string) (string, error) {
+func hashPassword(password string) (string, error) {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
