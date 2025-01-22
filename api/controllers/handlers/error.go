@@ -13,6 +13,14 @@ var KnownErrors = map[error]string{
 	gorm.ErrRecordNotFound: constants.DataNotFound,
 }
 
+func HandleErrorWithDetails(c *gin.Context, statusCode int, errorMessage string, details map[string]interface{}) {
+	response := gin.H{"error": errorMessage}
+	for key, value := range details {
+		response[key] = value
+	}
+	c.JSON(statusCode, response)
+}
+
 func HandleErrorWithCode(c *gin.Context, statusCode int, errorMessage string) {
 	c.JSON(statusCode, gin.H{"error": errorMessage})
 }
