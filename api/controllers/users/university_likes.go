@@ -20,11 +20,13 @@ func LikeUniversity(c *gin.Context) {
 	isLiked := logic.IsUserLikedUniversity(userID, university.UniversityID)
 	if isLiked {
 		c.JSON(http.StatusOK, gin.H{"message": "Already liked"})
+		return
 	}
 
 	err = logic.LikeUniversity(userID, university.UniversityID)
 	if err != nil {
 		handlers.HandleError(c, err)
+		return
 	}
 	logic.IncrementUniversityPopularity(university)
 	c.JSON(http.StatusOK, gin.H{"message": "Liked"})
@@ -43,6 +45,7 @@ func UnlikeUniversity(c *gin.Context) {
 	isLiked := logic.IsUserLikedUniversity(userID, university.UniversityID)
 	if !isLiked {
 		c.JSON(http.StatusOK, gin.H{"message": "Already unliked"})
+		return
 	}
 
 	if err := logic.UnlikeUniversity(userID, university.UniversityID); err != nil {
