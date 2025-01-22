@@ -2,85 +2,92 @@ package auth
 
 import (
 	"api/constants"
-	"api/db"
+	"api/controllers/auth/api"
+	"api/controllers/handlers"
+	"api/logic"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	"log"
 	"math/rand"
 	"net/http"
-	"time"
+	"strconv"
 )
 
 var ctx = context.Background()
 
-type SendRequest struct {
-	Email string `json:"email" binding:"required"`
-}
-
-type VerifyRequest struct {
-	Email string `json:"email" binding:"required"`
-	Code  string `json:"code" binding:"required"`
-}
-
-type Message struct {
-	Email string `json:"email"`
-	Code  string `json:"code"`
-}
-
 func SendCode(c *gin.Context) {
-	var request SendRequest
+	var request api.SendRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
+		return
+	}
+
+	alreadySent, err := logic.IsCodeAlreadySent(ctx, request.Email)
+	if err != nil {
+		handlers.HandleError(c, err)
+		return
+	}
+	if alreadySent {
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.PreviousCodeNotExpired)
 		return
 	}
 	code := GenerateCode()
 
-	err := db.Redis.Set(ctx, request.Email, code, constants.EmailCodeTtl*time.Minute).Err()
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+	if err := logic.SaveCodeToRedis(ctx, request.Email, code); err != nil {
+		handlers.HandleError(c, err)
 		return
 	}
 
-	msg := Message{request.Email, code}
-	msgJSON, _ := json.Marshal(msg)
-	err = db.Redis.Publish(ctx, "email_codes", msgJSON).Err()
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+	if err := logic.SendCodeViaPubSub(ctx, request.Email, code); err != nil {
+		handlers.HandleError(c, err)
 		return
 	}
+
 	log.Printf("Code %s sent to %s", code, request.Email)
-
 	c.JSON(http.StatusOK, gin.H{"message": "Code sent to " + request.Email})
 }
 
 func VerifyCode(c *gin.Context) {
-	var request VerifyRequest
+	var request api.VerifyRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
 		return
 	}
 
-	storedCode, err := db.Redis.Get(ctx, request.Email).Result()
-	if errors.Is(err, redis.Nil) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.CodeNotFoundOrExpired})
+	result, err := logic.GetCodeAndAttempts(ctx, request.Email)
+	if err != nil {
+		handlers.HandleError(c, err)
 		return
-	} else if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+	}
+
+	if len(result) == 0 {
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.CodeNotFoundOrExpired)
+		return
+	}
+
+	storedCode := result["code"]
+	attempts, _ := strconv.Atoi(result["attempts"])
+
+	if attempts > constants.MaxVerifyCodeAttempts {
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.TooManyAttempts)
 		return
 	}
 
 	if storedCode != request.Code {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidCode})
+		if err := logic.IncrementAttempts(ctx, request.Email); err != nil {
+			handlers.HandleError(c, err)
+			return
+		}
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidCode)
 		return
 	}
-	db.Redis.Del(ctx, request.Email)
+
+	if err := logic.DeleteCode(ctx, request.Email); err != nil {
+		handlers.HandleError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Email confirmed"})
 }
 

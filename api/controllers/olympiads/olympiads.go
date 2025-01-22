@@ -1,18 +1,16 @@
 package olympiads
 
 import (
-	"api/constants"
-	"api/db"
+	"api/controllers/handlers"
 	"api/models"
-	"errors"
+	"api/utils"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
 func GetOlympiads(c *gin.Context) {
 	var olympiads []models.Olympiad
-	query := db.DB.Model(&models.Olympiad{}).Debug()
+	query := utils.DB.Model(&models.Olympiad{}).Debug()
 
 	levels := c.QueryArray("level")
 	if len(levels) > 0 {
@@ -46,11 +44,7 @@ func GetOlympiads(c *gin.Context) {
 
 	err := query.Find(&olympiads).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": constants.DataNotFound})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constants.InternalServerError})
+		handlers.HandleError(c, err)
 		return
 	}
 

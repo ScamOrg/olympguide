@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"api/config"
-	"api/db"
 	"api/routers"
+	"api/utils"
 )
 
 func main() {
@@ -14,8 +14,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
-	db.ConnectDB(cfg)
-	db.ConnectRedis(cfg)
+	utils.ConnectDB(cfg)
+	utils.ConnectRedis(cfg)
 	r := routers.SetupRouter(cfg)
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)
