@@ -2,8 +2,9 @@ package fields
 
 import (
 	"api/constants"
-	"api/db"
+	"api/controllers/handlers"
 	"api/models"
+	"api/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -26,14 +27,14 @@ func GetFieldByID(c *gin.Context) {
 	idParam := c.Param("id")
 	fieldID, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constants.InvalidRequest})
+		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
 		return
 	}
 	var field models.Field
 
-	result := db.DB.Preload("Group").First(&field, fieldID)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": constants.DataNotFound})
+	result := utils.DB.Preload("Group").First(&field, fieldID)
+	if err = result.Error; err != nil {
+		handlers.HandleError(c, err)
 		return
 	}
 	request := FieldResponse{
