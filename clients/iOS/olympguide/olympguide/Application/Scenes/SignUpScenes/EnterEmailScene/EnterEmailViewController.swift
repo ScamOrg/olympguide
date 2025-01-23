@@ -14,7 +14,7 @@ final class EnterEmailViewController: UIViewController {
     var router: (EnterEmailRoutingLogic & EnterEmailDataPassing)?
     
     // MARK: - UI
-    private let emailTextField = CustomSearchBar(title: "email")
+    private let emailTextField = CustomSearchBar(with: "email")
     private let nextButton: UIButton = UIButton(type: .system)
     private var nextButtonBottomConstraint: NSLayoutConstraint!
     private var currentEmail: String = ""
@@ -169,6 +169,7 @@ extension EnterEmailViewController: EnterEmailDisplayLogic {
         if let errorMessage = viewModel.errorMessage {
             let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default))
+            emailTextField.makeRed()
             present(alert, animated: true)
         } else {
             router?.routeToInputCode()
