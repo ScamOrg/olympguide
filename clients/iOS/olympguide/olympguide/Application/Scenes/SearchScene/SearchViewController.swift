@@ -29,7 +29,7 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     
     // MARK: - Lifecycle
     init(searchType: SearchType) {
-        customSearchBar = CustomSearchBar(title: searchType.title())
+        customSearchBar = CustomSearchBar(with: searchType.title())
         super.init(nibName: nil, bundle: nil)
         setup()
         router?.dataStore?.searchType = searchType
