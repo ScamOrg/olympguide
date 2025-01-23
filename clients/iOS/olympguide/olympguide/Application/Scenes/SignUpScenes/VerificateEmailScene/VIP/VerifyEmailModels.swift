@@ -6,9 +6,9 @@
 //
 
 enum VerifyEmailModels {
-    enum SendCode {
+    enum VerifyCode {
         struct Request {
-            let code: Int
+            let code: String
             let email: String
         }
         
