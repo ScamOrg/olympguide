@@ -14,7 +14,7 @@ final class VerifyEmailRouter: VerifyEmailRoutingLogic, VerifyEmailDataPassing {
     
     func routeToInputCode() {
         let email = dataStore?.email
-        let inputCodeVC = VerifyEmailViewController(email: email ?? "")
+        let inputCodeVC = PersonalDataViewController(email: email ?? "")
         
         viewController?.navigationController?.pushViewController(inputCodeVC, animated: true)
     }
