@@ -11,10 +11,10 @@ final class VerifyEmailPresenter: VerifyEmailPresentationLogic {
     
     weak var viewController: VerifyEmailDisplayLogic?
     
-    func presentVerifyCode(response: VerifyEmailModels.SendCode.Response) {
+    func presentVerifyCode(response: VerifyEmailModels.VerifyCode.Response) {
         if response.success {
             // Ошибки нет — значит всё ОК
-            let viewModel = VerifyEmailModels.SendCode.ViewModel(errorMessage: nil)
+            let viewModel = VerifyEmailModels.VerifyCode.ViewModel(errorMessage: nil)
             viewController?.displayVerifyCodeResult(viewModel: viewModel)
         } else {
             // Есть ошибка
@@ -28,7 +28,7 @@ final class VerifyEmailPresenter: VerifyEmailPresentationLogic {
                 errorMessage = "Произошла неизвестная ошибка"
             }
             
-            let viewModel = VerifyEmailModels.SendCode.ViewModel(errorMessage: errorMessage)
+            let viewModel = VerifyEmailModels.VerifyCode.ViewModel(errorMessage: errorMessage)
             viewController?.displayVerifyCodeResult(viewModel: viewModel)
         }
     }
