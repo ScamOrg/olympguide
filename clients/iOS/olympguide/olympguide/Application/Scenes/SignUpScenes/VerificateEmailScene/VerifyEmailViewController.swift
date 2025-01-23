@@ -7,7 +7,10 @@
 
 import UIKit
 
-final class VerifyEmailViewController: UIViewController {
+final class VerifyEmailViewController: UIViewController, VerifyEmailDisplayLogic {
+    var interactor: VerifyEmailBusinessLogic?
+    var router: (VerifyEmailRoutingLogic & VerifyEmailDataPassing)?
+    
     private var userEmail: String = ""
     
     private let descriptionLabel = UILabel()
@@ -26,12 +29,30 @@ final class VerifyEmailViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "Подтвердите почту"
+        configure()
         configureUI()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         verifyCodeField.setFocusToFirstField()
+    }
+    
+    private func configure() {
+        let viewController = self
+        let interactor = VerifyEmailInteractor()
+        let presenter = VerifyEmailPresenter()
+        let router = VerifyEmailRouter()
+        
+        viewController.interactor = interactor
+        viewController.router = router
+        
+        interactor.presenter = presenter
+        
+        presenter.viewController = viewController
+        
+        router.viewController = viewController
+        router.dataStore = interactor
     }
     
     private func configureUI() {
@@ -56,41 +77,25 @@ final class VerifyEmailViewController: UIViewController {
     
     private func configureVerifyCodeField() {
         view.addSubview(verifyCodeField)
+        
         verifyCodeField.pinTop(to: descriptionLabel.bottomAnchor, 50)
         verifyCodeField.pinCenterX(to: view)
-    }
-}
-
-
-class CodeInputViewController: UIViewController {
-    let verifyCodeField = VerifyCodeField()
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
         
-        
-        // Добавляем его на вью контроллера
-        view.backgroundColor = .white
-        view.addSubview(verifyCodeField)
-        verifyCodeField.translatesAutoresizingMaskIntoConstraints = false
-        // Задаём размер и позицию (центрируем вью на экране)
-        NSLayoutConstraint.activate([
-            verifyCodeField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            verifyCodeField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            
-        ])
-        //        verifyCodeField.setHeight(50)
-        //        verifyCodeField.setWidth(230)
-        
-        // Слушаем событие "все цифры введены"
-        verifyCodeField.onComplete = { code in
-            print("Пользователь ввёл код: \(code)")
+        verifyCodeField.onComplete = {[weak self] code in
+            let request = VerifyEmailModels.VerifyCode.Request(code: code, email: self?.userEmail ?? "")
+            self?.interactor?.verifyCode(request: request)
         }
     }
     
-    //    override func viewDidAppear(_ animated: Bool) {
-    //        super.viewDidAppear(animated)
-    //        // Теперь даём фокус, когда экран уже отобразился
-    //        verifyCodeField.setFocusToFirstField()
-    //    }
+    func displayVerifyCodeResult(viewModel: VerifyEmailModels.VerifyCode.ViewModel) {
+        if let errorMessage = viewModel.errorMessage {
+            let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            verifyCodeField.makeRed()
+        } else {
+            router?.routeToInputCode()
+        }
+    }
+    // pankratovvlad1@gmail.com
 }
