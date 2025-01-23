@@ -110,6 +110,14 @@ final class VerifyCodeField: UIView, UIKeyInput {
         handleTap()
     }
     
+    func makeRed() {
+        UIView.animate(withDuration: 0.3) {[weak self] in
+            self?.digitLabels.forEach {
+                $0.backgroundColor = UIColor(hex: "FFCDCD")
+            }
+        }
+    }
+    
     // MARK: - Обновление UI (отображение цифр)
     private func updateLabels() {
         for i in 0..<digitCount {
@@ -168,7 +176,13 @@ final class VerifyCodeField: UIView, UIKeyInput {
     // Удаление последнего символа (Backspace)
     func deleteBackward() {
         guard !digits.isEmpty else { return }
-        
+        if digitLabels[0].backgroundColor == UIColor(hex: "FFCDCD") {
+            UIView.animate(withDuration: 0.2) {[weak self] in
+                self?.digitLabels.forEach {
+                    $0.backgroundColor = .white
+                }
+            }
+        }
         // Удаляем из массива последнюю цифру
         digits.removeLast()
         // Обновляем
