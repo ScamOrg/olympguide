@@ -79,12 +79,14 @@ final class CustomSearchBar: UIView {
     private var isActive = false
     
     // MARK: - Lifecycle
-    init(title: String) {
+    init(with title: String) {
         super.init(frame: .zero)
         titleLabel.text = title
         commonInit()
         setupKeyboardObservers()
     }
+    
+    private var isRed: Bool = false
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -130,6 +132,7 @@ final class CustomSearchBar: UIView {
         addSubview(deleteButton)
         
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        textField.delegate = self
         deleteButton.addTarget(self, action: #selector(didTapDeleteButton), for: .touchUpInside)
         deleteButton.isHidden = true
         addCloseButtonOnKeyboard()
@@ -209,6 +212,13 @@ final class CustomSearchBar: UIView {
         textField.textContentType = textContentType
     }
     
+    func makeRed() {
+        UIView.animate(withDuration: 0.3) {
+            self.backgroundColor = UIColor(hex: "#FFCDCD")
+        }
+        isRed = true
+    }
+    
     // MARK: - Objc funcs
     @objc
     func didTapSearchBar() {
@@ -250,8 +260,14 @@ final class CustomSearchBar: UIView {
         deleteButton.isHidden = (textField.text ?? "").isEmpty ? true : false
         delegate?.customSearchBar(self, textDidChange: textField.text ?? "")
         
-        if deleteButton.isHidden && !isKeyboardVisible {
+        if deleteButton.isHidden && !textField.isFirstResponder {
             didTapSearchBar()
+        }
+        if isRed {
+            isRed = false
+            UIView.animate(withDuration: 0.2) {
+                self.backgroundColor = .white
+            }
         }
     }
     
@@ -264,7 +280,7 @@ final class CustomSearchBar: UIView {
     @objc
     private func closeKeyboard() {
         textField.resignFirstResponder()
-        didTapSearchBar()
+//        didTapSearchBar()
     }
     
     @objc private func keyboardWillShow(_ notification: Notification) {
@@ -273,5 +289,11 @@ final class CustomSearchBar: UIView {
 
     @objc private func keyboardWillHide(_ notification: Notification) {
         isKeyboardVisible = false
+    }
+}
+
+extension CustomSearchBar: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        didTapSearchBar()
     }
 }
