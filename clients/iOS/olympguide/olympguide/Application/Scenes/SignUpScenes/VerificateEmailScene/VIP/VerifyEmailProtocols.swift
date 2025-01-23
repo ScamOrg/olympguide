@@ -10,7 +10,7 @@ import UIKit
 
 // MARK: - Business Logic
 protocol VerifyEmailBusinessLogic {
-    func verifyCode(request: VerifyEmailModels.SendCode.Request)
+    func verifyCode(request: VerifyEmailModels.VerifyCode.Request)
 }
 
 // MARK: - Data Store
@@ -21,12 +21,12 @@ protocol VerifyEmailDataStore {
 
 // MARK: - Presentation Logic
 protocol VerifyEmailPresentationLogic {
-    func presentVerifyCode(response: VerifyEmailModels.SendCode.Response)
+    func presentVerifyCode(response: VerifyEmailModels.VerifyCode.Response)
 }
 
 // MARK: - Display Logic
 protocol VerifyEmailDisplayLogic: AnyObject {
-    func displayVerifyCodeResult(viewModel: VerifyEmailModels.SendCode.ViewModel)
+    func displayVerifyCodeResult(viewModel: VerifyEmailModels.VerifyCode.ViewModel)
 }
 
 // MARK: - Routing Logic
