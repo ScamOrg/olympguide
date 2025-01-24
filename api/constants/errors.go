@@ -16,3 +16,5 @@ const (
 	TooManyAttempts        = "Too many attempts"
 	PreviousCodeNotExpired = "Please wait until the previous code expires"
 )
+
+//const map[string]
