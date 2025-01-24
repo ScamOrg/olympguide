@@ -1,7 +1,6 @@
 package fields
 
 import (
-	"api/constants"
 	"api/controllers/handlers"
 	"api/models"
 	"api/utils"
@@ -27,7 +26,7 @@ func GetFieldByID(c *gin.Context) {
 	idParam := c.Param("id")
 	fieldID, err := strconv.Atoi(idParam)
 	if err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
+		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
 		return
 	}
 	var field models.Field
