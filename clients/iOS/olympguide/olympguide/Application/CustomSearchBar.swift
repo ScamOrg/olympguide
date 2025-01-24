@@ -58,24 +58,55 @@ final class CustomSearchBar: UIView {
         tf.textColor = .black
         tf.alpha = 0
         tf.isHidden = true
-        tf.autocorrectionType = .no
-        tf.spellCheckingType = .no
-        tf.autocapitalizationType = .none
+        //        tf.autocorrectionType = .no
+        //        tf.spellCheckingType = .no
+        //        tf.autocapitalizationType = .none
         return tf
+    }()
+    
+    private var isKeyboardVisible = false
+    
+    private let deleteButton: UIButton = {
+        let button = UIButton()
+        button.tintColor = .black
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        button.imageView?.contentMode = .scaleAspectFit
+        button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        return button
     }()
     
     private var isActive = false
     
     // MARK: - Lifecycle
-    init(title: String) {
+    init(with title: String) {
         super.init(frame: .zero)
         titleLabel.text = title
         commonInit()
+        setupKeyboardObservers()
     }
+    
+    private var isRed: Bool = false
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonInit()
+        setupKeyboardObservers()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
     }
     
     // MARK: - Private funcs
@@ -92,21 +123,18 @@ final class CustomSearchBar: UIView {
         textField.inputAccessoryView = toolbar
     }
     
-    @objc
-    private func closeKeyboard() {
-        textField.resignFirstResponder()
-        didTapSearchBar()
-    }
-    
     private func commonInit() {
         backgroundColor = Constants.Colors.backgroundColor
         layer.cornerRadius = Constants.Dimensions.cornerRadius
         
         addSubview(titleLabel)
         addSubview(textField)
+        addSubview(deleteButton)
         
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        
+        textField.delegate = self
+        deleteButton.addTarget(self, action: #selector(didTapDeleteButton), for: .touchUpInside)
+        deleteButton.isHidden = true
         addCloseButtonOnKeyboard()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchBar))
@@ -116,6 +144,7 @@ final class CustomSearchBar: UIView {
     // MARK: - Layout
     override func layoutSubviews() {
         super.layoutSubviews()
+        titleLabel.transform = .identity
         
         let padding: CGFloat = Constants.Dimensions.padding
         let labelSize = titleLabel.intrinsicContentSize
@@ -129,18 +158,24 @@ final class CustomSearchBar: UIView {
             height: labelSize.height
         )
         
-
         if isActive {
             let scaledWidth = titleLabel.bounds.width * (1 - Constants.Dimensions.titleScale)
             let scaleTransform = CGAffineTransform(translationX: -scaledWidth / 2, y: Constants.Dimensions.titleTranslateY)
                 .scaledBy(x: Constants.Dimensions.titleScale, y: Constants.Dimensions.titleScale)
             titleLabel.transform = scaleTransform
-    
+            
             let textFieldY = titleLabel.frame.maxY - Constants.Dimensions.titleTranslateY
             textField.frame = CGRect(
                 x: padding,
                 y: textFieldY + (Constants.Dimensions.titleTranslateY - 3),
-                width: bounds.width - 2 * padding,
+                width: bounds.width - 2 * padding - 25,
+                height: 24
+            )
+            
+            deleteButton.frame = CGRect(
+                x: textField.layer.frame.maxX + 1,
+                y: textField.layer.frame.minY,
+                width: 24,
                 height: 24
             )
             
@@ -151,12 +186,42 @@ final class CustomSearchBar: UIView {
             titleLabel.frame = CGRect(x: labelX, y: labelY, width: labelSize.width, height: labelSize.height)
             
             textField.frame = .zero
+            deleteButton.frame = .zero
         }
+    }
+    
+    override var intrinsicContentSize: CGSize {
+        return CGSize(
+            width: UIScreen.main.bounds.width - 40,
+            height: 48
+        )
+    }
+    
+    override var frame: CGRect {
+        get { return super.frame }
+        set {
+            super.frame = CGRect(
+                origin: newValue.origin,
+                size: self.intrinsicContentSize
+            )
+        }
+    }
+    
+    func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
+        textField.keyboardType = keyboardType
+        textField.textContentType = textContentType
+    }
+    
+    func makeRed() {
+        UIView.animate(withDuration: 0.3) {
+            self.backgroundColor = UIColor(hex: "#FFCDCD")
+        }
+        isRed = true
     }
     
     // MARK: - Objc funcs
     @objc
-    private func didTapSearchBar() {
+    func didTapSearchBar() {
         let isThereText = !(self.textField.text?.isEmpty ?? true)
         guard !isThereText else { return }
         
@@ -192,6 +257,43 @@ final class CustomSearchBar: UIView {
     
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
+        deleteButton.isHidden = (textField.text ?? "").isEmpty ? true : false
         delegate?.customSearchBar(self, textDidChange: textField.text ?? "")
+        
+        if deleteButton.isHidden && !textField.isFirstResponder {
+            didTapSearchBar()
+        }
+        if isRed {
+            isRed = false
+            UIView.animate(withDuration: 0.2) {
+                self.backgroundColor = .white
+            }
+        }
+    }
+    
+    @objc
+    private func didTapDeleteButton() {
+        textField.text = ""
+        textFieldDidChange(textField)
+    }
+    
+    @objc
+    private func closeKeyboard() {
+        textField.resignFirstResponder()
+//        didTapSearchBar()
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        isKeyboardVisible = true
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        isKeyboardVisible = false
+    }
+}
+
+extension CustomSearchBar: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        didTapSearchBar()
     }
 }

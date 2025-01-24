@@ -32,11 +32,9 @@ class TabButton: UIView {
     init(title: String, icon: String, tag: Int, action: UIAction, tintColor: UIColor = Constants.defaultTintColor) {
         super.init(frame: .zero)
         
-        // Button setting
         button = UIButton(primaryAction: action)
         button.tag = tag
         
-        // Symbol configuration
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: Constants.iconPointSize, weight: .regular)
         var iconImage = UIImage(systemName: icon, withConfiguration: symbolConfig)
         
@@ -44,16 +42,13 @@ class TabButton: UIView {
             iconImage = UIImage(systemName: icon + Constants.fillSuffix, withConfiguration: symbolConfig)
         }
         
-        // Set accessibilityIdentifier
         iconImage?.accessibilityIdentifier = tintColor == Constants.filledTintColor ? icon + Constants.fillSuffix : icon
         
-        // Button setting
         button.setImage(iconImage, for: .normal)
         button.tintColor = tintColor
         button.setWidth(Constants.buttonWidth)
         button.setHeight(Constants.buttonHeight)
         
-        // Customising the header
         titleView.text = title
         titleView.font = .systemFont(ofSize: Constants.titleFontSize)
         titleView.textColor = tintColor
@@ -84,10 +79,8 @@ class TabButton: UIView {
             return
         }
         
-        // Form a new symbol name
         let newSymbolName = currentSymbolName.replacingOccurrences(of: Constants.fillSuffix, with: "") + Constants.fillSuffix
         
-        // Customising the icon
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: Constants.iconPointSize, weight: .regular)
         let newIconImage = UIImage(systemName: newSymbolName, withConfiguration: symbolConfig)
         button.setImage(newIconImage, for: .normal)

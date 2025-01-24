@@ -129,6 +129,7 @@ final class FilterSortView: UIView {
     
     private func createFilterButton(with title: String) -> UIButton {
         let button = FilterButton(title: title)
+        button.tintColor = .black
         button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         return button
     }
