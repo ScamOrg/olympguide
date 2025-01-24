@@ -130,12 +130,12 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
         enterEmailVC.hidesBottomBarWhenPushed = true
         
         navigationController?.pushViewController(enterEmailVC, animated: true)
-        
     }
     
     @objc private func loginButtonTapped() {
         print("Войти нажато")
-        let searchVC = SearchViewController(searchType: .olympiads)
+//        let searchVC = VerificateEmailViewController(email: "pankravvlad1@gmail.com")
+        let searchVC = PersonalDataViewController(email: "pankravvlad1@gmail.com")
         navigationController?.pushViewController(searchVC, animated: true)
     }
 }
