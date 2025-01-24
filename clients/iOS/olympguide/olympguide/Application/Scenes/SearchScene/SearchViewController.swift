@@ -29,7 +29,7 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     
     // MARK: - Lifecycle
     init(searchType: SearchType) {
-        customSearchBar = CustomSearchBar(title: searchType.title())
+        customSearchBar = CustomSearchBar(with: searchType.title())
         super.init(nibName: nil, bundle: nil)
         setup()
         router?.dataStore?.searchType = searchType
@@ -46,8 +46,9 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         loadScene()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        customSearchBar.didTapSearchBar()
     }
     
     // MARK: - Methods
@@ -71,8 +72,8 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         customSearchBar.delegate = self
         view.addSubview(customSearchBar)
         
-        customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
-        customSearchBar.setWidth(UIScreen.main.bounds.width - 2 * Constants.Dimensions.searchBarHorizontalMargin)
+//        customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
+//        customSearchBar.setWidth(UIScreen.main.bounds.width - 2 * Constants.Dimensions.searchBarHorizontalMargin)
         customSearchBar.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
         customSearchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.searchBarHorizontalMargin)
         

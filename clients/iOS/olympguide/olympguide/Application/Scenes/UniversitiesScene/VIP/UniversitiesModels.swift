@@ -25,7 +25,7 @@ enum Universities {
                 let name: String
                 let logoURL: String
                 let region: String
-                let popularity: String
+                let like: Bool
             }
             
             let universities: [UniversityViewModel]
@@ -45,10 +45,9 @@ struct UniversityModel: Codable {
     let name: String
     let logo: String
     let region: String
-    let popularity: Int
-
+    let like: Bool
     enum CodingKeys: String, CodingKey {
         case universityID = "university_id"
-        case name, logo, region, popularity
+        case name, logo, region, like
     }
 }
