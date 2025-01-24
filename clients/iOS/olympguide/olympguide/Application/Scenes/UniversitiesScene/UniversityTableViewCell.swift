@@ -114,13 +114,15 @@ class UniversityTableViewCell: UITableViewCell {
         nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
-        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
+//        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
         
         favoriteButton.pinCenterY(to: contentView)
         favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         favoriteButton.setWidth(Constants.Dimensions.favoriteButtonSize)
         favoriteButton.setHeight(Constants.Dimensions.favoriteButtonSize)
         
+        separatorLine.pinTop(to: logoImageView.bottomAnchor, 20, .grOE)
+        separatorLine.pinTop(to: nameLabel.bottomAnchor, 20, .grOE)
         separatorLine.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
@@ -138,6 +140,9 @@ class UniversityTableViewCell: UITableViewCell {
     func configure(with viewModel: Universities.Load.ViewModel.UniversityViewModel) {
         nameLabel.text = viewModel.name
         regionLabel.text = viewModel.region
+        let isFavorite = viewModel.like
+        let newImageName = isFavorite ? Constants.Images.bookmarkFill : Constants.Images.bookmark
+        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
         
         if let url = URL(string: viewModel.logoURL) {
             URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
