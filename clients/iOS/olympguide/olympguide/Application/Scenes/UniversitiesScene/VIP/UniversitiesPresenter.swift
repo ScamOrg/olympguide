@@ -17,7 +17,7 @@ final class UniversitiesPresenter: UniversitiesPresentationLogic {
                 name: university.name,
                 logoURL: university.logo,
                 region: university.region,
-                popularity: "Popularity: \(university.popularity)"
+                like: university.like
             )
         }
         
