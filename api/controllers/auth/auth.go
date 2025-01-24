@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"api/constants"
 	"api/controllers/auth/api"
 	"api/controllers/handlers"
 	"api/logic"
@@ -20,18 +19,18 @@ type LoginRequest struct {
 func SignUp(c *gin.Context) {
 	var request api.SignUpRequest
 	if err := c.ShouldBind(&request); err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
+		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
 		return
 	}
 	parsedBirthday, err := time.Parse("02.01.2006", request.Birthday)
 	if err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidBirthday)
+		handlers.HandleErrorWithCode(c, handlers.InvalidBirthday)
 		return
 	}
 
 	regionExists := logic.IsRegionExists(request.RegionID)
 	if !regionExists {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.RegionNotFound)
+		handlers.HandleErrorWithCode(c, handlers.RegionNotFound)
 		return
 	}
 
@@ -52,18 +51,18 @@ func SignUp(c *gin.Context) {
 func Login(c *gin.Context) {
 	var request LoginRequest
 	if err := c.ShouldBind(&request); err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
+		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
 		return
 	}
 
 	user, err := logic.GetUserByEmail(request.Email)
 	if err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusUnauthorized, constants.UserNotFound)
+		handlers.HandleErrorWithCode(c, handlers.UserNotFound)
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusUnauthorized, constants.InvalidPassword)
+		handlers.HandleErrorWithCode(c, handlers.InvalidPassword)
 		return
 	}
 
