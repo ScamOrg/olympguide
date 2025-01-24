@@ -19,7 +19,7 @@ var ctx = context.Background()
 func SendCode(c *gin.Context) {
 	var request api.SendRequest
 	if err := c.ShouldBind(&request); err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
+		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
 		return
 	}
 
@@ -30,7 +30,8 @@ func SendCode(c *gin.Context) {
 	}
 	if isSent {
 		details := map[string]interface{}{"time": time.Seconds()}
-		handlers.HandleErrorWithDetails(c, http.StatusBadRequest, constants.PreviousCodeNotExpired, details)
+		err := handlers.PreviousCodeNotExpired.WithAdditional(details)
+		handlers.HandleErrorWithCode(c, err)
 		return
 	}
 	code := GenerateCode()
@@ -52,7 +53,7 @@ func SendCode(c *gin.Context) {
 func VerifyCode(c *gin.Context) {
 	var request api.VerifyRequest
 	if err := c.ShouldBind(&request); err != nil {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidRequest)
+		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
 		return
 	}
 
@@ -63,7 +64,7 @@ func VerifyCode(c *gin.Context) {
 	}
 
 	if len(result) == 0 {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.CodeNotFoundOrExpired)
+		handlers.HandleErrorWithCode(c, handlers.CodeNotFoundOrExpired)
 		return
 	}
 
@@ -71,7 +72,7 @@ func VerifyCode(c *gin.Context) {
 	attempts, _ := strconv.Atoi(result["attempts"])
 
 	if attempts > constants.MaxVerifyCodeAttempts {
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.TooManyAttempts)
+		handlers.HandleErrorWithCode(c, handlers.TooManyAttempts)
 		return
 	}
 
@@ -80,7 +81,7 @@ func VerifyCode(c *gin.Context) {
 			handlers.HandleError(c, err)
 			return
 		}
-		handlers.HandleErrorWithCode(c, http.StatusBadRequest, constants.InvalidCode)
+		handlers.HandleErrorWithCode(c, handlers.InvalidCode)
 		return
 	}
 
