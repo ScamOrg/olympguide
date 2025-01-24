@@ -1,35 +1,20 @@
 package users
 
 import (
-	"api/db"
-	"api/models"
-	"errors"
+	"api/controllers/handlers"
+	"api/logic"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
 func GetRegion(c *gin.Context) {
-	userID, _ := c.Get("user_id")
-	userIDUint, _ := userID.(uint)
+	userID, _ := c.MustGet("user_id").(uint)
 
-	var user models.User
-	if err := db.DB.First(&user, userIDUint).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		}
-		return
-	}
+	regionID := logic.GetUserRegionID(userID)
+	region, err := logic.GetRegionByID(regionID)
 
-	var region models.Region
-	if err := db.DB.First(&region, user.RegionID).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Region not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		}
+	if err != nil {
+		handlers.HandleError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"region_id": region.RegionID, "name": region.Name})

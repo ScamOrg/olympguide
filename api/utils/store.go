@@ -1,4 +1,4 @@
-package db
+package utils
 
 import (
 	"api/config"
@@ -9,9 +9,9 @@ import (
 	"log"
 )
 
-func GetSessionStore(cfg *config.Config) sessions.Store {
+func CreateSessionStore(cfg *config.Config) sessions.Store {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
-	store, err := redis.NewStore(constants.MAX_SESSION_CONN, "tcp", redisAddress, "", []byte("og_secret"))
+	store, err := redis.NewStore(constants.MaxSessionConn, "tcp", redisAddress, "", []byte("og_secret"))
 	if err != nil {
 		log.Fatal(err)
 	}
