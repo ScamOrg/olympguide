@@ -54,6 +54,7 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
     
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.profileTitle
+        navigationItem.largeTitleDisplayMode = .always
     }
     
     private func configureTableView() {
@@ -68,6 +69,11 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
         
         tableView.register(ProfileButtonTableViewCell.self, forCellReuseIdentifier: ProfileButtonTableViewCell.reuseIdentifier)
         tableView.register(ProfileTableViewCell.self, forCellReuseIdentifier: ProfileTableViewCell.reuseIdentifier)
+        
+        let headerContainer = UIView()
+        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 10)
+        
+        tableView.tableHeaderView = headerContainer
     }
     
     // MARK: - UITableViewDataSource
@@ -120,10 +126,16 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
     
     // MARK: - Actions
     @objc private func registerButtonTapped() {
-        print("Зарегистрироваться нажато")
+        let enterEmailVC = EnterEmailViewController()
+        enterEmailVC.hidesBottomBarWhenPushed = true
+        
+        navigationController?.pushViewController(enterEmailVC, animated: true)
     }
     
     @objc private func loginButtonTapped() {
         print("Войти нажато")
+//        let searchVC = VerificateEmailViewController(email: "pankravvlad1@gmail.com")
+        let searchVC = PersonalDataViewController(email: "pankravvlad1@gmail.com")
+        navigationController?.pushViewController(searchVC, animated: true)
     }
 }

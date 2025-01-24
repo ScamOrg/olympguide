@@ -53,7 +53,7 @@ class NavigationBarViewController: UINavigationController {
         navigationBar.barTintColor = .white
         navigationBar.shadowImage = UIImage()
         navigationBar.prefersLargeTitles = true
-//        navigationBar.isTranslucent = false
+        //        navigationBar.isTranslucent = false
     }
     
     func setSearchButtonAction(target: AnyObject, action: Selector) {
@@ -67,8 +67,21 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
         willShow viewController: UIViewController,
         animated: Bool
     ) {
-        UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
+        guard let coordinator = navigationController.transitionCoordinator else {
             self.searchButton.alpha = (viewController is MainVC) ? 1.0 : 0.0
+            return
         }
+        guard let tabBarVC = tabBarController as? TabBarViewController else { return }
+        
+        coordinator.animateAlongsideTransition(in: navigationBar, animation: { _ in
+            self.searchButton.alpha = (viewController is MainVC) ? 1.0 : 0.0
+            tabBarVC.customTabBar.alpha = (viewController is ProfileViewController) || (viewController is MainVC) ? 1.0 : 0.0
+        }, completion: { context in
+            if context.isCancelled,
+               let fromVC = context.viewController(forKey: .from) {
+                self.searchButton.alpha = (fromVC is MainVC) ? 1.0 : 0.0
+                tabBarVC.customTabBar.alpha = (viewController is ProfileViewController) || (viewController is MainVC) ? 1.0 : 0.0
+            }
+        })
     }
 }

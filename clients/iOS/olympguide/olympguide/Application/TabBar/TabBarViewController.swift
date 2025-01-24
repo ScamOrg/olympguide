@@ -85,7 +85,7 @@ final class TabBarViewController: UITabBarController {
         )
     }()
     
-    private lazy var customTabBar: UIStackView = {
+    lazy var customTabBar: UIStackView = {
         $0.axis = .horizontal
         $0.distribution = .equalSpacing
         $0.alignment = .center
@@ -127,6 +127,7 @@ final class TabBarViewController: UITabBarController {
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
+        isTabBarHidden = true
     }
     
     // MARK: - Configuration
@@ -258,9 +259,7 @@ class BrowseViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.title = "Browse"
-        
-
-        
+            
         let searchController = UISearchController(searchResultsController: nil)
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search"

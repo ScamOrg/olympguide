@@ -10,7 +10,8 @@ import Foundation
 class UniversitiesWorker {
     
     private enum Constants {
-        static let baseURL: String = "https://bf08eca8-0612-472c-95bf-ba00f2795c75.mock.pstmn.io/universities"
+//        static let baseURL: String = "https://bf08eca8-0612-472c-95bf-ba00f2795c75.mock.pstmn.io/universities"
+        static let baseURL: String = "http://5.34.212.145:8080/universities"
         static let invalidURLMessage: String = "Invalid URL"
         static let decodingErrorMessage: String = "Decoding error"
     }
