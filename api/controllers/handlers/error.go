@@ -43,7 +43,16 @@ var KnownErrors = map[error]string{
 }
 
 func HandleErrorWithCode(c *gin.Context, appError AppError) {
-	c.JSON(appError.Code, gin.H{"message": appError.Message, "type": appError.Type})
+	response := gin.H{
+		"message": appError.Message,
+		"type":    appError.Type,
+	}
+	if appError.Details != nil {
+		for k, v := range appError.Details {
+			response[k] = v
+		}
+	}
+	c.JSON(appError.Code, response)
 }
 
 func HandleError(c *gin.Context, err error) {
