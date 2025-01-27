@@ -7,22 +7,31 @@
 
 import UIKit
 
-final class VerifyEmailViewController: UIViewController, VerifyEmailDisplayLogic {
+final class VerifyEmailViewController: UIViewController {
     var interactor: VerifyEmailBusinessLogic?
     var router: (VerifyEmailRoutingLogic & VerifyEmailDataPassing)?
     
-    private var userEmail: String = ""
+    private var userEmail: String
+    private var timer: Timer?
+    private var remainingTime: Int
     
+    private let timerLabel = UIButton()
+//    private let timerLabel = UILabel()
     private let descriptionLabel = UILabel()
     private let verifyCodeField = VerifyCodeField()
     
-    init(email: String) {
-        super.init(nibName: nil, bundle: nil)
+    init(email: String, time: Int) {
+        self.remainingTime = time
         self.userEmail = email
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        timer?.invalidate()
     }
     
     override func viewDidLoad() {
@@ -31,6 +40,7 @@ final class VerifyEmailViewController: UIViewController, VerifyEmailDisplayLogic
         title = "Подтвердите почту"
         configure()
         configureUI()
+        startTimer()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -61,11 +71,12 @@ final class VerifyEmailViewController: UIViewController, VerifyEmailDisplayLogic
         
         configureDescriptioLabel()
         configureVerifyCodeField()
+        configureTimerLabel()
     }
     
     private func configureDescriptioLabel() {
         descriptionLabel.textAlignment = .left
-        descriptionLabel.text = "Введите четырёхзначный код присланный на\n\(userEmail)"
+        descriptionLabel.text = "Введите четырёхзначный код, присланный на \(userEmail)"
         descriptionLabel.numberOfLines = 0
         descriptionLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 12) ?? .systemFont(ofSize: 12)
         
@@ -87,6 +98,65 @@ final class VerifyEmailViewController: UIViewController, VerifyEmailDisplayLogic
         }
     }
     
+    private func configureTimerLabel() {
+        view.addSubview(timerLabel)
+        
+        timerLabel.setTitle(formatTimeMessage(remainingTime), for: .normal)
+        timerLabel.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 10) ?? .systemFont(ofSize: 10)
+        timerLabel.titleLabel?.numberOfLines = 0
+        timerLabel.titleLabel?.textAlignment = .center
+//        timerLabel.titleLabel?.text = formatTimeMessage(remainingTime)
+        timerLabel.backgroundColor = .clear
+        timerLabel.setTitleColor(.black, for: .normal)
+//        timerLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 10) ?? .systemFont(ofSize: 10)
+//        timerLabel.textAlignment = .center
+//        timerLabel.text = formatTimeMessage(remainingTime)
+//        timerLabel.numberOfLines = 0
+        
+        timerLabel.pinCenterX(to: view)
+        timerLabel.pinTop(to: verifyCodeField.bottomAnchor, 42)
+        
+    }
+    
+    private func formatTimeMessage(_ time: Int) -> String {
+            // Форматирование сообщения с временем
+            let minutes = time / 60
+            let seconds = time % 60
+            let formattedTime = String(format: "%02d:%02d", minutes, seconds)
+            return "Запросить следующий код можно через\n\(formattedTime)"
+        }
+    
+    private func startTimer() {
+        // Создание и запуск таймера
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateTimer()
+        }
+    }
+    
+    private func updateTimer() {
+        // Обновление оставшегося времени и интерфейса
+        if remainingTime > 0 {
+            remainingTime -= 1
+//            timerLabel.set = formatTimeMessage(remainingTime)
+            timerLabel.setTitle(formatTimeMessage(remainingTime), for: .normal)
+//            timerLabel.titleLabel?.text = formatTimeMessage(remainingTime)
+        } else {
+            timer?.invalidate()
+            timer = nil
+            handleTimerEnd()
+        }
+    }
+    
+    private func handleTimerEnd() {
+        // Изменение цвета фона на синий по окончании времени
+//        UIView.animate(withDuration: 0.5) {
+//            self.view.backgroundColor = .blue
+//        }
+    }
+}
+
+extension VerifyEmailViewController: VerifyEmailDisplayLogic {
     func displayVerifyCodeResult(viewModel: VerifyEmailModels.VerifyCode.ViewModel) {
         if let errorMessage = viewModel.errorMessage {
             let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
