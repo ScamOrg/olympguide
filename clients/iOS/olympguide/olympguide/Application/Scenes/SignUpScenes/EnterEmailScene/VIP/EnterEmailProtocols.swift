@@ -17,6 +17,7 @@ protocol EnterEmailBusinessLogic {
 /// Храним данные, которые могут потребоваться при переходе на другой экран
 protocol EnterEmailDataStore {
     var email: String? { get set }
+    var time: Int? { get set }
 }
 
 // MARK: - Presentation Logic
