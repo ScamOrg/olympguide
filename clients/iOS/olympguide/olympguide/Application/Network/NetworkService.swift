@@ -16,10 +16,15 @@ protocol NetworkServiceProtocol {
     )
 }
 
-// Можно сделать класс, который будет знать базовый URL, общие хедеры и т.д.
 final class NetworkService: NetworkServiceProtocol {
-    private let baseURL = "http://5.34.212.145:8080"
+    private let baseURL: String
     
+    init() {
+        guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String else {
+            fatalError("BASE_URL is not set in Info.plist!")
+        }
+        self.baseURL = baseURLString
+    }
     func request(
         endpoint: String,
         method: String,
@@ -70,19 +75,13 @@ final class NetworkService: NetworkServiceProtocol {
                     
                     // Дополнительно смотрим статус-код:
                     if !(200...299).contains(httpResponse.statusCode) {
-                        // Если статус-код не 2xx, считаем, что это ошибка
-                        // Но проверяем, не является ли это нашим "previousCodeNotExpired"
                         if baseResponse.type == "PreviousCodeNotExpired", let time = baseResponse.time {
                             completion(.failure(.previousCodeNotExpired(time: time)))
                             return
                         }
-                        
-                        // Любая другая ошибка
                         completion(.failure(.serverError(message: baseResponse.message)))
                         return
                     }
-                    
-                    // Если 2xx
                     completion(.success(baseResponse))
                     
                 } catch {
