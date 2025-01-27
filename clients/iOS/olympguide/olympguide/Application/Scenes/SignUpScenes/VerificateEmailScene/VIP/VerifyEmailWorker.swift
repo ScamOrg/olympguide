@@ -50,14 +50,9 @@ final class VerifyEmailWorker: VerifyEmailWorkerLogic {
                     return
                 }
                 
-                // 3. Парсим тело ответа
-                // Предположим, если статус код != 200...299,
-                // мы считаем, что нужно смотреть, есть ли "error" в JSON
                 if !(200...299).contains(httpResponse.statusCode) {
                     if let data = data {
                         do {
-                            // Пример для простого случая, когда приходит JSON вида:
-                            // { "error": "Code not found or expired" }
                             let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
                             if let errorMessage = dict?["error"] as? String {
                                 let serverError = NSError(domain: "ServerError", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
