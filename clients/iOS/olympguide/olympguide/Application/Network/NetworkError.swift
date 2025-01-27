@@ -14,6 +14,7 @@ enum NetworkError: LocalizedError {
     case serverError(message: String?)
     case previousCodeNotExpired(time: Int)
     case unknown(message: String?)
+    case internalServerError(message: String?)
     
     var errorDescription: String? {
         switch self {
@@ -29,6 +30,8 @@ enum NetworkError: LocalizedError {
             // Если хотим, чтобы в описании писалось время
             return "Previous code is still valid"
         case .unknown(let message):
+            return message
+        case .internalServerError(message: let message):
             return message
         }
     }
