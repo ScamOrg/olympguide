@@ -21,9 +21,7 @@ final class VerifyEmailPresenter: VerifyEmailPresentationLogic {
             let errorMessage: String
             
             if let error = response.error {
-                // Если это NSError, вытащим локализованное описание
-                errorMessage = (error as NSError).userInfo[NSLocalizedDescriptionKey] as? String
-                    ?? "Произошла неизвестная ошибка"
+                errorMessage = error.localizedDescription  // <-- используем localizedDescription
             } else {
                 errorMessage = "Произошла неизвестная ошибка"
             }
