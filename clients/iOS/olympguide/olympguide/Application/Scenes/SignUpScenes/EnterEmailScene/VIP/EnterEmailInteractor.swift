@@ -9,20 +9,19 @@ import Foundation
 
 final class EnterEmailInteractor: EnterEmailBusinessLogic, EnterEmailDataStore {
     
-    // MARK: - External properties
     var presenter: EnterEmailPresentationLogic?
     var worker: EnterEmailWorkerLogic = EnterEmailWorker()
     
-    // MARK: - EnterEmailDataStore
     var email: String?
+    var time: Int?
     
-    // MARK: - EnterEmailBusinessLogic
     func sendCode(request: EnterEmailModels.SendCode.Request) {
         // 1. Сохраняем email в dataStore
         self.email = request.email
         
         // 2. Валидируем email
         guard isValidEmail(request.email) else {
+            // Показываем ошибку в презентере
             let error = NSError(domain: "InvalidEmail", code: 400, userInfo: [
                 NSLocalizedDescriptionKey: "Некорректный адрес электронной почты"
             ])
@@ -31,18 +30,43 @@ final class EnterEmailInteractor: EnterEmailBusinessLogic, EnterEmailDataStore {
             return
         }
         
-        // 3. Если email валиден — делаем запрос через worker
-        worker.sendCode(email: request.email) { [weak self] error in
+        // 3. Делаем запрос
+        worker.sendCode(email: request.email) { [weak self] result in
             guard let self = self else { return }
             
-            if let error = error {
-                // Ошибка сервера или сети
-                let response = EnterEmailModels.SendCode.Response(success: false, error: error)
+            switch result {
+            case .success(let baseResponse):
+                // Сервер вернул 2xx, значит формально всё ОК.
+                // Если хочется, можно посмотреть baseResponse.type/message
+                // Вдруг там всё же что-то, но статус 200.
+                self.time = baseResponse.time
+                let response = EnterEmailModels.SendCode.Response(
+                    success: true,
+                    error: nil
+                )
                 self.presenter?.presentSendCode(response: response)
-            } else {
-                // Успешно отправили код
-                let response = EnterEmailModels.SendCode.Response(success: true, error: nil)
-                self.presenter?.presentSendCode(response: response)
+                
+            case .failure(let networkError):
+                // Проверяем, вдруг это .previousCodeNotExpired?
+                switch networkError {
+                case .previousCodeNotExpired(let time):
+                    // В ТЗ написано, что это «не ошибка» и надо идти дальше
+                    self.time = time
+                    let response = EnterEmailModels.SendCode.Response(
+                        success: true, // можем считать это успехом
+                        error: nil
+                    )
+                    self.presenter?.presentSendCode(response: response)
+                    
+                default:
+                    // Любая другая ошибка: показываем в UI
+                    let response = EnterEmailModels.SendCode.Response(
+                        success: false,
+                        error: networkError as NSError
+                        // Можно сконвертить к NSError, если нужн
+                    )
+                    self.presenter?.presentSendCode(response: response)
+                }
             }
         }
     }
