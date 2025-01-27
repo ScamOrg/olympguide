@@ -13,25 +13,38 @@ final class VerifyEmailInteractor: VerifyEmailBusinessLogic, VerifyEmailDataStor
     var presenter: VerifyEmailPresentationLogic?
     var worker: VerifyEmailWorkerLogic = VerifyEmailWorker()
     
-    // MARK: - EnterEmailDataStore
+    // MARK: - DataStore
     var email: String?
     
-    // MARK: - EnterEmailBusinessLogic
+    // MARK: - VerifyEmailBusinessLogic
     func verifyCode(request: VerifyEmailModels.VerifyCode.Request) {
-        // 1. Сохраняем email в dataStore
+        // Сохраняем email в dataStore (если нужно для дальнейшей логики)
         self.email = request.email
-        let code = request.code
-        // 3. Если email валиден — делаем запрос через worker
-        worker.verifyCode(code: code, email: request.email) { [weak self] error in
+        
+        // Делаем запрос на верификацию
+        worker.verifyCode(code: request.code, email: request.email) { [weak self] result in
             guard let self = self else { return }
             
-            if let error = error {
-                // Ошибка сервера или сети
-                let response = VerifyEmailModels.VerifyCode.Response(success: false, error: error)
+            switch result {
+            case .success(_):
+                // Успешно (статус 2xx). Параметры в BaseServerResponse,
+                // если они нужны — можно использовать.
+                let response = VerifyEmailModels.VerifyCode.Response(
+                    success: true,
+                    error: nil
+                )
                 self.presenter?.presentVerifyCode(response: response)
-            } else {
-                // Успешно отправили код
-                let response = VerifyEmailModels.VerifyCode.Response(success: true, error: nil)
+                
+            case .failure(let networkError):
+                // Сюда приходит любая ошибка, включая .serverError, .decodingError, .unknown и т.д.
+                // Если нужно, можно «свичевать» внутри этой ветки и обрабатывать отдельные кейсы
+                // (например, previousCodeNotExpired). Но здесь пример упрощённый.
+                
+                let response = VerifyEmailModels.VerifyCode.Response(
+                    success: false,
+                    // Если презентеру важен NSError, можно сконвертировать:
+                    error: networkError as NSError
+                )
                 self.presenter?.presentVerifyCode(response: response)
             }
         }
