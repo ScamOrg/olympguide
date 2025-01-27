@@ -8,40 +8,22 @@
 import Foundation
 
 protocol EnterEmailWorkerLogic {
-    func sendCode(email: String, completion: @escaping (Error?) -> Void)
+    func sendCode(email: String, completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void)
 }
 
 final class EnterEmailWorker: EnterEmailWorkerLogic {
+    private let networkService: NetworkServiceProtocol
     
-    func sendCode(email: String, completion: @escaping (Error?) -> Void) {
-        guard let url = URL(string: "http://5.34.212.145:8080/auth/send_code") else {
-            DispatchQueue.main.async {
-                completion(NSError(domain: "InvalidURL", code: 0))
-            }
-            return
+    init(networkService: NetworkServiceProtocol = NetworkService()) {
+        self.networkService = networkService
+    }
+    
+    func sendCode(email: String, completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void) {
+        let endpoint = "/auth/send_code"
+        let body: [String: Any] = ["email": email]
+        
+        networkService.request(endpoint: endpoint, method: "POST", body: body) { result in
+            completion(result)
         }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let jsonBody: [String: Any] = ["email": email]
-        do {
-            let data = try JSONSerialization.data(withJSONObject: jsonBody, options: [])
-            request.httpBody = data
-        } catch {
-            DispatchQueue.main.async {
-                completion(error)
-            }
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                completion(error)
-            }
-        }
-        task.resume()
     }
 }
