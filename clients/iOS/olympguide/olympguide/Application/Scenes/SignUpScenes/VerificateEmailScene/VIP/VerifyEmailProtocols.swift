@@ -11,27 +11,31 @@ import UIKit
 // MARK: - Business Logic
 protocol VerifyEmailBusinessLogic {
     func verifyCode(request: VerifyEmailModels.VerifyCode.Request)
+    func resendCode(request: VerifyEmailModels.ResendCode.Request)
 }
 
 // MARK: - Data Store
 /// Храним данные, которые могут потребоваться при переходе на другой экран
 protocol VerifyEmailDataStore {
     var email: String? { get set }
+    var time: Int? { get set }
 }
 
 // MARK: - Presentation Logic
 protocol VerifyEmailPresentationLogic {
     func presentVerifyCode(response: VerifyEmailModels.VerifyCode.Response)
+    func presentResendCode(response: VerifyEmailModels.ResendCode.Response)
 }
 
 // MARK: - Display Logic
 protocol VerifyEmailDisplayLogic: AnyObject {
     func displayVerifyCodeResult(viewModel: VerifyEmailModels.VerifyCode.ViewModel)
+    func displayResendCodeResult(viewModel: VerifyEmailModels.ResendCode.ViewModel)
 }
 
 // MARK: - Routing Logic
 protocol VerifyEmailRoutingLogic {
-    func routeToInputCode()
+    func routeToPersonalData()
 }
 
 // MARK: - Data Passing
