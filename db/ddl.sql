@@ -56,11 +56,12 @@ CREATE TABLE university
 (
     university_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    logo BYTEA,
+    logo TEXT,
+    email TEXT,
+    site TEXT,
     description TEXT,
     region_id INTEGER NOT NULL,
-    popularity INTEGER NOT NULL DEFAULT 0,
-    link TEXT
+    popularity INTEGER NOT NULL DEFAULT 0
 );
 
 ALTER TABLE university ADD FOREIGN KEY (region_id) REFERENCES region (region_id) ON DELETE CASCADE;
@@ -95,11 +96,10 @@ ALTER TABLE faculty ADD FOREIGN KEY (university_id) REFERENCES university (unive
 
 CREATE TABLE IF NOT EXISTS admin_user
 (
-   user_id INTEGER PRIMARY KEY,
-   can_change_olymp BOOLEAN NOT NULL DEFAULT FALSE,
-   can_change_university BOOLEAN NOT NULL DEFAULT FALSE,
-   edit_university_id INTEGER,
-   is_founder BOOLEAN NOT NULL DEFAULT FALSE
+    user_id INTEGER PRIMARY KEY,
+    edit_university_id INTEGER,
+    is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    is_founder BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 ALTER TABLE admin_user ADD FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE;
