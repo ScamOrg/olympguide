@@ -8,7 +8,10 @@
 import Foundation
 
 protocol EnterEmailWorkerLogic {
-    func sendCode(email: String, completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void)
+    func sendCode(
+        email: String,
+        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+    )
 }
 
 final class EnterEmailWorker: EnterEmailWorkerLogic {
@@ -22,8 +25,19 @@ final class EnterEmailWorker: EnterEmailWorkerLogic {
         let endpoint = "/auth/send_code"
         let body: [String: Any] = ["email": email]
         
-        networkService.request(endpoint: endpoint, method: "POST", body: body) { result in
-            completion(result)
+        // Вызываем наш универсальный метод
+        networkService.request(
+            endpoint: endpoint,
+            method: .post,
+            queryItems: nil, // в данном случае не нужны
+            body: body
+        ) { (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let baseResponse):
+                completion(.success(baseResponse))
+            case .failure(let error):
+                completion(.failure(error))
+            }
         }
     }
 }
