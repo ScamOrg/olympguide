@@ -7,16 +7,25 @@
 
 import Foundation
 
+import Foundation
+
+enum HTTPMethod: String {
+    case get  = "GET"
+    case post = "POST"
+}
+
 protocol NetworkServiceProtocol {
-    func request(
+    func request<T: Decodable>(
         endpoint: String,
-        method: String,
+        method: HTTPMethod,
+        queryItems: [URLQueryItem]?,
         body: [String: Any]?,
-        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+        completion: @escaping (Result<T, NetworkError>) -> Void
     )
 }
 
 final class NetworkService: NetworkServiceProtocol {
+    
     private let baseURL: String
     
     init() {
@@ -25,22 +34,25 @@ final class NetworkService: NetworkServiceProtocol {
         }
         self.baseURL = baseURLString
     }
-    func request(
+    
+    func request<T: Decodable>(
         endpoint: String,
-        method: String,
+        method: HTTPMethod,
+        queryItems: [URLQueryItem]?,
         body: [String: Any]?,
-        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+        completion: @escaping (Result<T, NetworkError>) -> Void
     ) {
-        guard let url = URL(string: baseURL + endpoint) else {
+        var urlComponents = URLComponents(string: baseURL + endpoint)
+        urlComponents?.queryItems = queryItems
+        guard let url = urlComponents?.url else {
             completion(.failure(.invalidURL))
             return
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = method
+        request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // Формируем body
         if let body = body {
             do {
                 let data = try JSONSerialization.data(withJSONObject: body, options: [])
@@ -53,7 +65,6 @@ final class NetworkService: NetworkServiceProtocol {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
-                // Сначала проверяем саму сетевую ошибку
                 if let error = error {
                     completion(.failure(.unknown(message: error.localizedDescription)))
                     return
@@ -69,25 +80,24 @@ final class NetworkService: NetworkServiceProtocol {
                     return
                 }
                 
-                // Парсим JSON в BaseServerResponse
                 do {
-                    let baseResponse = try JSONDecoder().decode(BaseServerResponse.self, from: data)
-                    
-                    // Дополнительно смотрим статус-код:
+                    let decodedData = try JSONDecoder().decode(T.self, from: data)
                     if !(200...299).contains(httpResponse.statusCode) {
-                        if baseResponse.type == "PreviousCodeNotExpired", let time = baseResponse.time {
-                            completion(.failure(.previousCodeNotExpired(time: time)))
+                        if let errorData = decodedData as? BaseServerResponse {
+                            if errorData.type == "PreviousCodeNotExpired", let time = errorData.time {
+                                completion(.failure(.previousCodeNotExpired(time: time)))
+                                return
+                            }
+                            completion(.failure(.serverError(message: errorData.message)))
                             return
                         }
-                        completion(.failure(.serverError(message: baseResponse.message)))
-                        return
                     }
-                    completion(.success(baseResponse))
-                    
+                    completion(.success(decodedData))
                 } catch {
                     completion(.failure(.decodingError))
                 }
             }
-        }.resume()
+        }
+        .resume()
     }
 }
