@@ -15,20 +15,16 @@ final class VerifyEmailInteractor: VerifyEmailBusinessLogic, VerifyEmailDataStor
     
     // MARK: - DataStore
     var email: String?
-    
+    var time: Int?
     // MARK: - VerifyEmailBusinessLogic
     func verifyCode(request: VerifyEmailModels.VerifyCode.Request) {
-        // Сохраняем email в dataStore (если нужно для дальнейшей логики)
         self.email = request.email
         
-        // Делаем запрос на верификацию
         worker.verifyCode(code: request.code, email: request.email) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(_):
-                // Успешно (статус 2xx). Параметры в BaseServerResponse,
-                // если они нужны — можно использовать.
                 let response = VerifyEmailModels.VerifyCode.Response(
                     success: true,
                     error: nil
@@ -36,16 +32,48 @@ final class VerifyEmailInteractor: VerifyEmailBusinessLogic, VerifyEmailDataStor
                 self.presenter?.presentVerifyCode(response: response)
                 
             case .failure(let networkError):
-                // Сюда приходит любая ошибка, включая .serverError, .decodingError, .unknown и т.д.
-                // Если нужно, можно «свичевать» внутри этой ветки и обрабатывать отдельные кейсы
-                // (например, previousCodeNotExpired). Но здесь пример упрощённый.
-                
                 let response = VerifyEmailModels.VerifyCode.Response(
                     success: false,
-                    // Если презентеру важен NSError, можно сконвертировать:
                     error: networkError as NSError
                 )
                 self.presenter?.presentVerifyCode(response: response)
+            }
+        }
+    }
+    
+    func resendCode(request: VerifyEmailModels.ResendCode.Request) {
+        self.email = request.email
+        
+        worker.resendCode(email: request.email) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let baseResponse):
+                self.time = baseResponse.time
+                let response = VerifyEmailModels.ResendCode.Response(
+                    success: true,
+                    error: nil
+                )
+                self.presenter?.presentResendCode(response: response)
+                
+            case .failure(let networkError):
+                // Проверяем, вдруг это .previousCodeNotExpired?
+                switch networkError {
+                case .previousCodeNotExpired(let time):
+                    self.time = time
+                    let response = VerifyEmailModels.ResendCode.Response(
+                        success: true,
+                        error: nil
+                    )
+                    self.presenter?.presentResendCode(response: response)
+                    
+                default:
+                    let response = VerifyEmailModels.ResendCode.Response(
+                        success: false,
+                        error: networkError as NSError
+                    )
+                    self.presenter?.presentResendCode(response: response)
+                }
             }
         }
     }
