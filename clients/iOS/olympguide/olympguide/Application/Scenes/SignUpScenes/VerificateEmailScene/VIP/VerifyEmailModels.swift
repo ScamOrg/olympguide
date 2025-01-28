@@ -21,4 +21,19 @@ enum VerifyEmailModels {
             let errorMessage: String?
         }
     }
+    
+    enum ResendCode {
+        struct Request {
+            let email: String
+        }
+        
+        struct Response {
+            let success: Bool
+            let error: Error?
+        }
+        
+        struct ViewModel {
+            let errorMessage: String?
+        }
+    }
 }
