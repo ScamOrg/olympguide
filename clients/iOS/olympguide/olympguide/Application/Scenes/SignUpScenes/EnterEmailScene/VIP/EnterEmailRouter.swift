@@ -12,16 +12,11 @@ final class EnterEmailRouter: EnterEmailRoutingLogic, EnterEmailDataPassing {
     weak var viewController: UIViewController?
     var dataStore: EnterEmailDataStore?
 
-    func routeToInputCode() {
-        // Предположим, у нас есть класс InputCodeViewController
-        // (можете создать по аналогии свой VIP-модуль или обычный контроллер)
+    func routeToVerifyCode() {
         let email = dataStore?.email
         let time = dataStore?.time
         
         let inputCodeVC = VerifyEmailViewController(email: email ?? "", time: time ?? 180)
-        
-        // Если нужно передать email в следующий экран:
-        // inputCodeVC.email = dataStore?.email
         
         viewController?.navigationController?.pushViewController(inputCodeVC, animated: true)
     }
