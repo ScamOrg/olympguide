@@ -9,5 +9,4 @@ struct BaseServerResponse: Decodable {
     let message: String?
     let type: String?
     let time: Int?
-    // let data: [String: Any]?
 }
