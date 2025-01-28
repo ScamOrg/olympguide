@@ -173,7 +173,7 @@ extension EnterEmailViewController: EnterEmailDisplayLogic {
             emailTextField.makeRed()
             present(alert, animated: true)
         } else {
-            router?.routeToInputCode()
+            router?.routeToVerifyCode()
         }
     }
 }
