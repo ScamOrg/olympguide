@@ -12,7 +12,7 @@ final class VerifyEmailRouter: VerifyEmailRoutingLogic, VerifyEmailDataPassing {
     weak var viewController: UIViewController?
     var dataStore: VerifyEmailDataStore?
     
-    func routeToInputCode() {
+    func routeToPersonalData() {
         let email = dataStore?.email
         let inputCodeVC = PersonalDataViewController(email: email ?? "")
         
