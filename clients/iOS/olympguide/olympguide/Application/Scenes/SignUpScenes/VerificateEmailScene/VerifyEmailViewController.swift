@@ -116,6 +116,7 @@ final class VerifyEmailViewController: UIViewController {
         timerLabel.pinCenterX(to: view)
         timerLabel.pinTop(to: verifyCodeField.bottomAnchor, 42)
         
+        timerLabel.addTarget(self, action: #selector(resendCodeTapped), for: .touchUpInside)
     }
     
     private func formatTimeMessage(_ time: Int) -> String {
@@ -149,14 +150,25 @@ final class VerifyEmailViewController: UIViewController {
     }
     
     private func handleTimerEnd() {
-        // Изменение цвета фона на синий по окончании времени
-//        UIView.animate(withDuration: 0.5) {
-//            self.view.backgroundColor = .blue
-//        }
+        timerLabel.setTitle("Запроcить код снова", for: .normal)
+    }
+    
+    @objc
+    func resendCodeTapped() {
+        if timer == nil {
+            interactor?.resendCode(request: VerifyEmailModels.ResendCode.Request(email: userEmail))
+        }
     }
 }
 
 extension VerifyEmailViewController: VerifyEmailDisplayLogic {
+    func displayResendCodeResult(viewModel: VerifyEmailModels.ResendCode.ViewModel) {
+        remainingTime = 180
+        timer?.invalidate()
+        timer = nil
+        startTimer()
+    }
+    
     func displayVerifyCodeResult(viewModel: VerifyEmailModels.VerifyCode.ViewModel) {
         if let errorMessage = viewModel.errorMessage {
             let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
@@ -164,8 +176,7 @@ extension VerifyEmailViewController: VerifyEmailDisplayLogic {
             present(alert, animated: true)
             verifyCodeField.makeRed()
         } else {
-            router?.routeToInputCode()
+            router?.routeToPersonalData()
         }
     }
-    // pankratovvlad1@gmail.com
 }
