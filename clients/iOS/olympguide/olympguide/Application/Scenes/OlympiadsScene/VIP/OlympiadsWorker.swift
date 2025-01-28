@@ -9,14 +9,16 @@ import Foundation
 
 class OlympiadsWorker {
     
-    private enum Constants {
-        static let baseURL: String = "http://5.34.212.145:8080/olympiads"
-        static let invalidURLMessage: String = "Invalid URL"
-        static let decodingErrorMessage: String = "Decoding error"
+    private let networkService: NetworkServiceProtocol
+    
+    // Если нужно, чтобы базовый URL отличался от того, что в Info.plist,
+    // можно завести отдельный init(...) или сделать второй сервис
+    // либо передать в NetworkService другой baseURL при инициализации.
+    // Но для примера оставим как есть:
+    init(networkService: NetworkServiceProtocol = NetworkService()) {
+        self.networkService = networkService
     }
-    
-    private let decoder: JSONDecoder = JSONDecoder()
-    
+
     func fetchOlympiads(levels: [Int]?, sort: String?, search: String?, completion: @escaping (Result<[OlympiadModel], Error>) -> Void) {
         var queryItems = [URLQueryItem]()
         if let levels = levels {
@@ -30,33 +32,19 @@ class OlympiadsWorker {
         if let search = search {
             queryItems.append(URLQueryItem(name: "search", value: search))
         }
-
-        var urlComponents = URLComponents(string: Constants.baseURL)
-        urlComponents?.queryItems = queryItems
-        guard let url = urlComponents?.url else {
-            completion(.failure(NSError(domain: Constants.invalidURLMessage, code: 0)))
-            return
-        }
-
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            print("DataTask started")
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data", code: 0)))
-                return
-            }
-
-            do {
-                let olympiads = try self.decoder.decode([OlympiadModel].self, from: data)
+        
+        networkService.request(
+            endpoint: "/olympiads",
+            method: .get,
+            queryItems: queryItems,
+            body: nil
+        ) { (result: Result<[OlympiadModel], NetworkError>) in
+            switch result {
+            case .success(let olympiads):
                 completion(.success(olympiads))
-            } catch {
-                print("Decoding error: \(error)")
-                completion(.failure(NSError(domain: Constants.decodingErrorMessage, code: 0)))
+            case .failure(let error):
+                completion(.failure(error))
             }
-        }.resume()
+        }
     }
 }
