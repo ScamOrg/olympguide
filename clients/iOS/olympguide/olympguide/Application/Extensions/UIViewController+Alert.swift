@@ -11,7 +11,8 @@ import UIKit
 extension UIViewController {
 
     // MARK: - Show Alert Method
-    func showAlert(title: String = "Ошибка", message: String?, cancelTitle: String = "Отмена") {
+    func showAlert(title: String = "Ошибка", with message: String?, cancelTitle: String = "Отмена") {
+
         let alert = UIAlertController(title: title, message: (message ?? "Ошибка"), preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: cancelTitle, style: .cancel, handler: nil)
         alert.addAction(cancelAction)

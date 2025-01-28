@@ -14,9 +14,10 @@ protocol EnterEmailBusinessLogic {
 }
 
 // MARK: - Data Store
-/// Храним данные, которые могут потребоваться при переходе на другой экран
+// Храним данные, которые могут потребоваться при переходе на другой экран
 protocol EnterEmailDataStore {
     var email: String? { get set }
+    var time: Int? { get set }
 }
 
 // MARK: - Presentation Logic
@@ -31,7 +32,7 @@ protocol EnterEmailDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol EnterEmailRoutingLogic {
-    func routeToInputCode()
+    func routeToVerifyCode()
 }
 
 // MARK: - Data Passing

@@ -95,7 +95,8 @@ final class EnterEmailViewController: UIViewController {
     }
     
     // MARK: - Actions
-    @objc private func didTapNextButton() {
+    @objc
+    private func didTapNextButton() {
         let request = EnterEmailModels.SendCode.Request(email: currentEmail)
         interactor?.sendCode(request: request)
     }
@@ -172,7 +173,7 @@ extension EnterEmailViewController: EnterEmailDisplayLogic {
             emailTextField.makeRed()
             present(alert, animated: true)
         } else {
-            router?.routeToInputCode()
+            router?.routeToVerifyCode()
         }
     }
 }
