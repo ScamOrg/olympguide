@@ -10,15 +10,19 @@ import Foundation
 protocol VerifyEmailWorkerLogic {
     func verifyCode(code: String,
                     email: String,
-                    completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void)
+                    completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+    )
+    
+    func resendCode(
+        email: String,
+        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+    )
 }
 
 final class VerifyEmailWorker: VerifyEmailWorkerLogic {
     
     private let networkService: NetworkServiceProtocol
     
-    // Позволяем внедрять NetworkService извне (для тестов или мока).
-    // Или используем дефолтный, если ничего не передали.
     init(networkService: NetworkServiceProtocol = NetworkService()) {
         self.networkService = networkService
     }
@@ -32,9 +36,37 @@ final class VerifyEmailWorker: VerifyEmailWorkerLogic {
             "email": email
         ]
         
-        networkService.request(endpoint: endpoint, method: "POST", body: body) { result in
-            // Просто пробрасываем результат наружу
-            completion(result)
+        networkService.request(
+            endpoint: endpoint,
+            method: .post,
+            queryItems: nil,
+            body: body
+        ) { (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let baseResponse):
+                completion(.success(baseResponse))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func resendCode(email: String, completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void) {
+        let endpoint = "/auth/send_code"
+        let body: [String: Any] = ["email": email]
+        
+        networkService.request(
+            endpoint: endpoint,
+            method: .post,
+            queryItems: nil,
+            body: body
+        ) { (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let baseResponse):
+                completion(.success(baseResponse))
+            case .failure(let error):
+                completion(.failure(error))
+            }
         }
     }
 }
