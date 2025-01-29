@@ -28,7 +28,11 @@ func GetUniversities(c *gin.Context) {
 	search := c.Query("search")
 	userID, _ := c.Get("user_id")
 
-	universities, _ := logic.GetUniversities(userID, regionIDs, fromMyRegion, search)
+	universities, err := logic.GetUniversities(userID, regionIDs, fromMyRegion, search)
+	if err != nil {
+		handlers.HandleUnknownError(c, err)
+		return
+	}
 
 	response := api.CreateUniversitiesResponse(universities, userID)
 	c.JSON(http.StatusOK, response)

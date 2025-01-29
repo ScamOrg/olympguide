@@ -1,12 +1,13 @@
 package models
 
 type Olympiad struct {
-	OlympiadID  uint   `json:"olympiad_id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Level       int16  `json:"level"`
-	Profile     string `json:"profile"`
-	Link        string `json:"link"`
+	OlympiadID  uint `gorm:"primaryKey"`
+	Name        string
+	Description string
+	Level       int16
+	Profile     string
+	Link        string
+	Popularity  int
 }
 
 type Field struct {

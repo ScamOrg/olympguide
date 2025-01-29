@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS olympiad
     description TEXT,
     level SMALLINT NOT NULL,
     profile TEXT NOT NULL,
-    link TEXT
+    link TEXT,
+    popularity INTEGER NOT NULL DEFAULT 0
 );
 
 ALTER TABLE olympiad ADD CONSTRAINT olympiad_level_checker CHECK (level = ANY(ARRAY[1, 2, 3]));

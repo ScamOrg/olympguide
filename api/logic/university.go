@@ -57,12 +57,7 @@ func UpdateUniversity(university *models.University) error {
 	return nil
 }
 
-func IncrementUniversityPopularity(university *models.University) {
-	university.Popularity += 1
-	utils.DB.Save(university)
-}
-
-func DecrementUniversityPopularity(university *models.University) {
-	university.Popularity -= 1
+func ChangeUniversityPopularity(university *models.University, value int) {
+	university.Popularity += value
 	utils.DB.Save(university)
 }
