@@ -10,11 +10,11 @@ import UIKit
 final class PersonalDataViewController: UIViewController {
     private var userEmail: String = ""
     
-    let lastNameTextField: CustomSearchBar = CustomSearchBar(with: "Фамилия")
-    let nameTextField: CustomSearchBar = CustomSearchBar(with: "Имя")
-    let secondNameTextField: CustomSearchBar = CustomSearchBar(with: "Отчество")
+    let lastNameTextField: CustomInputDataField = CustomInputDataField(with: "Фамилия")
+    let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
+    let secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
-    let regionTextField: CustomSearchBar = CustomSearchBar(with: "Регион")
+    let regionTextField: CustomInputDataField = CustomInputDataField(with: "Регион")
     
     var lastName = ""
     var name = ""
@@ -78,7 +78,7 @@ final class PersonalDataViewController: UIViewController {
 }
 
 extension PersonalDataViewController : CustomTextFieldDelegate {
-    func customSearchBar(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: CustomTextField, textDidChange text: String) {
         switch searchBar.tag {
         case 1:
             name = text
