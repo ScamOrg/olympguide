@@ -40,7 +40,7 @@ private enum Constants {
 
 // MARK: - Protocol
 protocol CustomTextFieldDelegate: AnyObject {
-    func customSearchBar(_ searchBar: CustomTextField, textDidChange text: String)
+    func action(_ searchBar: CustomTextField, textDidChange text: String)
 }
 
 // MARK: - CustomTextField
@@ -218,7 +218,7 @@ class CustomTextField: UIView {
     @objc func textFieldDidChange(_ textField: UITextField) {
         let hasText = !(textField.text?.isEmpty ?? true)
         deleteButton.isHidden = !hasText
-        delegate?.customSearchBar(self, textDidChange: textField.text ?? "")
+        delegate?.action(self, textDidChange: textField.text ?? "")
         
         if !hasText && !textField.isFirstResponder {
             didTapSearchBar()
@@ -238,7 +238,6 @@ class CustomTextField: UIView {
 // MARK: - UITextFieldDelegate
 
 extension CustomTextField: UITextFieldDelegate {
-    
     func textFieldDidEndEditing(_ textField: UITextField) {
         didTapSearchBar()
     }
