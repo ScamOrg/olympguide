@@ -23,13 +23,13 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     var router: (SearchRoutingLogic & SearchDataPassing)?
     
     // MARK: - Variables
-    private let customSearchBar: CustomSearchBar
+    private let customSearchBar: CustomTextField
     private let tableView = UITableView()
     private var itemsToShow: [String] = []
     
     // MARK: - Lifecycle
     init(searchType: SearchType) {
-        customSearchBar = CustomSearchBar(with: searchType.title())
+        customSearchBar = CustomTextField(with: searchType.title())
         super.init(nibName: nil, bundle: nil)
         setup()
         router?.dataStore?.searchType = searchType
@@ -111,9 +111,9 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     }
 }
 
-// MARK: - CustomSearchBarDelegate
+// MARK: - CustomTextFieldDelegate
 extension SearchViewController: CustomTextFieldDelegate {
-    func customSearchBar(_ searchBar: CustomTextField, textDidChange text: String) {
+    func action(_ searchBar: CustomTextField, textDidChange text: String) {
         let request = Search.TextDidChange.Request(query: text)
         interactor?.textDidChange(request: request)
     }
