@@ -26,14 +26,14 @@ func GetFieldByID(c *gin.Context) {
 	idParam := c.Param("id")
 	fieldID, err := strconv.Atoi(idParam)
 	if err != nil {
-		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
+		handlers.HandleAppError(c, handlers.InvalidRequest)
 		return
 	}
 	var field models.Field
 
 	result := utils.DB.Preload("Group").First(&field, fieldID)
 	if err = result.Error; err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 	request := FieldResponse{

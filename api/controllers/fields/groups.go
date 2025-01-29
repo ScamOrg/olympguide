@@ -34,7 +34,7 @@ func GetFields(c *gin.Context) {
 	}).Find(&groups).Error
 
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 	var response []GroupResponse

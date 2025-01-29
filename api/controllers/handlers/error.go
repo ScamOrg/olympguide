@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"api/constants"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
-	"net/http"
 )
 
 type AppError struct {
@@ -14,11 +12,6 @@ type AppError struct {
 	Type    string
 	Message string
 	Details map[string]interface{}
-}
-
-func (e AppError) WithAdditional(data map[string]interface{}) AppError {
-	e.Details = data
-	return e
 }
 
 var (
@@ -38,11 +31,12 @@ var (
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
 )
 
-var KnownErrors = map[error]string{
-	gorm.ErrRecordNotFound: constants.DataNotFound,
+func (e AppError) WithAdditional(data map[string]interface{}) AppError {
+	e.Details = data
+	return e
 }
 
-func HandleErrorWithCode(c *gin.Context, appError AppError) {
+func HandleAppError(c *gin.Context, appError AppError) {
 	response := gin.H{
 		"message": appError.Message,
 		"type":    appError.Type,
@@ -55,32 +49,21 @@ func HandleErrorWithCode(c *gin.Context, appError AppError) {
 	c.JSON(appError.Code, response)
 }
 
-func HandleError(c *gin.Context, err error) {
-	var errorMessage string
-	var statusCode int
+var KnownErrors = map[error]AppError{
+	gorm.ErrRecordNotFound: DataNotFound,
+}
 
-	for knownErr, message := range KnownErrors {
+func HandleUnknownError(c *gin.Context, err error) {
+	var resultError *AppError = nil
+	for knownErr, appErr := range KnownErrors {
 		if errors.Is(err, knownErr) {
-			errorMessage = message
+			resultError = &appErr
 			break
 		}
 	}
-	if errorMessage == "" {
-		errorMessage = constants.InternalServerError
-		statusCode = http.StatusInternalServerError
+	if resultError == nil {
+		resultError = &InternalServerError
 		log.Printf("Internal Server Error: %v", err)
-	} else {
-		switch errorMessage {
-		case constants.DataNotFound:
-			statusCode = http.StatusNotFound
-		case constants.Unauthorized:
-			statusCode = http.StatusUnauthorized
-		case constants.InvalidRequest:
-			statusCode = http.StatusBadRequest
-		default:
-			statusCode = http.StatusInternalServerError
-		}
 	}
-
-	c.JSON(statusCode, gin.H{"error": errorMessage})
+	HandleAppError(c, *resultError)
 }

@@ -44,7 +44,7 @@ func GetOlympiads(c *gin.Context) {
 
 	err := query.Find(&olympiads).Error
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 

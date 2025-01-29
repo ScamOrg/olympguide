@@ -11,19 +11,19 @@ import (
 func CreateUniversity(c *gin.Context) {
 	request, err := api.BindUniversityRequest(c)
 	if err != nil {
-		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
+		handlers.HandleAppError(c, handlers.InvalidRequest)
 		return
 	}
 
 	if !logic.IsRegionExists(request.RegionID) {
-		handlers.HandleErrorWithCode(c, handlers.RegionNotFound)
+		handlers.HandleAppError(c, handlers.RegionNotFound)
 		return
 	}
 
 	university := api.CreateUniversityFromRequest(request)
 	id, err := logic.CreateUniversity(&university)
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 

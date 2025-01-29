@@ -1,16 +1,16 @@
 package middleware
 
 import (
-	"api/constants"
+	"api/controllers/handlers"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, exist := c.Get("user_id")
 		if exist == false {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": constants.Unauthorized})
+			handlers.HandleAppError(c, handlers.Unauthorized)
+			c.Abort()
 			return
 		}
 		c.Next()

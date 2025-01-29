@@ -19,30 +19,30 @@ var ctx = context.Background()
 func SendCode(c *gin.Context) {
 	var request api.SendRequest
 	if err := c.ShouldBind(&request); err != nil {
-		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
+		handlers.HandleAppError(c, handlers.InvalidRequest)
 		return
 	}
 
 	isSent, time, err := logic.IsCodeAlreadySent(ctx, request.Email)
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 	if isSent {
 		details := map[string]interface{}{"time": time.Seconds()}
 		err := handlers.PreviousCodeNotExpired.WithAdditional(details)
-		handlers.HandleErrorWithCode(c, err)
+		handlers.HandleAppError(c, err)
 		return
 	}
 	code := GenerateCode()
 
 	if err := logic.SaveCodeToRedis(ctx, request.Email, code); err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 
 	if err := logic.SendCodeViaPubSub(ctx, request.Email, code); err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 
@@ -53,18 +53,18 @@ func SendCode(c *gin.Context) {
 func VerifyCode(c *gin.Context) {
 	var request api.VerifyRequest
 	if err := c.ShouldBind(&request); err != nil {
-		handlers.HandleErrorWithCode(c, handlers.InvalidRequest)
+		handlers.HandleAppError(c, handlers.InvalidRequest)
 		return
 	}
 
 	result, err := logic.GetCodeAndAttempts(ctx, request.Email)
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 
 	if len(result) == 0 {
-		handlers.HandleErrorWithCode(c, handlers.CodeNotFoundOrExpired)
+		handlers.HandleAppError(c, handlers.CodeNotFoundOrExpired)
 		return
 	}
 
@@ -72,21 +72,21 @@ func VerifyCode(c *gin.Context) {
 	attempts, _ := strconv.Atoi(result["attempts"])
 
 	if attempts > constants.MaxVerifyCodeAttempts {
-		handlers.HandleErrorWithCode(c, handlers.TooManyAttempts)
+		handlers.HandleAppError(c, handlers.TooManyAttempts)
 		return
 	}
 
 	if storedCode != request.Code {
 		if err := logic.IncrementAttempts(ctx, request.Email); err != nil {
-			handlers.HandleError(c, err)
+			handlers.HandleUnknownError(c, err)
 			return
 		}
-		handlers.HandleErrorWithCode(c, handlers.InvalidCode)
+		handlers.HandleAppError(c, handlers.InvalidCode)
 		return
 	}
 
 	if err := logic.DeleteCode(ctx, request.Email); err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 

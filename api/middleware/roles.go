@@ -1,12 +1,11 @@
 package middleware
 
 import (
-	"api/constants"
+	"api/controllers/handlers"
 	"api/models"
 	"api/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func UniversityMiddleware() gin.HandlerFunc {
@@ -14,14 +13,16 @@ func UniversityMiddleware() gin.HandlerFunc {
 		userID, _ := c.Get("user_id")
 		var adminUser models.AdminUser
 		if err := utils.DB.Where("user_id = ?", userID).First(&adminUser).Error; err != nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": constants.UserNotAdmin})
+			handlers.HandleAppError(c, handlers.UserNotAdmin)
+			c.Abort()
 			return
 		}
 		universityID := c.Param("id")
 		canEditUniversity := universityID == fmt.Sprint(adminUser.EditUniversityID)
 
 		if !adminUser.IsAdmin && !adminUser.IsFounder && !canEditUniversity {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": constants.NotEnoughRights})
+			handlers.HandleAppError(c, handlers.NotEnoughRights)
+			c.Abort()
 			return
 		}
 		c.Next()
