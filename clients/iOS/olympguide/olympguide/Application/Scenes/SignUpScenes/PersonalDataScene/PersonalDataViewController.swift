@@ -10,6 +10,20 @@ import UIKit
 final class PersonalDataViewController: UIViewController {
     private var userEmail: String = ""
     
+    let lastNameTextField: CustomSearchBar = CustomSearchBar(with: "Фамилия")
+    let nameTextField: CustomSearchBar = CustomSearchBar(with: "Имя")
+    let secondNameTextField: CustomSearchBar = CustomSearchBar(with: "Отчество")
+    let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
+    let regionTextField: CustomSearchBar = CustomSearchBar(with: "Регион")
+    
+    var lastName = ""
+    var name = ""
+    var secondName = ""
+    var birthday = ""
+    var region = ""
+    var password = ""
+    var confirmPassword = ""
+    
     init(email: String) {
         super.init(nibName: nil, bundle: nil)
         self.userEmail = email
@@ -19,12 +33,13 @@ final class PersonalDataViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    let lastNameTextField: CustomSearchBar = CustomSearchBar(with: "Фамилия")
-    let nameTextField: CustomSearchBar = CustomSearchBar(with: "Имя")
-    let secondNameTextField: CustomSearchBar = CustomSearchBar(with: "Отчество")
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        nameTextField.tag = 1
+        secondNameTextField.tag = 2
+        lastNameTextField.tag = 3
         view.backgroundColor = .white
         title = "Личные данные"
         configureUI()
@@ -34,6 +49,7 @@ final class PersonalDataViewController: UIViewController {
         configureLastNameTextField()
         configureNameTextField()
         configureSecondNameTextField()
+        configureBirthdayPicker()
     }
     
     private func configureLastNameTextField() {
@@ -47,11 +63,33 @@ final class PersonalDataViewController: UIViewController {
         nameTextField.pinTop(to: lastNameTextField.bottomAnchor, 24)
         nameTextField.pinLeft(to: view.leadingAnchor, 20)
     }
-        
+    
     private func configureSecondNameTextField() {
         view.addSubview(secondNameTextField)
         secondNameTextField.pinTop(to: nameTextField.bottomAnchor, 24)
         secondNameTextField.pinLeft(to: view.leadingAnchor, 20)
     }
+    
+    private func configureBirthdayPicker() {
+        view.addSubview(birthdayPicker)
+        birthdayPicker.pinTop(to: secondNameTextField.bottomAnchor, 24)
+        birthdayPicker.pinLeft(to: view.leadingAnchor, 20)
+    }
+}
+
+extension PersonalDataViewController : CustomSearchBarDelegate {
+    func customSearchBar(_ searchBar: CustomSearchBar, textDidChange text: String) {
+        switch searchBar.tag {
+        case 1:
+            name = text
+        case 2:
+            secondName = text
+        case 3:
+            lastName = text
+        default:
+            break
+        }
+    }
+    
     
 }
