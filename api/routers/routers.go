@@ -83,8 +83,8 @@ func setupUserRoutes(r *gin.Engine) {
 			favouriteGroup.DELETE("/university/:id", users.UnlikeUniversity)
 
 			favouriteGroup.GET("/olympiads", olympiads.GetLikedOlympiads)
-			favouriteGroup.POST("/olympiad/:id", users.LikeUniversity)
-			favouriteGroup.DELETE("/olympiad/:id", users.UnlikeUniversity)
+			favouriteGroup.POST("/olympiad/:id", users.LikeOlympiad)
+			favouriteGroup.DELETE("/olympiad/:id", users.UnlikeOlympiad)
 		}
 	}
 }
