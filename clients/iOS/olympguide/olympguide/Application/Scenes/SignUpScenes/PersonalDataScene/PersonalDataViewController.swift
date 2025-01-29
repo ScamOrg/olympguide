@@ -77,8 +77,8 @@ final class PersonalDataViewController: UIViewController {
     }
 }
 
-extension PersonalDataViewController : CustomSearchBarDelegate {
-    func customSearchBar(_ searchBar: CustomSearchBar, textDidChange text: String) {
+extension PersonalDataViewController : CustomTextFieldDelegate {
+    func customSearchBar(_ searchBar: CustomTextField, textDidChange text: String) {
         switch searchBar.tag {
         case 1:
             name = text
