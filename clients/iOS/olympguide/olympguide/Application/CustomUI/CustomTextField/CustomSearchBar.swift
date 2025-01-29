@@ -8,7 +8,7 @@
 import UIKit
 
 // MARK: - CustomSearchBar
-final class CustomSearchBar : CustomTextField {
+final class CustomInputDataField : CustomTextField {
     private var isWrong = false
     
     func makeRed() {
