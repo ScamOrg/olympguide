@@ -112,8 +112,8 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
 }
 
 // MARK: - CustomSearchBarDelegate
-extension SearchViewController: CustomSearchBarDelegate {
-    func customSearchBar(_ searchBar: CustomSearchBar, textDidChange text: String) {
+extension SearchViewController: CustomTextFieldDelegate {
+    func customSearchBar(_ searchBar: CustomTextField, textDidChange text: String) {
         let request = Search.TextDidChange.Request(query: text)
         interactor?.textDidChange(request: request)
     }
