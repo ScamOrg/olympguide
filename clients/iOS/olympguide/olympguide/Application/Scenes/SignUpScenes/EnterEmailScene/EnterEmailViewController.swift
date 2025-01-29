@@ -102,8 +102,8 @@ final class EnterEmailViewController: UIViewController {
     }
 }
 
-extension EnterEmailViewController: CustomSearchBarDelegate {
-    func customSearchBar(_ searchBar: CustomSearchBar, textDidChange text: String) {
+extension EnterEmailViewController: CustomTextFieldDelegate {
+    func customSearchBar(_ searchBar: CustomTextField, textDidChange text: String) {
         currentEmail = text
     }
 }
