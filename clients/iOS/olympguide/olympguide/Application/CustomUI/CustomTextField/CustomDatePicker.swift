@@ -29,14 +29,18 @@ final class CustomDatePicker: CustomTextField {
         }
         datePicker.datePickerMode = .date
         datePicker.maximumDate = Date()
-        let defaultDate = Calendar.current.date(from: DateComponents(year: 2009, month: 1, day: 1))
+        
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let targetYear = currentYear - 16
+        let defaultDate = Calendar.current.date(from: DateComponents(year: targetYear, month: 1, day: 1))
         datePicker.date = defaultDate ?? Date()
+        
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
     }
     
     override func closeKeyboard() {
         dateChanged(datePicker)
-
+        
         super.closeKeyboard()
     }
     
