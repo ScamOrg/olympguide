@@ -117,7 +117,7 @@ class CustomTextField: UIView {
         let closeButton = UIBarButtonItem(title: Constants.Strings.closeButtonTitle,
                                           style: .done,
                                           target: self,
-                                          action: #selector(closeKeyboard))
+                                          action: #selector(closeInputView))
         toolbar.items = [flexSpace, closeButton]
         textField.inputAccessoryView = toolbar
     }
@@ -224,7 +224,7 @@ class CustomTextField: UIView {
         textFieldDidChange(textField)
     }
     
-    @objc func closeKeyboard() {
+    @objc func closeInputView() {
         textField.resignFirstResponder()
     }
 }
