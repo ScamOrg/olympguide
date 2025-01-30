@@ -123,8 +123,8 @@ class CustomTextField: UIView {
     }
     
     private func addTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchBar))
-        addGestureRecognizer(tapGesture)
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchBar))
+//        addGestureRecognizer(tapGesture)
     }
     
     // MARK: - Layout
@@ -197,6 +197,10 @@ class CustomTextField: UIView {
             textField.resignFirstResponder()
         }
         
+        updateAppereance()
+    }
+    
+    func updateAppereance() {
         UIView.animate(withDuration: 0.3, animations: {
             self.setNeedsLayout()
             self.layoutIfNeeded()
@@ -226,6 +230,21 @@ class CustomTextField: UIView {
     
     @objc func closeInputView() {
         textField.resignFirstResponder()
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
+        guard let touch = touches.first else { return }
+        guard !textField.isFirstResponder else { return }
+        
+        let point = touch.location(in: self)
+        
+        let buttonFrame = actionButton.convert(actionButton.bounds, to: self)
+        
+        if !buttonFrame.contains(point) {
+            didTapSearchBar()
+        }
     }
 }
 
@@ -264,5 +283,32 @@ extension CustomTextField: UITextFieldDelegate {
     
     func textFieldSendAction(for event: UIControl.Event) {
         textField.sendActions(for: event)
+    }
+    
+    func isUserInteractionEnabled(_ isUserInteractionEnabled: Bool) {
+        textField.isUserInteractionEnabled = isUserInteractionEnabled
+    }
+}
+
+extension CustomTextField {
+    func setActionButtonImage(_ image: UIImage?) {
+        actionButton.setImage(image, for: .normal)
+    }
+    
+    func setActionButtonTarget(
+        _ target: Any?,
+        _ action: Selector =  #selector(didTapDeleteButton),
+        for event: UIControl.Event = .editingChanged
+    ) {
+        actionButton.removeTarget(nil, action: nil, for: .allEvents)
+        actionButton.addTarget(target, action: action, for: event)
+    }
+    
+    func addActionButtonTarget(
+        _ target: Any?,
+        _ action: Selector =  #selector(didTapDeleteButton),
+        for event: UIControl.Event = .editingChanged
+    ) {
+        actionButton.addTarget(target, action: action, for: event)
     }
 }
