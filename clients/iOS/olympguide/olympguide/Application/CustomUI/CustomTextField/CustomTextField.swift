@@ -94,7 +94,7 @@ class CustomTextField: UIView {
         textField.alpha = 0
         textField.isHidden = true
         textField.delegate = self
-        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         addSubview(textField)
     }
     
@@ -185,12 +185,6 @@ class CustomTextField: UIView {
         }
     }
     
-    // MARK: - Public Methods
-    func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
-        textField.keyboardType = keyboardType
-        textField.textContentType = textContentType
-    }
-    
     // MARK: - Actions
     @objc func didTapSearchBar() {
         let hasText = !(textField.text?.isEmpty ?? true)
@@ -230,7 +224,7 @@ class CustomTextField: UIView {
         textFieldDidChange(textField)
     }
     
-    @objc private func closeKeyboard() {
+    @objc func closeKeyboard() {
         textField.resignFirstResponder()
     }
 }
@@ -240,5 +234,31 @@ class CustomTextField: UIView {
 extension CustomTextField: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         didTapSearchBar()
+    }
+    
+    func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
+        textField.keyboardType = keyboardType
+        textField.textContentType = textContentType
+    }
+    
+    func setTextFieldTarget(
+        _ target: Any?,
+        _ action: Selector =  #selector(textFieldDidChange),
+        for event: UIControl.Event = .editingChanged
+    ) {
+        textField.removeTarget(nil, action: nil, for: .allEvents)
+        textField.addTarget(target, action: action, for: event)
+    }
+    
+    func setTextFieldInputView(_ inputView: UIView?) {
+        textField.inputView = inputView
+    }
+    
+    func setTextFieldText(_ text: String?) {
+        textField.text = text
+    }
+    
+    func textFieldSendAction(for event: UIControl.Event) {
+        textField.sendActions(for: event)
     }
 }
