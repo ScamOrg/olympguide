@@ -7,16 +7,22 @@
 
 import UIKit
 
+protocol OptionsViewControllerDelegate: AnyObject {
+    func didSelectOption(_ options: [Int])
+    func didCancle()
+}
+
 final class OptionsViewController: UIViewController {
     
     // MARK: - Properties
-    private let items: [String]
+    weak var delegate: OptionsViewControllerDelegate?
     
+    private let items: [String]
     private let dimmingView = UIView()
     private let containerView = UIView()
     private var panGesture: UIPanGestureRecognizer!
     private var finalY: CGFloat = 0
-    
+    private var initialSelectedIndices: Set<Int> = []
     private let peak: UIView = {
         $0.backgroundColor = Constants.Colors.peakColor
         $0.layer.cornerRadius = Constants.Dimensions.peakCornerRadius
@@ -36,8 +42,8 @@ final class OptionsViewController: UIViewController {
         $0.titleLabel?.font = Constants.Fonts.buttonFont
         $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
         
-        $0.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)
-        $0.addTarget(nil, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchDragExit, .touchCancel])
+        $0.addTarget(nil, action: #selector(buttonTouchDown), for: .touchDown)
+        $0.addTarget(nil, action: #selector(cancelButtonTouchUp), for: [.touchUpInside, .touchDragExit, .touchCancel])
         
         return $0
     }(UIButton())
@@ -49,15 +55,15 @@ final class OptionsViewController: UIViewController {
         $0.titleLabel?.font = Constants.Fonts.buttonFont
         $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
         
-        $0.addTarget(nil, action: #selector(buttonTouchDown(_:)), for: .touchDown)
-        $0.addTarget(nil, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchDragExit, .touchCancel])
+        $0.addTarget(nil, action: #selector(buttonTouchDown), for: .touchDown)
+        $0.addTarget(nil, action: #selector(saveButtonTouchUp), for: [.touchUpInside, .touchDragExit, .touchCancel])
         
         return $0
     }(UIButton())
     
     private var isMultipleChoice: Bool
     var selectedIndices: Set<Int> = []
-    var selectedIndex: Int? = nil
+    lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
     
     private let tableView: UITableView = {
         let table = UITableView()
@@ -86,6 +92,17 @@ final class OptionsViewController: UIViewController {
         configureContainerView()
         configureGesture()
         configureContent()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if selectedIndices == initialSelectedIndices { return }
+        let temp = selectedIndices
+        selectedIndices.removeAll()
+        for index in temp {
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        }
+        selectedIndices = initialSelectedIndices
     }
     
     // MARK: - Funcs
@@ -152,7 +169,12 @@ final class OptionsViewController: UIViewController {
         saveButton.pinLeft(to: containerView.centerXAnchor, Constants.Dimensions.buttonSpacing)
         
         containerView.addSubview(tableView)
-        tableView.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
+        if items.count >= Constants.Numbers.rowsLimit  {
+            cinfigureSearchBar()
+            tableView.pinTop(to: searchBar.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
+        } else {
+            tableView.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
+        }
         tableView.pinLeft(to: containerView.leadingAnchor)
         tableView.pinRight(to: containerView.trailingAnchor)
         tableView.pinBottom(to: saveButton.topAnchor)
@@ -162,6 +184,13 @@ final class OptionsViewController: UIViewController {
         tableView.isScrollEnabled = items.count >= Constants.Numbers.rowsLimit
         
         containerView.backgroundColor = Constants.Colors.containerBackgroundColor
+    }
+    
+    private func cinfigureSearchBar() {
+        containerView.addSubview(searchBar)
+        
+        searchBar.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
+        searchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
     
     // MARK: - Show curtain (animation)
@@ -186,6 +215,7 @@ final class OptionsViewController: UIViewController {
         animateDismiss {
             self.dismiss(animated: false)
         }
+        delegate?.didCancle()
     }
     
     @objc
@@ -259,7 +289,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             let imageName = selectedIndices.contains(indexPath.row) ? Constants.Images.filledSquare : Constants.Images.square
             cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
         } else {
-            let imageName = selectedIndex == indexPath.row ? Constants.Images.filledCircle : Constants.Images.circle
+            let imageName = selectedIndices.contains(indexPath.row) ? Constants.Images.filledCircle : Constants.Images.circle
             cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
         }
         
@@ -280,25 +310,21 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     // MARK: - Press processing
     private func handleButtonTap(at indexPath: IndexPath) {
-        if isMultipleChoice {
-            if selectedIndices.contains(indexPath.row) {
-                selectedIndices.remove(indexPath.row)
-            } else {
-                selectedIndices.insert(indexPath.row)
-            }
+        if selectedIndices.contains(indexPath.row) {
+            selectedIndices.remove(indexPath.row)
             tableView.reloadRows(at: [indexPath], with: .automatic)
-        } else {
-            var indexPathsToReload: [IndexPath] = []
-            if let previous = selectedIndex, previous != indexPath.row {
-                indexPathsToReload.append(IndexPath(row: previous, section: 0))
+            return
+        }
+        selectedIndices.insert(indexPath.row)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+        if !isMultipleChoice {
+            for number in selectedIndices {
+                if number != indexPath.row {
+                    selectedIndices.remove(number)
+                    tableView.reloadRows(at: [IndexPath(row: number, section: 0)], with: .automatic)
+                    break
+                }
             }
-            if selectedIndex == indexPath.row {
-                selectedIndex = nil
-            } else {
-                selectedIndex = indexPath.row
-                indexPathsToReload.append(indexPath)
-            }
-            tableView.reloadRows(at: indexPathsToReload, with: .automatic)
         }
     }
     
@@ -309,15 +335,38 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
                        options: [.curveEaseIn, .allowUserInteraction]) {
             sender.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
         }
+        
     }
     
-    @objc
     private func buttonTouchUp(_ sender: UIButton) {
         UIView.animate(withDuration: 0.1,
                        delay: 0,
                        options: [.curveEaseOut, .allowUserInteraction]) {
             sender.transform = .identity
         }
+    }
+    
+    @objc func cancelButtonTouchUp(_ sender: UIButton) {
+        buttonTouchUp(sender)
+//        delegate?.didCancle()
+                
+        closeSheet()
+    }
+    
+    @objc func saveButtonTouchUp(_ sender: UIButton) {
+        buttonTouchUp(sender)
+        initialSelectedIndices = selectedIndices
+        delegate?.didSelectOption(Array(selectedIndices))
+        animateDismiss {
+            self.dismiss(animated: false)
+        }
+    }
+}
+
+extension OptionsViewController: CustomTextFieldDelegate {
+    func action(_ searchBar: CustomTextField, textDidChange text: String) {
+        let request = Search.TextDidChange.Request(query: text)
+        interactor?.textDidChange(request: request)
     }
 }
 

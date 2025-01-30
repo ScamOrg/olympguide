@@ -26,6 +26,7 @@ class CustomPasswordField: CustomTextField {
                 .touchCancel
             ]
         )
+        setTextFieldType(.default, .newPassword)
     }
     
     @MainActor required init?(coder: NSCoder) {

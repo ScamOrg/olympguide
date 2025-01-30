@@ -47,12 +47,12 @@ protocol CustomTextFieldDelegate: AnyObject {
 class CustomTextField: UIView {
     
     // MARK: - Properties
-    weak var delegate: CustomTextFieldDelegate?
+    weak var delegate: (any CustomTextFieldDelegate)?
     
     private let titleLabel = UILabel()
     private let textField = UITextField()
     private let actionButton = UIButton()
-    private var isActive = false
+    var isActive = false
     
     // MARK: - Initializers
     init(with title: String) {
@@ -187,7 +187,7 @@ class CustomTextField: UIView {
     
     // MARK: - Actions
     @objc func didTapSearchBar() {
-        let hasText = !(textField.text?.isEmpty ?? true)
+        let hasText = isEmty()
         guard !hasText else { return }
         
         isActive.toggle()
@@ -198,6 +198,10 @@ class CustomTextField: UIView {
         }
         
         updateAppereance()
+    }
+    
+    func isEmty() -> Bool {
+        !(textField.text?.isEmpty ?? true)
     }
     
     func updateAppereance() {
@@ -255,7 +259,7 @@ extension CustomTextField: UITextFieldDelegate {
         didTapSearchBar()
     }
     
-    func setTextFieldType(_ keyboardType: UIKeyboardType, _ textContentType: UITextContentType) {
+    func setTextFieldType(_ keyboardType: UIKeyboardType = .default, _ textContentType: UITextContentType) {
         textField.keyboardType = keyboardType
         textField.textContentType = textContentType
     }

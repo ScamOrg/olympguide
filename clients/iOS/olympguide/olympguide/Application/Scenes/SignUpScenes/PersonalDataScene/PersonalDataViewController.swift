@@ -14,7 +14,24 @@ final class PersonalDataViewController: UIViewController {
     let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
     let secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
-    let regionTextField: CustomInputDataField = CustomInputDataField(with: "Регион")
+    let regionTextField: RegionTextField = RegionTextField(
+        with: "Регион",
+        regions: [
+            "Москва",
+            "Санкт-Петербург",
+            "Йошкар-Ола",
+            "Екатеринбург",
+            "Петрозаводск",
+            "Казань",
+            "Новосибирск",
+            "Нижний Новгород",
+            "Омск",
+            "Ростов-на-Дону",
+            "Самара",
+            "Саратов",
+            "Ульяновск"
+        ]
+    )
     let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
     
     var lastName = ""
@@ -62,6 +79,7 @@ final class PersonalDataViewController: UIViewController {
         configureNameTextField()
         configureSecondNameTextField()
         configureBirthdayPicker()
+        configureRegionTextField()
         configurePasswordTextField()
     }
     
@@ -89,9 +107,17 @@ final class PersonalDataViewController: UIViewController {
         birthdayPicker.pinLeft(to: view.leadingAnchor, 20)
     }
     
+    private func configureRegionTextField() {
+        view.addSubview(regionTextField)
+        regionTextField.pinTop(to: birthdayPicker.bottomAnchor, 24)
+        regionTextField.pinLeft(to: view.leadingAnchor, 20)
+        
+        regionTextField.regionDelegate = self
+    }
+    
     private func configurePasswordTextField() {
         view.addSubview(passwordTextField)
-        passwordTextField.pinTop(to: birthdayPicker.bottomAnchor, 24)
+        passwordTextField.pinTop(to: regionTextField.bottomAnchor, 24)
         passwordTextField.pinLeft(to: view.leadingAnchor, 20)
     }
 }
@@ -112,5 +138,22 @@ extension PersonalDataViewController : CustomTextFieldDelegate {
         default:
             break
         }
+    }
+}
+
+extension PersonalDataViewController : RegionTextFieldDelegate {
+    func regionTextFieldDidSelect(region: String) {
+        
+    }
+    
+    func regionTextFieldWillSelect(with optionsVC: OptionsViewController) {
+        optionsVC.modalPresentationStyle = .overFullScreen
+        present(optionsVC, animated: false) {
+            optionsVC.animateShow()
+        }
+    }
+    
+    func dissmissKeyboard() {
+        view.endEditing(true)
     }
 }

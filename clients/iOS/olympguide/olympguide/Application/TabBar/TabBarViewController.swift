@@ -123,7 +123,7 @@ final class TabBarViewController: UITabBarController {
         let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
         
-        setViewControllers([MainViewController(), olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
+        setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
