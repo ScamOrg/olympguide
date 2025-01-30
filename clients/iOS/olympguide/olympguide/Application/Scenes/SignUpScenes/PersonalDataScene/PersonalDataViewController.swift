@@ -15,7 +15,7 @@ final class PersonalDataViewController: UIViewController {
     let secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
     let regionTextField: CustomInputDataField = CustomInputDataField(with: "Регион")
-    let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайтк пароль")
+    let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
     
     var lastName = ""
     var name = ""
