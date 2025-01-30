@@ -15,6 +15,7 @@ final class PersonalDataViewController: UIViewController {
     let secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
     let regionTextField: CustomInputDataField = CustomInputDataField(with: "Регион")
+    let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайтк пароль")
     
     var lastName = ""
     var name = ""
@@ -61,6 +62,7 @@ final class PersonalDataViewController: UIViewController {
         configureNameTextField()
         configureSecondNameTextField()
         configureBirthdayPicker()
+        configurePasswordTextField()
     }
     
     private func configureLastNameTextField() {
@@ -85,6 +87,12 @@ final class PersonalDataViewController: UIViewController {
         view.addSubview(birthdayPicker)
         birthdayPicker.pinTop(to: secondNameTextField.bottomAnchor, 24)
         birthdayPicker.pinLeft(to: view.leadingAnchor, 20)
+    }
+    
+    private func configurePasswordTextField() {
+        view.addSubview(passwordTextField)
+        passwordTextField.pinTop(to: birthdayPicker.bottomAnchor, 24)
+        passwordTextField.pinLeft(to: view.leadingAnchor, 20)
     }
 }
 

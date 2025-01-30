@@ -51,7 +51,7 @@ class CustomTextField: UIView {
     
     private let titleLabel = UILabel()
     private let textField = UITextField()
-    private let deleteButton = UIButton()
+    private let actionButton = UIButton()
     private var isActive = false
     
     // MARK: - Initializers
@@ -99,14 +99,14 @@ class CustomTextField: UIView {
     }
     
     private func configureDeleteButton() {
-        deleteButton.tintColor = .black
-        deleteButton.contentHorizontalAlignment = .fill
-        deleteButton.contentVerticalAlignment = .fill
-        deleteButton.imageView?.contentMode = .scaleAspectFit
-        deleteButton.setImage(UIImage(systemName: Constants.Strings.deleteButtonImage), for: .normal)
-        deleteButton.addTarget(self, action: #selector(didTapDeleteButton), for: .touchUpInside)
-        deleteButton.isHidden = true
-        addSubview(deleteButton)
+        actionButton.tintColor = .black
+        actionButton.contentHorizontalAlignment = .fill
+        actionButton.contentVerticalAlignment = .fill
+        actionButton.imageView?.contentMode = .scaleAspectFit
+        actionButton.setImage(UIImage(systemName: Constants.Strings.deleteButtonImage), for: .normal)
+        actionButton.addTarget(self, action: #selector(didTapDeleteButton), for: .touchUpInside)
+        actionButton.isHidden = true
+        addSubview(actionButton)
     }
     
     private func addCloseButtonOnKeyboard() {
@@ -162,7 +162,7 @@ class CustomTextField: UIView {
                 height: Constants.Dimensions.textFieldHeight
             )
             
-            deleteButton.frame = CGRect(
+            actionButton.frame = CGRect(
                 x: textField.frame.maxX + 1,
                 y: textField.frame.minY,
                 width: Constants.Dimensions.textFieldHeight,
@@ -170,7 +170,7 @@ class CustomTextField: UIView {
             )
         } else {
             textField.frame = .zero
-            deleteButton.frame = .zero
+            actionButton.frame = .zero
         }
     }
     
@@ -211,7 +211,7 @@ class CustomTextField: UIView {
     
     @objc func textFieldDidChange(_ textField: UITextField) {
         let hasText = !(textField.text?.isEmpty ?? true)
-        deleteButton.isHidden = !hasText
+        actionButton.isHidden = !hasText
         delegate?.action(self, textDidChange: textField.text ?? "")
         
         if !hasText && !textField.isFirstResponder {
@@ -256,6 +256,10 @@ extension CustomTextField: UITextFieldDelegate {
     
     func setTextFieldText(_ text: String?) {
         textField.text = text
+    }
+    
+    func setSecureTextEntry(_ isSecureTextEntry: Bool) {
+        textField.isSecureTextEntry = isSecureTextEntry
     }
     
     func textFieldSendAction(for event: UIControl.Event) {
