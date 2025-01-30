@@ -40,9 +40,20 @@ final class PersonalDataViewController: UIViewController {
         nameTextField.tag = 1
         secondNameTextField.tag = 2
         lastNameTextField.tag = 3
+        birthdayPicker.tag = 4
+        regionTextField.tag = 5
+        
         view.backgroundColor = .white
         title = "Личные данные"
         configureUI()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if self.isMovingFromParent {
+            navigationController?.popToRootViewController(animated: true)
+        }
     }
     
     private func configureUI() {
