@@ -97,10 +97,12 @@ extension PersonalDataViewController : CustomTextFieldDelegate {
             secondName = text
         case 3:
             lastName = text
+        case 4:
+            birthday = text
+        case 5:
+            region = text
         default:
             break
         }
     }
-    
-    
 }
