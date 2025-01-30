@@ -38,10 +38,10 @@ final class CustomDatePicker: CustomTextField {
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
     }
     
-    override func closeKeyboard() {
+    override func closeInputView() {
         dateChanged(datePicker)
         
-        super.closeKeyboard()
+        super.closeInputView()
     }
     
     @objc private func dateChanged(_ sender: UIDatePicker) {
