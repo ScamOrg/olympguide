@@ -123,7 +123,7 @@ final class TabBarViewController: UITabBarController {
         let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
         
-        setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
+        setViewControllers([MainViewController(), olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
@@ -166,159 +166,36 @@ final class TabBarViewController: UITabBarController {
 }
 
 
-class ViewController: UIViewController {
-    
-    
-    private let showSheetButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Поиск", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
-        button.setTitleColor(.systemBlue, for: .normal)
-        return button
+class MainViewController: UIViewController {
+
+    private let textField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Нажмите для кастомного ввода"
+        tf.borderStyle = .roundedRect
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
     }()
-    let fsView = FilterSortView(sortingOptions: ["Популярность", "Первый уровень"], filteringOptions: ["Уровень", "Профиль", "Уровень", "Профиль"])
+
+    // Создадим экземпляр вашего OptionsViewController
+    private let optionsVC = OptionsViewController(
+        items: ["Option 1", "Option 2", "Option 3"],
+        title: "Выберите опцию",
+        isMultipleChoice: false
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(fsView)
-        view.backgroundColor = .white
-        setupButton()
-        fsView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
-        fsView.pinLeft(to: view.leadingAnchor)
-        fsView.pinRight(to: view.trailingAnchor)
 
-        let backItem = UIBarButtonItem(title: "ВУЗы", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
-    }
-    
-    private func setupButton() {
-        view.addSubview(showSheetButton)
-        showSheetButton.translatesAutoresizingMaskIntoConstraints = false
-        
+        // Добавляем textField на экран
+        view.backgroundColor = .white
+        view.addSubview(textField)
+
         NSLayoutConstraint.activate([
-            showSheetButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            showSheetButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            textField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            textField.widthAnchor.constraint(equalToConstant: 200)
         ])
         
-        showSheetButton.addTarget(self, action: #selector(showSearchForUniversities), for: .touchUpInside)
-    }
-    
-    @objc
-    func showSearchForUniversities() {
-        let searchVC = SearchViewController(searchType: .universities)
-        navigationController?.pushViewController(searchVC, animated: true)
-    }
-    
-    @objc
-    private func showBottomSheetButtonTapped() {
-        let items = ["I уровень", "II уровень", "III уровень"]
-        let sheetVC = OptionsViewController(items: items, title: "Уровень олимпиады", isMultipleChoice: true)
-        sheetVC.modalPresentationStyle = .overFullScreen
-        present(sheetVC, animated: false) {
-            sheetVC.animateShow()
-        }
-    }
-}
-
-class MainViewController: UIViewController {
-    
-    //
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Настройка NavigationController для больших заголовков
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.title = "Browse"
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        if offset > 20 {
-            navigationController?.navigationBar.prefersLargeTitles = false
-        } else {
-            navigationController?.navigationBar.prefersLargeTitles = true
-        }
-    }
-    
-    @objc func showNextScreen() {
-        let nextVC = ViewController()
-        navigationController?.pushViewController(nextVC, animated: true)
-    }
-}
-
-
-import UIKit
-
-class BrowseViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
-    let tableView = UITableView()
-    let refreshControl = UIRefreshControl()
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-//        navigationItem.largeTitleDisplayMode = .automatic
-
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.title = "Browse"
-            
-        let searchController = UISearchController(searchResultsController: nil)
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search"
-        navigationItem.searchController = searchController
-        definesPresentationContext = true
-        
-        setupTableView()
-        setupRefreshControl()
-    }
-    
-    func setupTableView() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.frame = view.bounds
-        tableView.refreshControl = refreshControl
-        view.addSubview(tableView)
-    }
-    
-    func setupRefreshControl() {
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        refreshControl.tintColor = .systemBlue
-    }
-    
-    @objc func refreshData() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            self?.refreshControl.endRefreshing()
-        }
-    }
-        
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.textLabel?.text = "Item \(indexPath.row + 1)"
-        cell.accessoryType = .disclosureIndicator
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let detailVC = DetailViewController()
-        detailVC.title = "Item \(indexPath.row + 1)"
-        navigationController?.pushViewController(detailVC, animated: true)
-    }
-}
-
-class DetailViewController: UIViewController {
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        navigationItem.largeTitleDisplayMode = .never
-
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-//        navigationController?.navigationBar.prefersLargeTitles = false
+        textField.isUserInteractionEnabled = false
     }
 }
