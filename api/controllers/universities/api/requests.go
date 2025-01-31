@@ -22,7 +22,7 @@ func BindUniversityRequest(c *gin.Context) (UniversityRequest, error) {
 	return request, nil
 }
 
-func CreateUniversityFromRequest(request UniversityRequest) models.University {
+func CreateUniversityFromRequest(request *UniversityRequest) models.University {
 	return models.University{
 		Name:        request.Name,
 		Logo:        request.Logo,
@@ -33,7 +33,7 @@ func CreateUniversityFromRequest(request UniversityRequest) models.University {
 	}
 }
 
-func UpdateUniversityFromRequest(university *models.University, request UniversityRequest) {
+func UpdateUniversityFromRequest(university *models.University, request *UniversityRequest) {
 	university.Name = request.Name
 	university.Logo = request.Logo
 	university.Email = request.Email
