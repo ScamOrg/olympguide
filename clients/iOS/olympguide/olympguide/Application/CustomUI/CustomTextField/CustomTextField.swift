@@ -227,7 +227,7 @@ class CustomTextField: UIView {
         }
     }
     
-    @objc private func didTapDeleteButton() {
+    @objc func didTapDeleteButton() {
         textField.text = ""
         textFieldDidChange(textField)
     }
