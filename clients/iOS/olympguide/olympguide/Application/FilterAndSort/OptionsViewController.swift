@@ -17,67 +17,81 @@ final class OptionsViewController: UIViewController {
     // MARK: - Properties
     weak var delegate: OptionsViewControllerDelegate?
     
-    private let items: [String]
+    var interactor: (OptionsDataStore & OptionsBusinessLogic)?
+    
+    private var items: [OptionModel] = []
+    private var currentItems: [OptionModel] = []
+    
     private let dimmingView = UIView()
     private let containerView = UIView()
     private var panGesture: UIPanGestureRecognizer!
     private var finalY: CGFloat = 0
     private var initialSelectedIndices: Set<Int> = []
-    private let peak: UIView = {
-        $0.backgroundColor = Constants.Colors.peakColor
-        $0.layer.cornerRadius = Constants.Dimensions.peakCornerRadius
-        return $0
-    }(UIView())
+    var selectedIndices: Set<Int> = []
+    private var currentSelectedIndices: Set<Int> = []
     
-    private let titleLabel: UILabel = {
-        $0.font = Constants.Fonts.titleLabelFont
-        $0.textColor = Constants.Colors.titleLabelTextColor
-        return $0
-    }(UILabel())
+    private var currentToAll: [Int: Int] = [:]
+    private var allToCurrent: [Int: Int] = [:]
     
-    private let cancelButton: UIButton = {
-        $0.setTitle(Constants.Strings.cancel, for: .normal)
-        $0.setTitleColor(Constants.Colors.cancelButtonTextColor, for: .normal)
-        $0.backgroundColor = Constants.Colors.cancelButtonBackgroundColor
-        $0.titleLabel?.font = Constants.Fonts.buttonFont
-        $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
-        
-        $0.addTarget(nil, action: #selector(buttonTouchDown), for: .touchDown)
-        $0.addTarget(nil, action: #selector(cancelButtonTouchUp), for: [.touchUpInside, .touchDragExit, .touchCancel])
-        
-        return $0
-    }(UIButton())
+    private let peak: UIView = UIView()
     
-    private let saveButton: UIButton = {
-        $0.setTitle(Constants.Strings.apply, for: .normal)
-        $0.setTitleColor(Constants.Colors.saveButtonTextColor, for: .normal)
-        $0.backgroundColor = Constants.Colors.saveButtonBackgroundColor
-        $0.titleLabel?.font = Constants.Fonts.buttonFont
-        $0.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
-        
-        $0.addTarget(nil, action: #selector(buttonTouchDown), for: .touchDown)
-        $0.addTarget(nil, action: #selector(saveButtonTouchUp), for: [.touchUpInside, .touchDragExit, .touchCancel])
-        
-        return $0
-    }(UIButton())
+    private let titleLabel: UILabel = UILabel()
+    
+    private let cancelButton: UIButton = UIButton()
+    private let saveButton: UIButton = UIButton()
+    
+    
     
     private var isMultipleChoice: Bool
-    var selectedIndices: Set<Int> = []
     lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
     
-    private let tableView: UITableView = {
-        let table = UITableView()
-        table.translatesAutoresizingMaskIntoConstraints = false
-        table.register(OptionsTableViewCell.self, forCellReuseIdentifier: OptionsTableViewCell.identifier)
-        table.separatorStyle = .none
-        return table
-    }()
+    private let tableView: UITableView = UITableView()
     
     init(items: [String], title: String, isMultipleChoice: Bool) {
-        self.items = items
+        for (index, value) in items.enumerated() {
+            let option = OptionModel(
+                title: value,
+                realIndex: index,
+                currentIndex: index
+            )
+            self.items.append(option)
+        }
         self.titleLabel.text = title
         self.isMultipleChoice = isMultipleChoice
         super.init(nibName: nil, bundle: nil)
+        self.currentItems = self.items
+        self.currentSelectedIndices = self.selectedIndices
+    }
+    
+    init(items: [String], title: String, isMultipleChoice: Bool, selectedIndices: Set<Int>) {
+        for (index, value) in items.enumerated() {
+            let option = OptionModel(
+                title: value,
+                realIndex: index,
+                currentIndex: index
+            )
+            self.items.append(option)
+        }
+        
+        self.titleLabel.text = title
+        self.isMultipleChoice = isMultipleChoice
+        
+        super.init(nibName: nil, bundle: nil)
+        
+        self.currentItems = self.items
+        self.selectedIndices = selectedIndices
+        self.currentSelectedIndices = self.selectedIndices
+        
+        for index in selectedIndices {
+            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        }
+        
+        for i in 0..<items.count {
+            currentToAll[i] = i
+            allToCurrent[i] = i
+        }
+        
+        setup()
     }
     
     required init?(coder: NSCoder) {
@@ -88,24 +102,37 @@ final class OptionsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.modalPresentationStyle = .overFullScreen
+        configureGesture()
+        configureUI()
+    }
+    
+    func setup() {
+        let viewController = self
+        let interactor = OptionsViewInteractor()
+        let presenter = OptionViewPresenter()
+        
+        viewController.interactor = interactor
+        interactor.presenter = presenter
+        presenter.viewController = viewController
+        interactor.items = items
+    }
+        
+    // MARK: - Pan gesture setting (to pull the curtain down)
+    private func configureGesture() {
+        panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
+        containerView.addGestureRecognizer(panGesture)
+    }
+    
+    private func configureUI() {
         configureDimmingView()
         configureContainerView()
-        configureGesture()
-        configureContent()
+        configurePeak()
+        configureTitleLabel()
+        configureCancelButton()
+        configureSaveButton()
+        configureTableView()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        if selectedIndices == initialSelectedIndices { return }
-        let temp = selectedIndices
-        selectedIndices.removeAll()
-        for index in temp {
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        }
-        selectedIndices = initialSelectedIndices
-    }
-    
-    // MARK: - Funcs
     // MARK: - Setting a semi-transparent background
     private func configureDimmingView() {
         dimmingView.frame = view.bounds
@@ -134,6 +161,11 @@ final class OptionsViewController: UIViewController {
         view.addSubview(containerView)
         
         finalY = view.bounds.height - sheetHeight
+    }
+    
+    private func configurePeak() {
+        peak.backgroundColor = Constants.Colors.peakColor
+        peak.layer.cornerRadius = Constants.Dimensions.peakCornerRadius
         
         containerView.addSubview(peak)
         peak.frame = CGRect(
@@ -142,31 +174,54 @@ final class OptionsViewController: UIViewController {
             width: Constants.Dimensions.peakWidth,
             height: Constants.Dimensions.peakHeight
         )
+    }
+    
+    private func configureTitleLabel() {
+        titleLabel.font = Constants.Fonts.titleLabelFont
+        titleLabel.textColor = Constants.Colors.titleLabelTextColor
         
         containerView.addSubview(titleLabel)
         titleLabel.pinTop(to: containerView.topAnchor, Constants.Dimensions.titleLabelTopMargin)
         titleLabel.pinLeft(to: containerView.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
     
-    // MARK: - Pan gesture setting (to pull the curtain down)
-    private func configureGesture() {
-        panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-        containerView.addGestureRecognizer(panGesture)
-    }
-    
-    // MARK: - Content configuration
-    private func configureContent() {
+    private func configureCancelButton() {
+        cancelButton.setTitle(Constants.Strings.cancel, for: .normal)
+        cancelButton.setTitleColor(Constants.Colors.cancelButtonTextColor, for: .normal)
+        cancelButton.backgroundColor = Constants.Colors.cancelButtonBackgroundColor
+        cancelButton.titleLabel?.font = Constants.Fonts.buttonFont
+        cancelButton.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
+        
+        cancelButton.addTarget(nil, action: #selector(buttonTouchDown), for: .touchDown)
+        cancelButton.addTarget(nil, action: #selector(cancelButtonTouchUp), for: [.touchUpInside, .touchDragExit, .touchCancel])
+        
         containerView.addSubview(cancelButton)
         cancelButton.pinBottom(to: containerView.bottomAnchor, Constants.Dimensions.buttonBottomMargin)
         cancelButton.setHeight(Constants.Dimensions.buttonHeight)
         cancelButton.pinLeft(to: containerView.leadingAnchor, Constants.Dimensions.buttonLeftRightMargin)
         cancelButton.pinRight(to: containerView.centerXAnchor, Constants.Dimensions.buttonSpacing)
+    }
+    
+    private func configureSaveButton() {
+        saveButton.setTitle(Constants.Strings.apply, for: .normal)
+        saveButton.setTitleColor(Constants.Colors.saveButtonTextColor, for: .normal)
+        saveButton.backgroundColor = Constants.Colors.saveButtonBackgroundColor
+        saveButton.titleLabel?.font = Constants.Fonts.buttonFont
+        saveButton.layer.cornerRadius = Constants.Dimensions.buttonCornerRadius
+        
+        saveButton.addTarget(nil, action: #selector(buttonTouchDown), for: .touchDown)
+        saveButton.addTarget(nil, action: #selector(saveButtonTouchUp), for: [.touchUpInside, .touchDragExit, .touchCancel])
         
         containerView.addSubview(saveButton)
         saveButton.pinBottom(to: containerView.bottomAnchor, Constants.Dimensions.buttonBottomMargin)
         saveButton.setHeight(Constants.Dimensions.buttonHeight)
         saveButton.pinRight(to: containerView.trailingAnchor, Constants.Dimensions.buttonLeftRightMargin)
         saveButton.pinLeft(to: containerView.centerXAnchor, Constants.Dimensions.buttonSpacing)
+    }
+    
+    private func configureTableView() {
+        tableView.register(OptionsTableViewCell.self, forCellReuseIdentifier: OptionsTableViewCell.identifier)
+        tableView.separatorStyle = .none
         
         containerView.addSubview(tableView)
         if items.count >= Constants.Numbers.rowsLimit  {
@@ -189,6 +244,7 @@ final class OptionsViewController: UIViewController {
     private func cinfigureSearchBar() {
         containerView.addSubview(searchBar)
         
+        searchBar.delegate = self
         searchBar.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
         searchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.titleLabelLeftMargin)
     }
@@ -268,12 +324,12 @@ final class OptionsViewController: UIViewController {
 extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     private func calculateTableHeight() -> CGFloat {
-        return CGFloat(min(items.count, Constants.Numbers.rowsLimit)) * Constants.Dimensions.rowHeight
+        return CGFloat(min(currentItems.count, Constants.Numbers.rowsLimit)) * Constants.Dimensions.rowHeight
     }
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        return currentItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -282,14 +338,14 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             return UITableViewCell()
         }
         
-        let item = items[indexPath.row]
-        cell.titleLabel.text = item
+        let item = currentItems[indexPath.row]
+        cell.titleLabel.text = item.title
         
         if isMultipleChoice {
-            let imageName = selectedIndices.contains(indexPath.row) ? Constants.Images.filledSquare : Constants.Images.square
+            let imageName = currentSelectedIndices.contains(indexPath.row) ? Constants.Images.filledSquare : Constants.Images.square
             cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
         } else {
-            let imageName = selectedIndices.contains(indexPath.row) ? Constants.Images.filledCircle : Constants.Images.circle
+            let imageName = currentSelectedIndices.contains(indexPath.row) ? Constants.Images.filledCircle : Constants.Images.circle
             cell.actionButton.setImage(UIImage(systemName: imageName), for: .normal)
         }
         
@@ -297,7 +353,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             self?.handleButtonTap(at: indexPath)
         }
         
-        let isLastCell = indexPath.row == items.count - 1
+        let isLastCell = indexPath.row == currentItems.count - 1
         cell.hideSeparator(isLastCell)
         
         return cell
@@ -310,18 +366,28 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     // MARK: - Press processing
     private func handleButtonTap(at indexPath: IndexPath) {
-        if selectedIndices.contains(indexPath.row) {
-            selectedIndices.remove(indexPath.row)
+        if currentSelectedIndices.contains(indexPath.row) {
+            currentSelectedIndices.remove(indexPath.row)
             tableView.reloadRows(at: [indexPath], with: .automatic)
+            if let originIndex = currentToAll[indexPath.row] {
+                selectedIndices.remove(originIndex)
+            }
             return
         }
-        selectedIndices.insert(indexPath.row)
+        currentSelectedIndices.insert(indexPath.row)
+        if let originIndex = currentToAll[indexPath.row] {
+            selectedIndices.insert(originIndex)
+        }
+        
         tableView.reloadRows(at: [indexPath], with: .automatic)
         if !isMultipleChoice {
             for number in selectedIndices {
-                if number != indexPath.row {
+                if allToCurrent[number] != indexPath.row {
+                    if let currentIndex = allToCurrent[number] {
+                        currentSelectedIndices.remove(currentIndex)
+                        tableView.reloadRows(at: [IndexPath(row: currentIndex, section: 0)], with: .automatic)
+                    }
                     selectedIndices.remove(number)
-                    tableView.reloadRows(at: [IndexPath(row: number, section: 0)], with: .automatic)
                     break
                 }
             }
@@ -348,8 +414,8 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     @objc func cancelButtonTouchUp(_ sender: UIButton) {
         buttonTouchUp(sender)
-//        delegate?.didCancle()
-                
+        //        delegate?.didCancle()
+        
         closeSheet()
     }
     
@@ -365,8 +431,27 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension OptionsViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
-        let request = Search.TextDidChange.Request(query: text)
+        let request = Options.TextDidChange.Request(query: text)
         interactor?.textDidChange(request: request)
+    }
+}
+
+extension OptionsViewController: OptionsDisplayLogic {
+    func displayTextDidChange(viewModel: Options.TextDidChange.ViewModel) {
+        currentToAll.removeAll()
+        allToCurrent.removeAll()
+        currentSelectedIndices.removeAll()
+        for item in viewModel.options {
+            currentToAll[item.currentIndex] = item.realIndex
+            allToCurrent[item.realIndex] = item.currentIndex
+        }
+        for index in selectedIndices {
+            if let currentIndex = allToCurrent[index] {
+                currentSelectedIndices.insert(currentIndex)
+            }
+        }
+        currentItems = viewModel.options
+        tableView.reloadData()
     }
 }
 
