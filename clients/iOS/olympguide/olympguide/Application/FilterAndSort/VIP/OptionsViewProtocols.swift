@@ -13,15 +13,15 @@ protocol OptionsDataStore {
 
 // MARK: - ViewController → Interactor
 protocol OptionsBusinessLogic {
-    func textDidChange(request: Search.TextDidChange.Request)
+    func textDidChange(request: Options.TextDidChange.Request)
 }
 
 // MARK: - Presenter → ViewController
 protocol OptionsDisplayLogic: AnyObject {
-    func displayTextDidChange(viewModel: Search.TextDidChange.ViewModel)
+    func displayTextDidChange(viewModel: Options.TextDidChange.ViewModel)
 }
 
 // MARK: - Interactor → Presenter
 protocol OptionsPresentationLogic {
-    func presentTextDidChange(response: Search.TextDidChange.Response)
+    func presentTextDidChange(response: Options.TextDidChange.Response)
 }
