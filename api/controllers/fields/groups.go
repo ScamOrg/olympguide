@@ -22,3 +22,16 @@ func GetFields(c *gin.Context) {
 	response := api.CreateGroupResponse(groups, userID)
 	c.JSON(http.StatusOK, response)
 }
+
+func GetLikedFields(c *gin.Context) {
+	userID, _ := c.MustGet("user_id").(uint)
+
+	fields, err := logic.GetLikedFields(userID)
+	if err != nil {
+		handlers.HandleUnknownError(c, err)
+		return
+	}
+
+	response := api.CreateLikedGroupResponse(fields)
+	c.JSON(http.StatusOK, response)
+}

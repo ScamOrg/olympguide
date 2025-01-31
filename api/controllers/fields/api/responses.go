@@ -59,6 +59,32 @@ func CreateGroupResponse(groups []models.GroupField, userID any) []GroupResponse
 	return response
 }
 
+func CreateLikedGroupResponse(groups []models.GroupField) []GroupResponse {
+	var response []GroupResponse
+
+	for _, group := range groups {
+		if len(group.Fields) == 0 {
+			continue
+		}
+		var fields []FieldShortInfo
+		for _, field := range group.Fields {
+			fields = append(fields, FieldShortInfo{
+				FieldID: field.FieldID,
+				Name:    field.Name,
+				Code:    field.Code,
+				Degree:  field.Degree,
+				Like:    true,
+			})
+		}
+		response = append(response, GroupResponse{
+			Name:   group.Name,
+			Code:   group.Code,
+			Fields: fields,
+		})
+	}
+	return response
+}
+
 func CreateFieldResponse(field *models.Field, userID any) FieldResponse {
 	like := logic.IsUserLikedField(userID, field.FieldID)
 	return FieldResponse{
