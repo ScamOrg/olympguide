@@ -16,23 +16,20 @@ protocol RegionTextFieldDelegate: AnyObject {
 final class RegionTextField: CustomTextField {
     weak var regionDelegate: RegionTextFieldDelegate?
     var regions: [String] = []
-    var optionVC: OptionsViewController
+    var selectedIndecies: Set<Int> = []
     init(with title: String, regions: [String]) {
-        optionVC = OptionsViewController(items: regions,
-                                         title: "Регион",
-                                         isMultipleChoice: false)
         self.regions = regions
         super.init(with: title)
-        optionVC.delegate = self
         isUserInteractionEnabled(false)
     }
     
     @MainActor required init?(coder: NSCoder) {
-        optionVC = OptionsViewController(items: regions,
-                                         title: "Сортировка",
-                                         isMultipleChoice: false)
         super.init(coder: coder)
-        optionVC.delegate = self
+    }
+    
+    override func didTapDeleteButton() {
+        super.didTapDeleteButton()
+        selectedIndecies = []
     }
     
     override func didTapSearchBar() {
@@ -48,6 +45,13 @@ final class RegionTextField: CustomTextField {
     }
     
     private func presentOptions() {
+        let optionVC = OptionsViewController(
+            items: regions,
+            title: "Регион",
+            isMultipleChoice: false,
+            selectedIndices: selectedIndecies
+        )
+        optionVC.delegate = self
         regionDelegate?.regionTextFieldWillSelect(with: optionVC)
     }
     
@@ -55,8 +59,12 @@ final class RegionTextField: CustomTextField {
 
 extension RegionTextField : OptionsViewControllerDelegate {
     func didSelectOption(_ options: [Int]) {
-        guard !options.isEmpty else { return }
-        setTextFieldText(regions[options[0]])
+        selectedIndecies = Set(options)
+        if options.isEmpty {
+            setTextFieldText("")
+        } else {
+            setTextFieldText(regions[options[0]])
+        }
         textFieldSendAction(for: .editingChanged)
     }
     
