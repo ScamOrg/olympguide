@@ -123,7 +123,7 @@ final class TabBarViewController: UITabBarController {
         let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
         
-        setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
+        setViewControllers([ViewController(), olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
@@ -166,36 +166,128 @@ final class TabBarViewController: UITabBarController {
 }
 
 
-class MainViewController: UIViewController {
 
-    private let textField: UITextField = {
-        let tf = UITextField()
-        tf.placeholder = "Нажмите для кастомного ввода"
-        tf.borderStyle = .roundedRect
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        return tf
+import UIKit
+
+final class ViewController: UIViewController {
+
+    private let toggleButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Toggle Field", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
 
-    // Создадим экземпляр вашего OptionsViewController
-    private let optionsVC = OptionsViewController(
-        items: ["Option 1", "Option 2", "Option 3"],
-        title: "Выберите опцию",
-        isMultipleChoice: false
-    )
+    /// Контейнер для нашего CustomTextField.
+    /// Именно его высоту мы будем анимировать.
+    private let containerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        // Включим, чтобы "обрезать" содержимое, когда высота = 0
+        view.clipsToBounds = true
+        return view
+    }()
+
+    /// Сам кастомный текстфилд
+    private let customTextField = CustomTextField(with: "My Custom Field")
+
+    /// Таблица для наглядности
+    private let tableView: UITableView = {
+        let tv = UITableView()
+        tv.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
+    }()
+
+    /// Пример данных для таблицы
+    private let data = ["Первая строка", "Вторая строка", "Третья строка"]
+
+    /// Констрейнт, отвечающий за высоту `containerView`.
+    private var containerHeightConstraint: NSLayoutConstraint!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Добавляем textField на экран
         view.backgroundColor = .white
-        view.addSubview(textField)
+
+        // Добавим сабвью
+        view.addSubview(toggleButton)
+        view.addSubview(containerView)
+        view.addSubview(tableView)
+
+        // Настраиваем кнопку (пусть будет сверху, по центру)
+        NSLayoutConstraint.activate([
+            toggleButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            toggleButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+
+        // Привязываем containerView к низу кнопки
+        containerHeightConstraint = containerView.heightAnchor.constraint(equalToConstant: 0)
+        containerHeightConstraint.isActive = true
 
         NSLayoutConstraint.activate([
-            textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            textField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            textField.widthAnchor.constraint(equalToConstant: 200)
+            containerView.topAnchor.constraint(equalTo: toggleButton.bottomAnchor), // без отступов
+            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
-        
-        textField.isUserInteractionEnabled = false
+
+        // Привязываем таблицу к низу контейнера
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: containerView.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        // Размещаем кастомное поле внутри контейнера
+        containerView.addSubview(customTextField)
+        customTextField.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            // По центру контейнера
+            customTextField.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            customTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            // Ширину фиксируем на 200, а высоту сделаем, например, 5
+        ])
+
+        // Изначально делаем поле прозрачным, чтобы не "выпрыгивало"
+        customTextField.alpha = 0
+
+        // Настраиваем таблицу
+        tableView.dataSource = self
+        tableView.delegate = self
+
+        // Добавим экшн на кнопку
+        toggleButton.addTarget(self, action: #selector(toggleCustomTextField), for: .touchUpInside)
+    }
+
+    @objc private func toggleCustomTextField() {
+        if containerHeightConstraint.constant == 0 {
+            // Показываем
+            UIView.animate(withDuration: 0.3) {
+                self.containerHeightConstraint.constant = 60 // или сколько вам нужно
+                self.customTextField.alpha = 1
+                self.view.layoutIfNeeded()
+            }
+        } else {
+            // Скрываем
+            UIView.animate(withDuration: 0.3) {
+                self.containerHeightConstraint.constant = 0
+                self.customTextField.alpha = 0
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+}
+
+// MARK: - UITableViewDataSource, UITableViewDelegate
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        data.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = data[indexPath.row]
+        return cell
     }
 }
