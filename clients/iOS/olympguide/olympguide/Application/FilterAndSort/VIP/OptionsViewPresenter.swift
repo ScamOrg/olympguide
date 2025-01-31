@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+final class OptionViewPresenter : OptionsPresentationLogic {
+    weak var viewController: OptionsDisplayLogic?
+    
+    func presentTextDidChange(response: Options.TextDidChange.Response) {
+        let vm = Options.TextDidChange.ViewModel(options: response.options)
+        viewController?.displayTextDidChange(viewModel: vm)
+    }
+}
