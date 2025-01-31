@@ -2,7 +2,6 @@ name: olympguide
 
 services:
   db:
-    build: db
     container_name: postgres_db
     restart: always
     image: postgres:latest
