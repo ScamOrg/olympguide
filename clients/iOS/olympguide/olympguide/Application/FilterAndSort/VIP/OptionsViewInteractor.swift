@@ -10,7 +10,10 @@ final class OptionsViewInteractor : OptionsDataStore, OptionsBusinessLogic {
     var items: [OptionModel] = []
     var results: [OptionModel] = []
     
-    func textDidChange(request: Search.TextDidChange.Request) {
-        
+    private let worker = OptionsWorker()
+    
+    func textDidChange(request: Options.TextDidChange.Request) {
+        results = worker.filter(items: items, with: request.query)
+        presenter?.presentTextDidChange(response: Options.TextDidChange.Response(options: results))
     }
 }
