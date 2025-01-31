@@ -1,3 +1,6 @@
+--liquibase formatted sql
+--changeset 001-ddl
+
 CREATE SCHEMA olympguide;
 
 SET search_path TO olympguide;
@@ -233,6 +236,7 @@ CREATE TABLE IF NOT EXISTS program_subjects
 (
     program_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
+    required BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (program_id, subject_id)
 );
 

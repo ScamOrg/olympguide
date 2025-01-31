@@ -15,6 +15,19 @@ services:
       - ${DB_PORT}:${DB_PORT}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+  liquibase:
+    image: liquibase/liquibase:latest
+    container_name: liquibase
+    volumes:
+      - ./migrations:/liquibase/changelog
+    environment:
+      - LIQUIBASE_COMMAND=update
+      - LIQUIBASE_URL=jdbc:postgresql://db:${DB_PORT}/${DB_NAME}
+      - LIQUIBASE_USERNAME=${DB_USER}
+      - LIQUIBASE_PASSWORD=${DB_PASSWORD}
+      - LIQUIBASE_CHANGELOG_FILE=/liquibase/changelog/db.changelog-master.xml
+    depends_on:
+      - db
   redis:
     image: redis:latest
     container_name: redis
