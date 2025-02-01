@@ -23,6 +23,7 @@
 		<string>MontserratAlternates-Bold.ttf</string>
 		<string>MontserratAlternates-Medium.ttf</string>
 		<string>MontserratAlternates-Regular.ttf</string>
+		<string>MontserratAlternates-SemiBold.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
