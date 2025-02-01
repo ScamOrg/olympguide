@@ -20,13 +20,14 @@ services:
     volumes:
       - ./migrations:/liquibase/changelog
     environment:
-      - LIQUIBASE_COMMAND=update
-      - LIQUIBASE_URL=jdbc:postgresql://db:${DB_PORT}/${DB_NAME}
-      - LIQUIBASE_USERNAME=${DB_USER}
-      - LIQUIBASE_PASSWORD=${DB_PASSWORD}
-      - LIQUIBASE_CHANGELOG_FILE=/liquibase/changelog/db.changelog-master.xml
+      - LIQUIBASE_COMMAND_USERNAME=${DB_USER}
+      - LIQUIBASE_COMMAND_PASSWORD=${DB_PASSWORD}
+      - LIQUIBASE_COMMAND_UPDATE_URL=jdbc:postgresql://db:${DB_PORT}/${DB_NAME}
+      - LIQUIBASE_COMMAND_CHANGELOG_FILE=changelog/db.changelog-master.xml
+      - LIQUIBASE_COMMAND_DRIVER=org.postgresql.Driver
     depends_on:
       - db
+    entrypoint: ["liquibase", "update"]
   redis:
     image: redis:latest
     container_name: redis

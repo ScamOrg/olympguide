@@ -1,5 +1,4 @@
 --liquibase formatted sql
---changeset 004-insert_regions
 INSERT INTO olympguide.region (region_id, name) VALUES (1, 'Республика Адыгея');
 INSERT INTO olympguide.region (region_id, name) VALUES (2, 'Республика Алтай');
 INSERT INTO olympguide.region (region_id, name) VALUES (3, 'Алтайский край');

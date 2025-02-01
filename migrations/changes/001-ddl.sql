@@ -1,6 +1,4 @@
 --liquibase formatted sql
---changeset 001-ddl
-
 CREATE SCHEMA olympguide;
 
 SET search_path TO olympguide;

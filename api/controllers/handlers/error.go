@@ -21,6 +21,7 @@ var (
 	InvalidBirthday        = AppError{400, "InvalidBirthday", "Invalid birthday format, use DD.MM.YYYY", nil}
 	InvalidPassword        = AppError{400, "InvalidPassword", "Invalid password", nil}
 	InvalidCode            = AppError{400, "InvalidCode", "Invalid code", nil}
+	InvalidID              = AppError{400, "InvalidID", "Invalid id", nil}
 	DataNotFound           = AppError{404, "DataNotFound", "Data not found", nil}
 	RegionNotFound         = AppError{404, "RegionNotFound", "Region not found", nil}
 	UserNotFound           = AppError{404, "UserNotFound", "User with this email not found", nil}

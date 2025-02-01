@@ -1,5 +1,4 @@
 --liquibase formatted sql
---changeset 002-insert_groups_and_fields
 INSERT INTO olympguide.group_of_fields (group_id, name, code) VALUES (1, 'МАТЕМАТИКА И МЕХАНИКА', '01.00.00');
 INSERT INTO olympguide.group_of_fields (group_id, name, code) VALUES (2, 'КОМПЬЮТЕРНЫЕ И ИНФОРМАЦИОННЫЕ НАУКИ', '02.00.00');
 INSERT INTO olympguide.group_of_fields (group_id, name, code) VALUES (3, 'ФИЗИКА И АСТРОНОМИЯ', '03.00.00');

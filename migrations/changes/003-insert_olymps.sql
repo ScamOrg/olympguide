@@ -1,5 +1,4 @@
 --liquibase formatted sql
---changeset 003-insert_olymps
 INSERT INTO olympguide.olympiad (olympiad_id, name, description, level, profile) VALUES (1, '«Финатлон для старшеклассников» - Всероссийская олимпиада по финансовой грамотности, устойчивому развитию и защите прав потребителей финансовых услуг', null, 3, 'финансовая грамотность');
 INSERT INTO olympguide.olympiad (olympiad_id, name, description, level, profile) VALUES (2, '«Формула Единства»/«Третье тысячелетие»', null, 3, 'иностранный язык');
 INSERT INTO olympguide.olympiad (olympiad_id, name, description, level, profile) VALUES (3, '«Формула Единства»/«Третье тысячелетие»', null, 2, 'математика');

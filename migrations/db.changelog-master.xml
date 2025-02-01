@@ -4,8 +4,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <include file="changes/001-ddl.sql"/>
-    <include file="changes/002-add-indexes.sql"/>
-    <include file="changes/003-insert-data.sql"/>
+    <changeSet id="1" author="titarenko">
+        <sqlFile path="changelog/changes/001-ddl.sql"/>
+    </changeSet>
+    <changeSet id="2" author="titarenko">
+        <sqlFile path="changelog/changes/002-insert_groups_and_fields.sql"/>
+        <sqlFile path="changelog/changes/003-insert_olymps.sql"/>
+        <sqlFile path="changelog/changes/004-insert_regions.sql"/>
+    </changeSet>
 
 </databaseChangeLog>

@@ -20,6 +20,7 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	store := utils.CreateSessionStore(cfg)
 	r.Use(sessions.Sessions("session", store))
 	r.Use(middleware.SessionMiddleware())
+	r.Use(middleware.ValidateID())
 
 	setupOlympiadRoutes(r)
 	setupFieldRoutes(r)

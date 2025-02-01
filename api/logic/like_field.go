@@ -20,8 +20,8 @@ func IsUserLikedField(userID any, fieldID uint) bool {
 func GetLikedFields(userID uint) ([]models.GroupField, error) {
 	var likedGroups []models.GroupField
 	err := utils.DB.Preload("Fields", "field_id IN (SELECT field_id FROM olympguide.liked_fields)").
-		Joins("JOIN olympguide.fields ON fields.group_id = group_fields.group_id").
-		Joins("JOIN olympguide.liked_fields AS lf ON lf.field_id = fields.field_id").
+		Joins("JOIN olympguide.field_of_study AS fos ON fos.group_id = group_of_fields.group_id").
+		Joins("JOIN olympguide.liked_fields AS lf ON lf.field_id = fos.field_id").
 		Where("lf.user_id = ?", userID).
 		Distinct().
 		Find(&likedGroups).Error
