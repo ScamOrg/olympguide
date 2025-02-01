@@ -12,12 +12,12 @@ func DeleteUniversity(c *gin.Context) {
 	university, err := logic.GetUniversityByID(universityID)
 
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 
 	if err = logic.DeleteUniversity(university); err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 	c.Status(http.StatusOK)

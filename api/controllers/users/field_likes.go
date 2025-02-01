@@ -1,58 +1,56 @@
 package users
 
 import (
-	"api/constants"
 	"api/controllers/handlers"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func LikeUniversity(c *gin.Context) {
-	universityID := c.Param("id")
+func LikeField(c *gin.Context) {
+	fieldID := c.Param("id")
 	userID, _ := c.MustGet("user_id").(uint)
 
-	university, err := logic.GetUniversityByID(universityID)
+	field, err := logic.GetFieldByID(fieldID)
 	if err != nil {
 		handlers.HandleUnknownError(c, err)
 		return
 	}
 
-	isLiked := logic.IsUserLikedUniversity(userID, university.UniversityID)
+	isLiked := logic.IsUserLikedField(userID, field.FieldID)
 	if isLiked {
 		c.JSON(http.StatusOK, gin.H{"message": "Already liked"})
 		return
 	}
 
-	err = logic.LikeUniversity(userID, university.UniversityID)
+	err = logic.LikeField(userID, field.FieldID)
 	if err != nil {
 		handlers.HandleUnknownError(c, err)
 		return
 	}
-	logic.ChangeUniversityPopularity(university, constants.LikePopularityIncrease)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Liked"})
 }
 
-func UnlikeUniversity(c *gin.Context) {
-	universityID := c.Param("id")
+func UnlikeField(c *gin.Context) {
+	fieldID := c.Param("id")
 	userID, _ := c.MustGet("user_id").(uint)
 
-	university, err := logic.GetUniversityByID(universityID)
+	field, err := logic.GetFieldByID(fieldID)
 	if err != nil {
 		handlers.HandleUnknownError(c, err)
 		return
 	}
 
-	isLiked := logic.IsUserLikedUniversity(userID, university.UniversityID)
+	isLiked := logic.IsUserLikedField(userID, field.FieldID)
 	if !isLiked {
 		c.JSON(http.StatusOK, gin.H{"message": "Already unliked"})
 		return
 	}
 
-	if err := logic.UnlikeUniversity(userID, university.UniversityID); err != nil {
+	if err = logic.UnlikeField(userID, field.FieldID); err != nil {
 		handlers.HandleUnknownError(c, err)
 		return
 	}
-	logic.ChangeUniversityPopularity(university, constants.LikePopularityDecrease)
 	c.JSON(http.StatusOK, gin.H{"message": "Unliked"})
 }

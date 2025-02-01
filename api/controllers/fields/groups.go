@@ -1,61 +1,37 @@
 package fields
 
 import (
+	"api/controllers/fields/api"
 	"api/controllers/handlers"
-	"api/models"
-	"api/utils"
+	"api/logic"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
-type FieldShortInfo struct {
-	FieldID uint   `json:"field_id"`
-	Name    string `json:"name"`
-	Code    string `json:"code"`
-	Degree  string `json:"degree"`
-}
-type GroupResponse struct {
-	Name   string           `json:"name"`
-	Code   string           `json:"code"`
-	Fields []FieldShortInfo `json:"fields"`
-}
-
 func GetFields(c *gin.Context) {
-	var groups []models.GroupField
-	err := utils.DB.Preload("Fields", func(db *gorm.DB) *gorm.DB {
-		if degrees := c.QueryArray("degree"); len(degrees) > 0 {
-			db = db.Where("degree IN (?)", degrees)
-		}
-		if name := c.Query("search"); name != "" {
-			db = db.Where("name ILIKE ? OR code ILIKE ?", "%"+name+"%", "%"+name+"%")
-		}
-		return db
-	}).Find(&groups).Error
+	userID, _ := c.Get("user_id")
+	degrees := c.QueryArray("degree")
+	search := c.Query("search")
 
+	groups, err := logic.GetFields(degrees, search)
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
-	var response []GroupResponse
-	for _, group := range groups {
-		if len(group.Fields) == 0 {
-			continue
-		}
-		var fields []FieldShortInfo
-		for _, field := range group.Fields {
-			fields = append(fields, FieldShortInfo{
-				FieldID: field.FieldID,
-				Name:    field.Name,
-				Code:    field.Code,
-				Degree:  field.Degree,
-			})
-		}
-		response = append(response, GroupResponse{
-			Name:   group.Name,
-			Code:   group.Code,
-			Fields: fields,
-		})
+
+	response := api.CreateGroupResponse(groups, userID)
+	c.JSON(http.StatusOK, response)
+}
+
+func GetLikedFields(c *gin.Context) {
+	userID, _ := c.MustGet("user_id").(uint)
+
+	fields, err := logic.GetLikedFields(userID)
+	if err != nil {
+		handlers.HandleUnknownError(c, err)
+		return
 	}
+
+	response := api.CreateLikedGroupResponse(fields)
 	c.JSON(http.StatusOK, response)
 }

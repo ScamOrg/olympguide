@@ -14,7 +14,7 @@ func GetRegion(c *gin.Context) {
 	region, err := logic.GetRegionByID(regionID)
 
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"region_id": region.RegionID, "name": region.Name})

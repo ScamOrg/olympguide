@@ -17,7 +17,7 @@ func GetRegions(c *gin.Context) {
 	regions, err := logic.GetRegions()
 
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 

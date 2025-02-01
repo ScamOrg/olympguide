@@ -1,3 +1,4 @@
+--liquibase formatted sql
 CREATE SCHEMA olympguide;
 
 SET search_path TO olympguide;
@@ -31,7 +32,8 @@ CREATE TABLE IF NOT EXISTS olympiad
     description TEXT,
     level SMALLINT NOT NULL,
     profile TEXT NOT NULL,
-    link TEXT
+    link TEXT,
+    popularity INTEGER NOT NULL DEFAULT 0
 );
 
 ALTER TABLE olympiad ADD CONSTRAINT olympiad_level_checker CHECK (level = ANY(ARRAY[1, 2, 3]));
@@ -232,6 +234,7 @@ CREATE TABLE IF NOT EXISTS program_subjects
 (
     program_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
+    required BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (program_id, subject_id)
 );
 

@@ -20,6 +20,7 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	store := utils.CreateSessionStore(cfg)
 	r.Use(sessions.Sessions("session", store))
 	r.Use(middleware.SessionMiddleware())
+	r.Use(middleware.ValidateID())
 
 	setupOlympiadRoutes(r)
 	setupFieldRoutes(r)
@@ -81,6 +82,14 @@ func setupUserRoutes(r *gin.Engine) {
 			favouriteGroup.GET("/universities", universities.GetLikedUniversities)
 			favouriteGroup.POST("/university/:id", users.LikeUniversity)
 			favouriteGroup.DELETE("/university/:id", users.UnlikeUniversity)
+
+			favouriteGroup.GET("/olympiads", olympiads.GetLikedOlympiads)
+			favouriteGroup.POST("/olympiad/:id", users.LikeOlympiad)
+			favouriteGroup.DELETE("/olympiad/:id", users.UnlikeOlympiad)
+
+			favouriteGroup.GET("/fields", fields.GetLikedFields)
+			favouriteGroup.POST("/field/:id", users.LikeField)
+			favouriteGroup.DELETE("/field/:id", users.UnlikeField)
 		}
 	}
 }

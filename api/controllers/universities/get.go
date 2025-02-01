@@ -14,7 +14,7 @@ func GetUniversity(c *gin.Context) {
 
 	university, err := logic.GetUniversityByID(universityID)
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 
@@ -28,7 +28,11 @@ func GetUniversities(c *gin.Context) {
 	search := c.Query("search")
 	userID, _ := c.Get("user_id")
 
-	universities, _ := logic.GetUniversities(userID, regionIDs, fromMyRegion, search)
+	universities, err := logic.GetUniversities(userID, regionIDs, fromMyRegion, search)
+	if err != nil {
+		handlers.HandleUnknownError(c, err)
+		return
+	}
 
 	response := api.CreateUniversitiesResponse(universities, userID)
 	c.JSON(http.StatusOK, response)
@@ -39,7 +43,7 @@ func GetLikedUniversities(c *gin.Context) {
 
 	universities, err := logic.GetLikedUniversities(userID)
 	if err != nil {
-		handlers.HandleError(c, err)
+		handlers.HandleUnknownError(c, err)
 		return
 	}
 

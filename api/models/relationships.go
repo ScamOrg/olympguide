@@ -5,4 +5,16 @@ type LikedUniversities struct {
 	UserID       uint `gorm:"primaryKey"`
 }
 
+type LikedOlympiads struct {
+	OlympiadID uint `gorm:"primaryKey"`
+	UserID     uint `gorm:"primaryKey"`
+}
+
+type LikedFields struct {
+	FieldID uint `gorm:"primaryKey"`
+	UserID  uint `gorm:"primaryKey"`
+}
+
 func (LikedUniversities) TableName() string { return "olympguide.liked_universities" }
+func (LikedOlympiads) TableName() string    { return "olympguide.liked_olympiads" }
+func (LikedFields) TableName() string       { return "olympguide.liked_fields" }
