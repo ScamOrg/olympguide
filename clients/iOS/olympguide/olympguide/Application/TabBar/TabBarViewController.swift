@@ -169,7 +169,7 @@ final class TabBarViewController: UITabBarController {
 
 import UIKit
 
-final class ViewController: UIViewController {
+final class ViewController: UIViewController, SelectedBarDelegate {
 
     private let toggleButton: UIButton = {
         let button = UIButton(type: .system)
@@ -189,7 +189,7 @@ final class ViewController: UIViewController {
     }()
 
     /// Сам кастомный текстфилд
-    private let customTextField = CustomTextField(with: "My Custom Field")
+    private let customTextField = SelectedScrollView(selectedOptions: ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеренбург"])
 
     /// Таблица для наглядности
     private let tableView: UITableView = {
@@ -213,7 +213,7 @@ final class ViewController: UIViewController {
         view.addSubview(toggleButton)
         view.addSubview(containerView)
         view.addSubview(tableView)
-
+        
         // Настраиваем кнопку (пусть будет сверху, по центру)
         NSLayoutConstraint.activate([
             toggleButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -229,6 +229,7 @@ final class ViewController: UIViewController {
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
+        
 
         // Привязываем таблицу к низу контейнера
         NSLayoutConstraint.activate([
@@ -241,14 +242,16 @@ final class ViewController: UIViewController {
         // Размещаем кастомное поле внутри контейнера
         containerView.addSubview(customTextField)
         customTextField.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            // По центру контейнера
-            customTextField.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            customTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            // Ширину фиксируем на 200, а высоту сделаем, например, 5
-        ])
-
+        customTextField.delegate = self
+//
+//        NSLayoutConstraint.activate([
+//            // По центру контейнера
+//            customTextField.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+//            customTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+//            // Ширину фиксируем на 200, а высоту сделаем, например, 5
+//        ])
+        customTextField.pinLeft(to: containerView.leadingAnchor)
+        customTextField.pinRight(to: containerView.trailingAnchor)
         // Изначально делаем поле прозрачным, чтобы не "выпрыгивало"
         customTextField.alpha = 0
 
@@ -260,11 +263,11 @@ final class ViewController: UIViewController {
         toggleButton.addTarget(self, action: #selector(toggleCustomTextField), for: .touchUpInside)
     }
 
-    @objc private func toggleCustomTextField() {
+    @objc func toggleCustomTextField() {
         if containerHeightConstraint.constant == 0 {
             // Показываем
             UIView.animate(withDuration: 0.3) {
-                self.containerHeightConstraint.constant = 60 // или сколько вам нужно
+                self.containerHeightConstraint.constant = self.customTextField.bounds.height // или сколько вам нужно
                 self.customTextField.alpha = 1
                 self.view.layoutIfNeeded()
             }
