@@ -17,7 +17,7 @@ extension UIColor {
     }
     
     // MARK: - Initializer from hex
-    convenience init?(hex: String) {
+    convenience init?(hex: String, alpha: CGFloat = 1.0) {
         var newHex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         newHex = newHex.uppercased()
         
@@ -37,7 +37,7 @@ extension UIColor {
         let green = Double((rgb & 0x00FF00) >> 8) / 255
         let blue = Double(rgb & 0x0000FF) / 255
         
-        self.init(red: red, green: green, blue: blue, alpha: 1.0)
+        self.init(red: red, green: green, blue: blue, alpha: alpha)
     }
     
     // MARK: - Get Unique Colors
