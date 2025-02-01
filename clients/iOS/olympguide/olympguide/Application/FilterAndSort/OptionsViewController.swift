@@ -205,7 +205,7 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - UI Configuration
-
+    
     private func configureUI() {
         configureDimmingView()
         configureContainerView()
