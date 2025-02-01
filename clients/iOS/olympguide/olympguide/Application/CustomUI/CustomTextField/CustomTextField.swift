@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - Constants
 
-private enum Constants {
+fileprivate enum Constants {
     
     enum Fonts {
         static let titleFont = UIFont(name: "MontserratAlternates-Regular", size: 15)!
