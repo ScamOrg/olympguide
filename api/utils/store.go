@@ -9,11 +9,11 @@ import (
 	"log"
 )
 
-func CreateSessionStore(cfg *config.Config) sessions.Store {
+func ConnectSessionStore(cfg *config.Config) sessions.Store {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
 	store, err := redis.NewStore(constants.MaxSessionConn, "tcp", redisAddress, "", []byte("og_secret"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not connect to store: %v", err)
 	}
 	return store
 }

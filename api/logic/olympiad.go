@@ -5,7 +5,11 @@ import (
 	"api/utils"
 )
 
-func GetOlympiadByID(olympiadID string) (*models.Olympiad, error) {
+type OlympService struct {
+	repo
+}
+
+func (s *OlympService) GetOlympiadByID(olympiadID string) (*models.Olympiad, error) {
 	var olympiad models.Olympiad
 	if err := utils.DB.First(&olympiad, olympiadID).Error; err != nil {
 		return nil, err

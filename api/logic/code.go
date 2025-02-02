@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"api/constants"
 	"api/utils"
 	"context"
 	"encoding/json"
@@ -37,7 +36,7 @@ func SaveCodeToRedis(ctx context.Context, email, code string) error {
 	if err != nil {
 		return err
 	}
-	return utils.Redis.Expire(ctx, email, constants.EmailCodeTtl*time.Minute).Err()
+	return utils.Redis.Expire(ctx, email, EmailCodeTtl*time.Minute).Err()
 }
 
 func GetCodeAndAttempts(ctx context.Context, email string) (map[string]string, error) {

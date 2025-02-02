@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func GetOlympiads(c *gin.Context) {
+func (h) GetOlympiads(c *gin.Context) {
 	levels := c.QueryArray("level")
 	profiles := c.QueryArray("profile")
 	name := c.Query("name")

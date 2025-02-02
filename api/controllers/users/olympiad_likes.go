@@ -1,7 +1,6 @@
 package users
 
 import (
-	"api/constants"
 	"api/controllers/handlers"
 	"api/logic"
 	"github.com/gin-gonic/gin"
@@ -29,7 +28,7 @@ func LikeOlympiad(c *gin.Context) {
 		handlers.HandleUnknownError(c, err)
 		return
 	}
-	logic.ChangeOlympiadPopularity(olympiad, constants.LikePopularityIncrease)
+	logic.ChangeOlympiadPopularity(olympiad, main.LikePopularityIncrease)
 	c.JSON(http.StatusOK, gin.H{"message": "Liked"})
 }
 
@@ -53,6 +52,6 @@ func UnlikeOlympiad(c *gin.Context) {
 		handlers.HandleUnknownError(c, err)
 		return
 	}
-	logic.ChangeOlympiadPopularity(olympiad, constants.LikePopularityDecrease)
+	logic.ChangeOlympiadPopularity(olympiad, main.LikePopularityDecrease)
 	c.JSON(http.StatusOK, gin.H{"message": "Unliked"})
 }

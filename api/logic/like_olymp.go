@@ -1,9 +1,29 @@
 package logic
 
 import (
+	"api/constants"
 	"api/models"
 	"api/utils"
 )
+
+func ServiceLikeOlympiad(olympiadID string, userID uint) (bool, error) {
+	olympiad, err := GetOlympiadByID(olympiadID)
+	if err != nil {
+		return false, err
+	}
+
+	isLiked := IsUserLikedOlympiad(userID, olympiad.OlympiadID)
+	if isLiked {
+		return false, nil
+	}
+
+	err = logic.LikeOlympiad(userID, olympiad.OlympiadID)
+	if err != nil {
+		return false, err
+	}
+	logic.ChangeOlympiadPopularity(olympiad, constants.LikePopularityIncrease)
+	return true, nil
+}
 
 func IsUserLikedOlympiad(userID any, olympiadID uint) bool {
 	uintUserID, ok := userID.(uint)

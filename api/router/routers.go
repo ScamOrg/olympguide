@@ -1,7 +1,6 @@
-package routers
+package router
 
 import (
-	"api/config"
 	"api/controllers/auth"
 	"api/controllers/fields"
 	"api/controllers/olympiads"
@@ -14,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(cfg *config.Config) *gin.Engine {
+func SetupRouter(cfg *main.Config) *gin.Engine {
 	r := gin.Default()
 
 	store := utils.CreateSessionStore(cfg)
@@ -30,6 +29,18 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	setupUserRoutes(r)
 
 	return r
+}
+
+type OlympHandler struct {
+	os OlympServce
+}
+
+type OlympServce interface {
+	LikeOlymp()
+	Unlike()
+	GetById()
+	FindByUniversity()
+	FindByMyMood()
 }
 
 func setupOlympiadRoutes(r *gin.Engine) {
@@ -57,6 +68,7 @@ func setupAuthRoutes(r *gin.Engine) {
 }
 
 func setupUniversityRoutes(r *gin.Engine) {
+
 	r.GET("/universities", universities.GetUniversities)
 
 	universityGroup := r.Group("/university")

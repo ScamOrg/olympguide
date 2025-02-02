@@ -6,6 +6,8 @@ const (
 )
 const MaxSessionConn = 10
 
+const RedisDBNum = 0
+
 const (
 	LikePopularityIncrease = 1
 	LikePopularityDecrease = -1

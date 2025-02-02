@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"api/constants"
 	"api/controllers/auth/api"
 	"api/controllers/handlers"
 	"api/logic"
@@ -71,7 +70,7 @@ func VerifyCode(c *gin.Context) {
 	storedCode := result["code"]
 	attempts, _ := strconv.Atoi(result["attempts"])
 
-	if attempts > constants.MaxVerifyCodeAttempts {
+	if attempts > main.MaxVerifyCodeAttempts {
 		handlers.HandleAppError(c, handlers.TooManyAttempts)
 		return
 	}

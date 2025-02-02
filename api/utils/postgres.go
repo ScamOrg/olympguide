@@ -1,17 +1,15 @@
 package utils
 
 import (
+	"api/config"
 	"fmt"
 	"log"
 
-	"api/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func ConnectDB(cfg *config.Config) {
+func ConnectPostgres(cfg *config.Config) *gorm.DB {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 
@@ -19,6 +17,5 @@ func ConnectDB(cfg *config.Config) {
 	if err != nil {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
-	DB = database
-	log.Println("Connected to the database!")
+	return database
 }
