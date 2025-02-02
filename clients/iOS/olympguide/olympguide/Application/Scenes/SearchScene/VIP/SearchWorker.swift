@@ -22,9 +22,10 @@ final class SearchWorker {
         }
     }
     
-    /// Простейший метод для фильтрации полученного массива по строке
     func filter(items: [String], with query: String) -> [String] {
         guard !query.isEmpty else { return items }
-        return items.filter { $0.lowercased().contains(query.lowercased()) }
+        return items.filter {
+            $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines).contains(query.lowercased())
+        }
     }
 }

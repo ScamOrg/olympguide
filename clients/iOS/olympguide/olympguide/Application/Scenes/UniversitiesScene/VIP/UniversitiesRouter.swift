@@ -11,7 +11,7 @@ final class UniversitiesRouter: UniversitiesRoutingLogic {
     weak var viewController: UIViewController?
 
     func routeToDetails(for university: UniversityModel) {
-        let detailsViewController = ViewController()  
+        let detailsViewController = UIViewController()  
 //        detailsViewController.university = university
         viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
     }

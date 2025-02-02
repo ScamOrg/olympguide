@@ -14,7 +14,7 @@ final class EnterEmailViewController: UIViewController {
     var router: (EnterEmailRoutingLogic & EnterEmailDataPassing)?
     
     // MARK: - UI
-    private let emailTextField = CustomSearchBar(with: "email")
+    private let emailTextField: CustomInputDataField = CustomInputDataField(with: "email")
     private let nextButton: UIButton = UIButton(type: .system)
     private var nextButtonBottomConstraint: NSLayoutConstraint!
     private var currentEmail: String = ""
@@ -102,8 +102,8 @@ final class EnterEmailViewController: UIViewController {
     }
 }
 
-extension EnterEmailViewController: CustomSearchBarDelegate {
-    func customSearchBar(_ searchBar: CustomSearchBar, textDidChange text: String) {
+extension EnterEmailViewController: CustomTextFieldDelegate {
+    func action(_ searchBar: CustomTextField, textDidChange text: String) {
         currentEmail = text
     }
 }

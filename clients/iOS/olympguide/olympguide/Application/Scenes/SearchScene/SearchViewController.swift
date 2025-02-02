@@ -16,20 +16,20 @@ fileprivate enum Constants {
     }
 }
 
-final class SearchViewController: UIViewController, SearchDisplayLogic {
+final class SearchViewController: UIViewController {
     
     // MARK: - VIP
     var interactor: SearchBusinessLogic?
     var router: (SearchRoutingLogic & SearchDataPassing)?
     
     // MARK: - Variables
-    private let customSearchBar: CustomSearchBar
+    private let customSearchBar: CustomTextField
     private let tableView = UITableView()
     private var itemsToShow: [String] = []
     
     // MARK: - Lifecycle
     init(searchType: SearchType) {
-        customSearchBar = CustomSearchBar(with: searchType.title())
+        customSearchBar = CustomTextField(with: searchType.title())
         super.init(nibName: nil, bundle: nil)
         setup()
         router?.dataStore?.searchType = searchType
@@ -72,8 +72,8 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
         customSearchBar.delegate = self
         view.addSubview(customSearchBar)
         
-//        customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
-//        customSearchBar.setWidth(UIScreen.main.bounds.width - 2 * Constants.Dimensions.searchBarHorizontalMargin)
+        //        customSearchBar.setHeight(Constants.Dimensions.searchBarHeight)
+        //        customSearchBar.setWidth(UIScreen.main.bounds.width - 2 * Constants.Dimensions.searchBarHorizontalMargin)
         customSearchBar.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
         customSearchBar.pinLeft(to: view.leadingAnchor, Constants.Dimensions.searchBarHorizontalMargin)
         
@@ -95,7 +95,9 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
             interactor?.loadScene(request: request)
         }
     }
-    
+}
+
+extension SearchViewController: SearchDisplayLogic {
     // MARK: - SearchDisplayLogic
     func displayLoadScene(viewModel: Search.Load.ViewModel) {
         title = "Поиск"
@@ -111,9 +113,9 @@ final class SearchViewController: UIViewController, SearchDisplayLogic {
     }
 }
 
-// MARK: - CustomSearchBarDelegate
-extension SearchViewController: CustomSearchBarDelegate {
-    func customSearchBar(_ searchBar: CustomSearchBar, textDidChange text: String) {
+// MARK: - CustomTextFieldDelegate
+extension SearchViewController: CustomTextFieldDelegate {
+    func action(_ searchBar: CustomTextField, textDidChange text: String) {
         let request = Search.TextDidChange.Request(query: text)
         interactor?.textDidChange(request: request)
     }

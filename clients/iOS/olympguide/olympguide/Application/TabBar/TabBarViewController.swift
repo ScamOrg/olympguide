@@ -123,7 +123,7 @@ final class TabBarViewController: UITabBarController {
         let fieldsNavVC = NavigationBarViewController(rootViewController: fieldsVC)
         let profileNavVC = NavigationBarViewController(rootViewController: profileVC)
         
-        setViewControllers([universitiesNavVC, olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
+        setViewControllers([ViewController(), olympiadsNavVC, fieldsNavVC, profileNavVC], animated: true)
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
@@ -166,159 +166,131 @@ final class TabBarViewController: UITabBarController {
 }
 
 
-class ViewController: UIViewController {
-    
-    
-    private let showSheetButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Поиск", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
-        button.setTitleColor(.systemBlue, for: .normal)
-        return button
-    }()
-    let fsView = FilterSortView(sortingOptions: ["Популярность", "Первый уровень"], filteringOptions: ["Уровень", "Профиль", "Уровень", "Профиль"])
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.addSubview(fsView)
-        view.backgroundColor = .white
-        setupButton()
-        fsView.pinTop(to: view.safeAreaLayoutGuide.topAnchor)
-        fsView.pinLeft(to: view.leadingAnchor)
-        fsView.pinRight(to: view.trailingAnchor)
-
-        let backItem = UIBarButtonItem(title: "ВУЗы", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
-    }
-    
-    private func setupButton() {
-        view.addSubview(showSheetButton)
-        showSheetButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            showSheetButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            showSheetButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-        
-        showSheetButton.addTarget(self, action: #selector(showSearchForUniversities), for: .touchUpInside)
-    }
-    
-    @objc
-    func showSearchForUniversities() {
-        let searchVC = SearchViewController(searchType: .universities)
-        navigationController?.pushViewController(searchVC, animated: true)
-    }
-    
-    @objc
-    private func showBottomSheetButtonTapped() {
-        let items = ["I уровень", "II уровень", "III уровень"]
-        let sheetVC = OptionsViewController(items: items, title: "Уровень олимпиады", isMultipleChoice: true)
-        sheetVC.modalPresentationStyle = .overFullScreen
-        present(sheetVC, animated: false) {
-            sheetVC.animateShow()
-        }
-    }
-}
-
-class MainViewController: UIViewController {
-    
-    //
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Настройка NavigationController для больших заголовков
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.title = "Browse"
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offset = scrollView.contentOffset.y
-        if offset > 20 {
-            navigationController?.navigationBar.prefersLargeTitles = false
-        } else {
-            navigationController?.navigationBar.prefersLargeTitles = true
-        }
-    }
-    
-    @objc func showNextScreen() {
-        let nextVC = ViewController()
-        navigationController?.pushViewController(nextVC, animated: true)
-    }
-}
-
 
 import UIKit
 
-class BrowseViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
-    let tableView = UITableView()
-    let refreshControl = UIRefreshControl()
-    
+final class ViewController: UIViewController, SelectedBarDelegate {
+
+    private let toggleButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Toggle Field", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    /// Контейнер для нашего CustomTextField.
+    /// Именно его высоту мы будем анимировать.
+    private let containerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        // Включим, чтобы "обрезать" содержимое, когда высота = 0
+        view.clipsToBounds = true
+        return view
+    }()
+
+    /// Сам кастомный текстфилд
+    private let customTextField = SelectedScrollView(selectedOptions: ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеренбург"])
+
+    /// Таблица для наглядности
+    private let tableView: UITableView = {
+        let tv = UITableView()
+        tv.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
+    }()
+
+    /// Пример данных для таблицы
+    private let data = ["Первая строка", "Вторая строка", "Третья строка"]
+
+    /// Констрейнт, отвечающий за высоту `containerView`.
+    private var containerHeightConstraint: NSLayoutConstraint!
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-//        navigationItem.largeTitleDisplayMode = .automatic
+        view.backgroundColor = .white
 
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.title = "Browse"
-            
-        let searchController = UISearchController(searchResultsController: nil)
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search"
-        navigationItem.searchController = searchController
-        definesPresentationContext = true
-        
-        setupTableView()
-        setupRefreshControl()
-    }
-    
-    func setupTableView() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.frame = view.bounds
-        tableView.refreshControl = refreshControl
+        // Добавим сабвью
+        view.addSubview(toggleButton)
+        view.addSubview(containerView)
         view.addSubview(tableView)
-    }
-    
-    func setupRefreshControl() {
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        refreshControl.tintColor = .systemBlue
-    }
-    
-    @objc func refreshData() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            self?.refreshControl.endRefreshing()
-        }
-    }
         
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
+        // Настраиваем кнопку (пусть будет сверху, по центру)
+        NSLayoutConstraint.activate([
+            toggleButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            toggleButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+
+        // Привязываем containerView к низу кнопки
+        containerHeightConstraint = containerView.heightAnchor.constraint(equalToConstant: 0)
+        containerHeightConstraint.isActive = true
+
+        NSLayoutConstraint.activate([
+            containerView.topAnchor.constraint(equalTo: toggleButton.bottomAnchor), // без отступов
+            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        
+
+        // Привязываем таблицу к низу контейнера
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: containerView.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        // Размещаем кастомное поле внутри контейнера
+        containerView.addSubview(customTextField)
+        customTextField.translatesAutoresizingMaskIntoConstraints = false
+        customTextField.delegate = self
+//
+//        NSLayoutConstraint.activate([
+//            // По центру контейнера
+//            customTextField.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+//            customTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+//            // Ширину фиксируем на 200, а высоту сделаем, например, 5
+//        ])
+        customTextField.pinLeft(to: containerView.leadingAnchor)
+        customTextField.pinRight(to: containerView.trailingAnchor)
+        // Изначально делаем поле прозрачным, чтобы не "выпрыгивало"
+        customTextField.alpha = 0
+
+        // Настраиваем таблицу
+        tableView.dataSource = self
+        tableView.delegate = self
+
+        // Добавим экшн на кнопку
+        toggleButton.addTarget(self, action: #selector(toggleCustomTextField), for: .touchUpInside)
     }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.textLabel?.text = "Item \(indexPath.row + 1)"
-        cell.accessoryType = .disclosureIndicator
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let detailVC = DetailViewController()
-        detailVC.title = "Item \(indexPath.row + 1)"
-        navigationController?.pushViewController(detailVC, animated: true)
+
+    @objc func toggleCustomTextField() {
+        if containerHeightConstraint.constant == 0 {
+            // Показываем
+            UIView.animate(withDuration: 0.3) {
+                self.containerHeightConstraint.constant = self.customTextField.bounds.height // или сколько вам нужно
+                self.customTextField.alpha = 1
+                self.view.layoutIfNeeded()
+            }
+        } else {
+            // Скрываем
+            UIView.animate(withDuration: 0.3) {
+                self.containerHeightConstraint.constant = 0
+                self.customTextField.alpha = 0
+                self.view.layoutIfNeeded()
+            }
+        }
     }
 }
 
-class DetailViewController: UIViewController {
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        navigationItem.largeTitleDisplayMode = .never
-
+// MARK: - UITableViewDataSource, UITableViewDelegate
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        data.count
     }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-//        navigationController?.navigationBar.prefersLargeTitles = false
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = data[indexPath.row]
+        return cell
     }
 }
