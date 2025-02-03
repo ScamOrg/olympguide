@@ -216,25 +216,28 @@ final class SelectedScrollView: UIView {
         }
     }
     
-    private func createSelectedButton(with title: String) -> UIButton {
+    private func createSelectedButton(with title: String, tag: Int = 0) -> UIButton {
         let button = FilterButton(title: title)
+        button.tag = 0
         button.isSelectedItem.toggle()
         button.tintColor = .black
         button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         return button
     }
     
-    
-    
     // MARK: - Objc funcs
     
     @objc private func filterButtonTapped(_ sender: UIButton) {
-        
-        sender.isHidden = true 
+        sender.isHidden = true
         self.horizontalStackView.removeArrangedSubview(sender)
         sender.removeFromSuperview()
         if self.horizontalStackView.arrangedSubviews.count == 1 {
             delegate?.toggleCustomTextField()
         }
+    }
+    
+    func addButtonToStackView() {
+        let filterButton = createSelectedButton(with: "item")
+        horizontalStackView.addArrangedSubview(filterButton)
     }
 }
