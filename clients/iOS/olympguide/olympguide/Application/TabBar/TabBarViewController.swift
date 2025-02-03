@@ -293,4 +293,8 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         cell.textLabel?.text = data[indexPath.row]
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        customTextField.addButtonToStackView()
+    }
 }
