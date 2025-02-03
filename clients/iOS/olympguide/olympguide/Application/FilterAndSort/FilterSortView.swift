@@ -150,6 +150,7 @@ final class FilterSortView: UIView {
 
 protocol SelectedBarDelegate: UIViewController {
     func toggleCustomTextField()
+    func unselectOption(at index: Int)
 }
 
 final class SelectedScrollView: UIView {
@@ -218,7 +219,7 @@ final class SelectedScrollView: UIView {
     
     private func createSelectedButton(with title: String, tag: Int = 0) -> UIButton {
         let button = FilterButton(title: title)
-        button.tag = 0
+        button.tag = tag
         button.isSelectedItem.toggle()
         button.tintColor = .black
         button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
@@ -226,7 +227,6 @@ final class SelectedScrollView: UIView {
     }
     
     // MARK: - Objc funcs
-    
     @objc private func filterButtonTapped(_ sender: UIButton) {
         sender.isHidden = true
         self.horizontalStackView.removeArrangedSubview(sender)
@@ -234,10 +234,28 @@ final class SelectedScrollView: UIView {
         if self.horizontalStackView.arrangedSubviews.count == 1 {
             delegate?.toggleCustomTextField()
         }
+        delegate?.unselectOption(at: sender.tag)
     }
     
-    func addButtonToStackView() {
-        let filterButton = createSelectedButton(with: "item")
-        horizontalStackView.addArrangedSubview(filterButton)
+    func addButtonToStackView(with title: String, tag: Int) {
+        let selectedButton = createSelectedButton(with: title, tag: tag)
+        horizontalStackView.addArrangedSubview(selectedButton)
+        if self.horizontalStackView.arrangedSubviews.count == 2 {
+            layoutIfNeeded()
+            delegate?.toggleCustomTextField()
+        }
+    }
+    
+    func removeButtons(with tag: Int) {
+        for button in self.horizontalStackView.arrangedSubviews {
+            if let button = button as? FilterButton, button.tag == tag {
+                button.isHidden = true
+                self.horizontalStackView.removeArrangedSubview(button)
+                button.removeFromSuperview()
+                if self.horizontalStackView.arrangedSubviews.count == 1 {
+                    delegate?.toggleCustomTextField()
+                }
+            }
+        }
     }
 }
