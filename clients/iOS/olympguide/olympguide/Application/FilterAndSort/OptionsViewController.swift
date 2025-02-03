@@ -122,6 +122,7 @@ final class OptionsViewController: UIViewController {
     private var isMultipleChoice: Bool
     lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
     private let tableView: UITableView = UITableView()
+    private let selectedScrollView: SelectedScrollView = SelectedScrollView(selectedOptions: [])
 
     // MARK: - Initializers
 
