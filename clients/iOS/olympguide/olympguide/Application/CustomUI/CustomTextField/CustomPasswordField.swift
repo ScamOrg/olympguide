@@ -8,6 +8,8 @@
 import UIKit
 
 class CustomPasswordField: CustomTextField {
+    var savedText: String? = nil
+    
     override init(with title: String) {
         super.init(with: title)
         setSecureTextEntry(true)
@@ -27,6 +29,7 @@ class CustomPasswordField: CustomTextField {
             ]
         )
         setTextFieldType(.default, .newPassword)
+        configureVisiblePasswordField()
     }
     
     @MainActor required init?(coder: NSCoder) {
@@ -36,13 +39,38 @@ class CustomPasswordField: CustomTextField {
         setActionButtonTarget(self, #selector(showPassword), for: .touchDown)
     }
     
+//    override func textFieldDidChange(_ textField: UITextField) {
+//        if (savedText != nil) {
+//            setTextFieldText(savedText)
+//            savedText = nil
+//        }
+//        super.textFieldDidChange(textField)
+//    }
+    let visiblePassword = UILabel()
+    
+    func configureVisiblePasswordField() {
+        self.addSubview(visiblePassword)
+        visiblePassword.font =  UIFont(name: "MontserratAlternates-Regular", size: 14)!
+        visiblePassword.textColor = .black
+        visiblePassword.pinTop(to: textField.topAnchor)
+        visiblePassword.pinLeft(to: textField.leadingAnchor)
+        visiblePassword.pinRight(to: textField.trailingAnchor)
+        visiblePassword.pinBottom(to: textField.bottomAnchor)
+        visiblePassword.alpha = 0
+    }
     @objc private func hidePassword() {
         setActionButtonImage(UIImage(systemName: "eye"))
-        setSecureTextEntry(true)
+//        savedText = textField.text
+//        setSecureTextEntry(true)
+        visiblePassword.alpha = 0
+        textField.alpha = 1
     }
     
     @objc private func showPassword() {
         setActionButtonImage(UIImage(systemName: "eye.slash"))
-        setSecureTextEntry(false)
+//        setSecureTextEntry(false)
+        visiblePassword.text = textField.text
+        visiblePassword.alpha = 1
+        textField.alpha = 0
     }
 }
