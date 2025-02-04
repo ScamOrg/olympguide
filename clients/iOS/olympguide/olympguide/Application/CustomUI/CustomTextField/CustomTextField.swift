@@ -253,7 +253,6 @@ class CustomTextField: UIView {
 }
 
 // MARK: - UITextFieldDelegate
-
 extension CustomTextField: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         didTapSearchBar()
