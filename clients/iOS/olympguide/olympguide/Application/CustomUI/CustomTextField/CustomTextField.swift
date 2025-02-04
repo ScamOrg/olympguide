@@ -50,7 +50,7 @@ class CustomTextField: UIView {
     weak var delegate: (any CustomTextFieldDelegate)?
     
     private let titleLabel = UILabel()
-    private let textField = UITextField()
+    /*private*/ let textField = UITextField()
     private let actionButton = UIButton()
     var isActive = false
     
