@@ -1,8 +1,8 @@
-package fields
+package field
 
 import (
-	"api/controllers/fields/api"
-	"api/controllers/handlers"
+	"api/handler/errors"
+	"api/handler/field/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,7 +15,7 @@ func GetFieldByID(c *gin.Context) {
 	field, err := logic.GetFieldByID(fieldID)
 
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

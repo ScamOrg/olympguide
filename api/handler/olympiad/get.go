@@ -1,8 +1,8 @@
-package olympiads
+package olympiad
 
 import (
-	"api/controllers/handlers"
-	"api/controllers/olympiads/api"
+	"api/handler/errors"
+	"api/handler/olympiad/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -19,7 +19,7 @@ func (h) GetOlympiads(c *gin.Context) {
 	olympiads, err := logic.GetOlympiads(levels, profiles, name, sortBy, order)
 
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -32,7 +32,7 @@ func GetLikedOlympiads(c *gin.Context) {
 
 	olympiads, err := logic.GetLikedOlympiads(userID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

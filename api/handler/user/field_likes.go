@@ -1,7 +1,7 @@
-package users
+package user
 
 import (
-	"api/controllers/handlers"
+	"api/handler/errors"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,7 +13,7 @@ func LikeField(c *gin.Context) {
 
 	field, err := logic.GetFieldByID(fieldID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -25,7 +25,7 @@ func LikeField(c *gin.Context) {
 
 	err = logic.LikeField(userID, field.FieldID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -38,7 +38,7 @@ func UnlikeField(c *gin.Context) {
 
 	field, err := logic.GetFieldByID(fieldID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func UnlikeField(c *gin.Context) {
 	}
 
 	if err = logic.UnlikeField(userID, field.FieldID); err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Unliked"})

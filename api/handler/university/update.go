@@ -1,8 +1,8 @@
-package universities
+package university
 
 import (
-	"api/controllers/handlers"
-	"api/controllers/universities/api"
+	"api/handler/errors"
+	"api/handler/university/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,20 +13,20 @@ func UpdateUniversity(c *gin.Context) {
 
 	request, err := api.BindUniversityRequest(c)
 	if err != nil {
-		handlers.HandleAppError(c, handlers.InvalidRequest)
+		err.HandleAppError(c, err.InvalidRequest)
 		return
 	}
 
 	university, err := logic.GetUniversityByID(universityID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
 	api.UpdateUniversityFromRequest(university, request)
 
 	if err := logic.UpdateUniversity(university); err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

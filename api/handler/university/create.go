@@ -1,8 +1,8 @@
-package universities
+package university
 
 import (
-	"api/controllers/handlers"
-	"api/controllers/universities/api"
+	"api/handler/errors"
+	"api/handler/university/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,19 +11,19 @@ import (
 func CreateUniversity(c *gin.Context) {
 	request, err := api.BindUniversityRequest(c)
 	if err != nil {
-		handlers.HandleAppError(c, handlers.InvalidRequest)
+		err.HandleAppError(c, err.InvalidRequest)
 		return
 	}
 
 	if !logic.IsRegionExists(request.RegionID) {
-		handlers.HandleAppError(c, handlers.RegionNotFound)
+		err.HandleAppError(c, err.RegionNotFound)
 		return
 	}
 
 	university := api.CreateUniversityFromRequest(request)
 	id, err := logic.CreateUniversity(&university)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

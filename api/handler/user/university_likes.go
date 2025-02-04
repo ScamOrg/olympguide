@@ -1,7 +1,7 @@
-package users
+package user
 
 import (
-	"api/controllers/handlers"
+	"api/handler/errors"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,7 +13,7 @@ func LikeUniversity(c *gin.Context) {
 
 	university, err := logic.GetUniversityByID(universityID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -25,7 +25,7 @@ func LikeUniversity(c *gin.Context) {
 
 	err = logic.LikeUniversity(userID, university.UniversityID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 	logic.ChangeUniversityPopularity(university, main.LikePopularityIncrease)
@@ -38,7 +38,7 @@ func UnlikeUniversity(c *gin.Context) {
 
 	university, err := logic.GetUniversityByID(universityID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func UnlikeUniversity(c *gin.Context) {
 	}
 
 	if err := logic.UnlikeUniversity(userID, university.UniversityID); err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 	logic.ChangeUniversityPopularity(university, main.LikePopularityDecrease)

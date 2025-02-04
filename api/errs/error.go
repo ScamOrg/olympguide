@@ -1,4 +1,4 @@
-package handlers
+package errs
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ type AppError struct {
 }
 
 var (
-	InternalServerError    = AppError{500, "InternalServerError", "Internal server error", nil}
+	InternalServerError    = AppError{500, "InternalServerError", "Internal server errs", nil}
 	Unauthorized           = AppError{401, "Unauthorized", "Unauthorized", nil}
 	InvalidRequest         = AppError{400, "InvalidRequest", "Invalid request data", nil}
 	InvalidBirthday        = AppError{400, "InvalidBirthday", "Invalid birthday format, use DD.MM.YYYY", nil}
@@ -33,8 +33,13 @@ var (
 )
 
 func (e AppError) WithAdditional(data map[string]interface{}) AppError {
-	e.Details = data
-	return e
+	newError := e
+	newError.Details = data
+	return newError
+}
+
+func (e AppError) Error() string {
+	return e.Message
 }
 
 func HandleAppError(c *gin.Context, appError AppError) {

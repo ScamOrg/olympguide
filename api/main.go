@@ -2,6 +2,8 @@ package main
 
 import (
 	"api/config"
+	"api/handler/auth"
+	"api/middleware"
 	"api/repository"
 	"api/service"
 	"fmt"
@@ -25,12 +27,17 @@ func main() {
 	redis := utils.ConnectRedis(cfg)
 	store := utils.ConnectSessionStore(cfg)
 
+	codeRepo := repository.NewRedisCodeRepo(redis)
+	userRepo := repository.NewPgUserRepo(db)
+
+	codeService := service.NewCodeService(codeRepo)
+	userService := service.NewUserService(userRepo)
+
+	authHandler := auth.NewHandler(userService, codeService)
+
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))
-
-	codeRepo := repository.NewEmailCodeRepository(redis)
-	codeService := service.NewCodeService(codeRepo)
-	userHandler := handler.NewUserHandler(userService)
+	r = router.SetupRoutes(r, authHandler)
 
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)

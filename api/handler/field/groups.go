@@ -1,8 +1,8 @@
-package fields
+package field
 
 import (
-	"api/controllers/fields/api"
-	"api/controllers/handlers"
+	"api/handler/errors"
+	"api/handler/field/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,7 +15,7 @@ func GetFields(c *gin.Context) {
 
 	groups, err := logic.GetFields(degrees, search)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -28,7 +28,7 @@ func GetLikedFields(c *gin.Context) {
 
 	fields, err := logic.GetLikedFields(userID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"api/controllers/handlers"
+	"api/errs"
 	"api/models"
 	"api/utils"
 	"fmt"
@@ -13,7 +13,7 @@ func UniversityMiddleware() gin.HandlerFunc {
 		userID, _ := c.Get("user_id")
 		var adminUser models.AdminUser
 		if err := utils.DB.Where("user_id = ?", userID).First(&adminUser).Error; err != nil {
-			handlers.HandleAppError(c, handlers.UserNotAdmin)
+			err.HandleAppError(c, err.UserNotAdmin)
 			c.Abort()
 			return
 		}
@@ -21,7 +21,7 @@ func UniversityMiddleware() gin.HandlerFunc {
 		canEditUniversity := universityID == fmt.Sprint(adminUser.EditUniversityID)
 
 		if !adminUser.IsAdmin && !adminUser.IsFounder && !canEditUniversity {
-			handlers.HandleAppError(c, handlers.NotEnoughRights)
+			errs.HandleAppError(c, errs.NotEnoughRights)
 			c.Abort()
 			return
 		}

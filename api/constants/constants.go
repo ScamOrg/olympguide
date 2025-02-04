@@ -12,3 +12,7 @@ const (
 	LikePopularityIncrease = 1
 	LikePopularityDecrease = -1
 )
+
+const (
+	EmailCodeTopic = "email_codes"
+)

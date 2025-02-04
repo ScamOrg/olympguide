@@ -1,8 +1,8 @@
-package universities
+package university
 
 import (
-	"api/controllers/handlers"
-	"api/controllers/universities/api"
+	"api/handler/errors"
+	"api/handler/university/api"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,7 +14,7 @@ func GetUniversity(c *gin.Context) {
 
 	university, err := logic.GetUniversityByID(universityID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -30,7 +30,7 @@ func GetUniversities(c *gin.Context) {
 
 	universities, err := logic.GetUniversities(userID, regionIDs, fromMyRegion, search)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -43,7 +43,7 @@ func GetLikedUniversities(c *gin.Context) {
 
 	universities, err := logic.GetLikedUniversities(userID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

@@ -1,7 +1,7 @@
-package regions
+package region
 
 import (
-	"api/controllers/handlers"
+	"api/handler/errors"
 	"api/logic"
 	"api/models"
 	"github.com/gin-gonic/gin"
@@ -17,7 +17,7 @@ func GetRegions(c *gin.Context) {
 	regions, err := logic.GetRegions()
 
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 

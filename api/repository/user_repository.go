@@ -5,15 +5,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository interface {
+type IUserRepo interface {
 	GetAll() ([]models.User, error)
 	Create(user models.User) error
 }
 
-type UserRepositoryImpl struct {
+type PgUserRepo struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepositoryImpl {
-	return &UserRepositoryImpl{db: db}
+func NewPgUserRepo(db *gorm.DB) *PgUserRepo {
+	return &PgUserRepo{db: db}
 }

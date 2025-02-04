@@ -1,7 +1,7 @@
-package universities
+package university
 
 import (
-	"api/controllers/handlers"
+	"api/handler/errors"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -12,12 +12,12 @@ func DeleteUniversity(c *gin.Context) {
 	university, err := logic.GetUniversityByID(universityID)
 
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
 	if err = logic.DeleteUniversity(university); err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 	c.Status(http.StatusOK)

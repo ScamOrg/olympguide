@@ -15,7 +15,7 @@ type FieldShortInfo struct {
 type GroupResponse struct {
 	Name   string           `json:"name"`
 	Code   string           `json:"code"`
-	Fields []FieldShortInfo `json:"fields"`
+	Fields []FieldShortInfo `json:"field"`
 }
 
 type GroupShortInfo struct {

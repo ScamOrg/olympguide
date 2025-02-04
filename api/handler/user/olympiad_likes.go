@@ -1,7 +1,7 @@
-package users
+package user
 
 import (
-	"api/controllers/handlers"
+	"api/handler/errors"
 	"api/logic"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,7 +13,7 @@ func LikeOlympiad(c *gin.Context) {
 
 	olympiad, err := logic.GetOlympiadByID(olympiadID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -25,7 +25,7 @@ func LikeOlympiad(c *gin.Context) {
 
 	err = logic.LikeOlympiad(userID, olympiad.OlympiadID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 	logic.ChangeOlympiadPopularity(olympiad, main.LikePopularityIncrease)
@@ -38,7 +38,7 @@ func UnlikeOlympiad(c *gin.Context) {
 
 	olympiad, err := logic.GetOlympiadByID(olympiadID)
 	if err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func UnlikeOlympiad(c *gin.Context) {
 	}
 
 	if err = logic.UnlikeOlympiad(userID, olympiad.OlympiadID); err != nil {
-		handlers.HandleUnknownError(c, err)
+		err.HandleUnknownError(c, err)
 		return
 	}
 	logic.ChangeOlympiadPopularity(olympiad, main.LikePopularityDecrease)
