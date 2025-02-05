@@ -26,7 +26,7 @@ func (r *PgRegionRepo) RegionExists(regionID uint) bool {
 
 func (r *PgRegionRepo) GetUserRegionID(userID uint) (uint, error) {
 	var user model.User
-	if err := r.db.Where("user_id = ?").First(&user).Error; err != nil {
+	if err := r.db.Where("user_id = ?", userID).First(&user).Error; err != nil {
 		return 0, err
 	}
 	return user.RegionID, nil
