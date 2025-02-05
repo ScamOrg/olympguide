@@ -1,4 +1,4 @@
-package models
+package model
 
 type LikedUniversities struct {
 	UniversityID uint `gorm:"primaryKey"`

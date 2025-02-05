@@ -1,15 +1,14 @@
 package utils
 
 import (
-	"api/config"
-	"api/constants"
+	"api/utils/constants"
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"log"
 )
 
-func ConnectSessionStore(cfg *config.Config) sessions.Store {
+func ConnectSessionStore(cfg *Config) sessions.Store {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
 	store, err := redis.NewStore(constants.MaxSessionConn, "tcp", redisAddress, "", []byte("og_secret"))
 	if err != nil {

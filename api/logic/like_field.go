@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"api/models"
+	"api/model"
 	"api/utils"
 )
 
@@ -10,15 +10,15 @@ func IsUserLikedField(userID any, fieldID uint) bool {
 	if !ok {
 		return false
 	}
-	var likedField models.LikedFields
+	var likedField model.LikedFields
 	if err := utils.DB.Where("field_id = ? AND user_id = ?", fieldID, uintUserID).First(&likedField).Error; err == nil {
 		return true
 	}
 	return false
 }
 
-func GetLikedFields(userID uint) ([]models.GroupField, error) {
-	var likedGroups []models.GroupField
+func GetLikedFields(userID uint) ([]model.GroupField, error) {
+	var likedGroups []model.GroupField
 	err := utils.DB.Preload("Fields", "field_id IN (SELECT field_id FROM olympguide.liked_fields)").
 		Joins("JOIN olympguide.field_of_study AS fos ON fos.group_id = group_of_fields.group_id").
 		Joins("JOIN olympguide.liked_fields AS lf ON lf.field_id = fos.field_id").
@@ -32,7 +32,7 @@ func GetLikedFields(userID uint) ([]models.GroupField, error) {
 }
 
 func LikeField(userID uint, fieldID uint) error {
-	likedFields := models.LikedFields{
+	likedFields := model.LikedFields{
 		FieldID: fieldID,
 		UserID:  userID,
 	}
@@ -41,7 +41,7 @@ func LikeField(userID uint, fieldID uint) error {
 }
 
 func UnlikeField(userID uint, fieldID uint) error {
-	likedFields := models.LikedFields{
+	likedFields := model.LikedFields{
 		FieldID: fieldID,
 		UserID:  userID,
 	}

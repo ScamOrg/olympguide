@@ -1,32 +1,48 @@
 package router
 
 import (
-	"api/handler/auth"
+	"api/handler"
 	"api/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, authHandler *auth.Handler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, univerHandler *handler.UniverHandler) *gin.Engine {
 	r.Use(middleware.SessionMiddleware())
 	r.Use(middleware.ValidateID())
 
 	setupAuthRoutes(r, authHandler)
+	setupUniversityRoutes(r, univerHandler)
 	//setupOlympiadRoutes(r)
 	//setupFieldRoutes(r)
-	//setupUniversityRoutes(r)
+
 	//setupRegionRoutes(r)
 	//setupUserRoutes(r)
 
 	return r
 }
 
-func setupAuthRoutes(r *gin.Engine, authHandler *auth.Handler) {
+func setupAuthRoutes(r *gin.Engine, authHandler *handler.AuthHandler) {
 	authGroup := r.Group("/auth")
-	authGroup.POST("/send_code", auth.SendCode)
-	authGroup.POST("/verify_code", auth.VerifyCode)
-	//authGroup.POST("/sign_up", auth.SignUp)
-	//authGroup.POST("/login", auth.Login)
-	//authGroup.POST("/logout", auth.Logout)
+	authGroup.POST("/send_code", authHandler.SendCode)
+	authGroup.POST("/verify_code", authHandler.VerifyCode)
+	authGroup.POST("/sign_up", authHandler.SignUp)
+	authGroup.POST("/login", authHandler.Login)
+	authGroup.POST("/logout", authHandler.Logout)
+}
+
+func setupUniversityRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) {
+	//r.GET("/universities")
+	universityGroup := r.Group("/university")
+	{
+		universityGroup.GET("/:id", univerHandler.GetUniver)
+		//universitySecurityGroup := universityGroup.Group("/")
+		//universitySecurityGroup.Use(middleware.AuthMiddleware(), middleware.UniversityMiddleware())
+		//{
+		//	universitySecurityGroup.POST("/", university.CreateUniversity)
+		//	universitySecurityGroup.PUT("/:id", university.UpdateUniversity)
+		//	universitySecurityGroup.DELETE("/:id", university.DeleteUniversity)
+		//}
+	}
 }
 
 //func setupOlympiadRoutes(r *gin.Engine) {
@@ -43,24 +59,6 @@ func setupAuthRoutes(r *gin.Engine, authHandler *auth.Handler) {
 //}
 //
 
-//
-//func setupUniversityRoutes(r *gin.Engine) {
-//
-//	r.GET("/university", university.GetUniversities)
-//
-//	universityGroup := r.Group("/university")
-//	{
-//		universityGroup.GET("/:id", university.GetUniversity)
-//
-//		universitySecurityGroup := universityGroup.Group("/")
-//		universitySecurityGroup.Use(middleware.AuthMiddleware(), middleware.UniversityMiddleware())
-//		{
-//			universitySecurityGroup.POST("/", university.CreateUniversity)
-//			universitySecurityGroup.PUT("/:id", university.UpdateUniversity)
-//			universitySecurityGroup.DELETE("/:id", university.DeleteUniversity)
-//		}
-//	}
-//}
 //
 //func setupUserRoutes(r *gin.Engine) {
 //	userGroup := r.Group("/user", middleware.AuthMiddleware())

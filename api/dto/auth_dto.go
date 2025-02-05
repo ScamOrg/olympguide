@@ -1,9 +1,4 @@
-package transfer
-
-import (
-	"api/models"
-	"time"
-)
+package dto
 
 type SignUpRequest struct {
 	Email      string `json:"email" binding:"required"`
@@ -27,16 +22,4 @@ type SendRequest struct {
 type VerifyRequest struct {
 	Email string `json:"email" binding:"required"`
 	Code  string `json:"code" binding:"required"`
-}
-
-func CreateUserFromRequest(request SignUpRequest, birthday time.Time, hash string) models.User {
-	return models.User{
-		FirstName:    request.FirstName,
-		LastName:     request.LastName,
-		SecondName:   request.SecondName,
-		Email:        request.Email,
-		RegionID:     request.RegionID,
-		Birthday:     birthday,
-		PasswordHash: hash,
-	}
 }

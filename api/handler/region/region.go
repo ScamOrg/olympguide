@@ -3,7 +3,7 @@ package region
 import (
 	"api/handler/errors"
 	"api/logic"
-	"api/models"
+	"api/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,7 +25,7 @@ func GetRegions(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func CreateRegionsResponse(regions []models.Region) []RegionResponse {
+func CreateRegionsResponse(regions []model.Region) []RegionResponse {
 	var response []RegionResponse
 
 	for _, region := range regions {

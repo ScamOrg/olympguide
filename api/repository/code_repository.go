@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"api/constants"
+	"api/utils/constants"
 	"context"
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
@@ -11,11 +11,10 @@ import (
 
 type ICodeRepo interface {
 	CodeExists(ctx context.Context, email string) (bool, error)
-	SetCode(ctx context.Context, email, code string, attempts int) error
+	SetCode(ctx context.Context, email, code string, attempts int, ttl time.Duration) error
 	GetCodeInfo(ctx context.Context, email string) (string, int, error)
-	DeleteCode(ctx context.Context, email string) error
-	SetCodeTTL(ctx context.Context, email string, ttl time.Duration) error
 	GetCodeTTL(ctx context.Context, email string) (time.Duration, error)
+	DeleteCode(ctx context.Context, email string) error
 	SendCode(ctx context.Context, email, code string) error
 	DecreaseCodeAttempt(ctx context.Context, email string) error
 }
@@ -37,14 +36,14 @@ func (e *RedisCodeRepo) GetCodeTTL(ctx context.Context, email string) (time.Dura
 	return e.rdb.TTL(ctx, email).Result()
 }
 
-func (e *RedisCodeRepo) SetCode(ctx context.Context, email, code string, attempts int) error {
-	return e.rdb.HSet(ctx, email, map[string]interface{}{
+func (e *RedisCodeRepo) SetCode(ctx context.Context, email, code string, attempts int, duration time.Duration) error {
+	err := e.rdb.HSet(ctx, email, map[string]interface{}{
 		"code":     code,
 		"attempts": attempts,
 	}).Err()
-}
-
-func (e *RedisCodeRepo) SetCodeTTL(ctx context.Context, email string, duration time.Duration) error {
+	if err != nil {
+		return err
+	}
 	return e.rdb.Expire(ctx, email, duration).Err()
 }
 

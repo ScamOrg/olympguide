@@ -1,29 +1,12 @@
 package api
 
 import (
-	"api/models"
+	"api/model"
 	"github.com/gin-gonic/gin"
 )
 
-type UniversityRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Logo        string `json:"logo"`
-	Email       string `json:"email"`
-	Site        string `json:"site"`
-	Description string `json:"description"`
-	RegionID    uint   `json:"region_id" binding:"required"`
-}
-
-func BindUniversityRequest(c *gin.Context) (UniversityRequest, error) {
-	var request UniversityRequest
-	if err := c.ShouldBind(&request); err != nil {
-		return UniversityRequest{}, err
-	}
-	return request, nil
-}
-
-func CreateUniversityFromRequest(request UniversityRequest) models.University {
-	return models.University{
+func CreateUniversityFromRequest(request UniversityRequest) model.University {
+	return model.University{
 		Name:        request.Name,
 		Logo:        request.Logo,
 		Site:        request.Site,
@@ -33,7 +16,7 @@ func CreateUniversityFromRequest(request UniversityRequest) models.University {
 	}
 }
 
-func UpdateUniversityFromRequest(university *models.University, request UniversityRequest) {
+func UpdateUniversityFromRequest(university *model.University, request UniversityRequest) {
 	university.Name = request.Name
 	university.Logo = request.Logo
 	university.Email = request.Email

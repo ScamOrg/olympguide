@@ -1,12 +1,12 @@
 package logic
 
 import (
-	"api/models"
+	"api/model"
 	"api/utils"
 )
 
-func GetLikedUniversities(userID uint) ([]models.University, error) {
-	var universities []models.University
+func GetLikedUniversities(userID uint) ([]model.University, error) {
+	var universities []model.University
 
 	if err := utils.DB.
 		Joins("JOIN olympguide.liked_universities AS lu ON university.university_id = lu.university_id").
@@ -24,7 +24,7 @@ func IsUserLikedUniversity(userID any, universityID uint) bool {
 	if !ok {
 		return false
 	}
-	var likedUniversity models.LikedUniversities
+	var likedUniversity model.LikedUniversities
 	if err := utils.DB.Where("university_id = ? AND user_id = ?", universityID, uintUserID).First(&likedUniversity).Error; err == nil {
 		return true
 	}
@@ -32,7 +32,7 @@ func IsUserLikedUniversity(userID any, universityID uint) bool {
 }
 
 func LikeUniversity(userID uint, universityID uint) error {
-	likedUniversity := models.LikedUniversities{
+	likedUniversity := model.LikedUniversities{
 		UniversityID: universityID,
 		UserID:       userID,
 	}
@@ -41,7 +41,7 @@ func LikeUniversity(userID uint, universityID uint) error {
 }
 
 func UnlikeUniversity(userID uint, universityID uint) error {
-	likedUniversity := models.LikedUniversities{
+	likedUniversity := model.LikedUniversities{
 		UniversityID: universityID,
 		UserID:       userID,
 	}

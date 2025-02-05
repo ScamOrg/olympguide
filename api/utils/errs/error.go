@@ -15,7 +15,7 @@ type AppError struct {
 }
 
 var (
-	InternalServerError    = AppError{500, "InternalServerError", "Internal server errs", nil}
+	InternalServerError    = AppError{500, "InternalServerError", "Internal server error", nil}
 	Unauthorized           = AppError{401, "Unauthorized", "Unauthorized", nil}
 	InvalidRequest         = AppError{400, "InvalidRequest", "Invalid request data", nil}
 	InvalidBirthday        = AppError{400, "InvalidBirthday", "Invalid birthday format, use DD.MM.YYYY", nil}
@@ -26,7 +26,7 @@ var (
 	RegionNotFound         = AppError{404, "RegionNotFound", "Region not found", nil}
 	UserNotFound           = AppError{404, "UserNotFound", "User with this email not found", nil}
 	CodeNotFoundOrExpired  = AppError{404, "CodeNotFoundOrExpired", "Code not found or expired", nil}
-	NotEnoughRights        = AppError{403, "NotEnoughRights", "User does not have enough rights", nil}
+	NotEnoughRights        = AppError{403, "NotEnoughRights", "User does not haves enough rights", nil}
 	UserNotAdmin           = AppError{403, "UserNotAdmin", "User is not an administrator", nil}
 	TooManyAttempts        = AppError{429, "TooManyAttempts", "Too many attempts", nil}
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
@@ -42,7 +42,16 @@ func (e AppError) Error() string {
 	return e.Message
 }
 
-func HandleAppError(c *gin.Context, appError AppError) {
+func HandleError(c *gin.Context, err error) {
+	var appErr AppError
+	if errors.As(err, &appErr) {
+		handleAppError(c, appErr)
+	} else {
+		handleUnknownError(c, err)
+	}
+}
+
+func handleAppError(c *gin.Context, appError AppError) {
 	response := gin.H{
 		"message": appError.Message,
 		"type":    appError.Type,
@@ -59,7 +68,7 @@ var KnownErrors = map[error]AppError{
 	gorm.ErrRecordNotFound: DataNotFound,
 }
 
-func HandleUnknownError(c *gin.Context, err error) {
+func handleUnknownError(c *gin.Context, err error) {
 	var resultError *AppError = nil
 	for knownErr, appErr := range KnownErrors {
 		if errors.Is(err, knownErr) {
@@ -71,5 +80,5 @@ func HandleUnknownError(c *gin.Context, err error) {
 		resultError = &InternalServerError
 		log.Printf("Internal Server Error: %v", err)
 	}
-	HandleAppError(c, *resultError)
+	handleAppError(c, *resultError)
 }

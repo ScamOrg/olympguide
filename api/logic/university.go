@@ -1,20 +1,20 @@
 package logic
 
 import (
-	"api/models"
+	"api/model"
 	"api/utils"
 )
 
-func GetUniversityByID(universityID string) (*models.University, error) {
-	var university models.University
+func GetUniversityByID(universityID string) (*model.University, error) {
+	var university model.University
 	if err := utils.DB.Preload("Region").First(&university, universityID).Error; err != nil {
 		return nil, err
 	}
 	return &university, nil
 }
 
-func GetUniversities(userID any, regionIDs []string, fromMyRegion bool, search string) ([]models.University, error) {
-	var universities []models.University
+func GetUniversities(userID any, regionIDs []string, fromMyRegion bool, search string) ([]model.University, error) {
+	var universities []model.University
 
 	query := utils.DB.Preload("Region")
 
@@ -36,28 +36,28 @@ func GetUniversities(userID any, regionIDs []string, fromMyRegion bool, search s
 	return universities, nil
 }
 
-func DeleteUniversity(university *models.University) error {
+func DeleteUniversity(university *model.University) error {
 	if err := utils.DB.Delete(university).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateUniversity(university *models.University) (uint, error) {
+func CreateUniversity(university *model.University) (uint, error) {
 	if err := utils.DB.Create(&university).Error; err != nil {
 		return 0, err
 	}
 	return university.UniversityID, nil
 }
 
-func UpdateUniversity(university *models.University) error {
+func UpdateUniversity(university *model.University) error {
 	if err := utils.DB.Save(university).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func ChangeUniversityPopularity(university *models.University, value int) {
+func ChangeUniversityPopularity(university *model.University, value int) {
 	university.Popularity += value
 	utils.DB.Save(university)
 }

@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"api/models"
+	"api/model"
 	"api/utils"
 )
 
@@ -12,15 +12,15 @@ func IsRegionExists(regionID uint) bool {
 }
 
 func GetUserRegionID(userID uint) uint {
-	var user models.User
+	var user model.User
 	if err := utils.DB.Select("region_id").First(&user, userID).Error; err != nil {
 		return 0
 	}
 	return user.RegionID
 }
 
-func GetRegions() ([]models.Region, error) {
-	var regions []models.Region
+func GetRegions() ([]model.Region, error) {
+	var regions []model.Region
 
 	if err := utils.DB.Find(&regions).Error; err != nil {
 		return nil, err
@@ -28,8 +28,8 @@ func GetRegions() ([]models.Region, error) {
 	return regions, nil
 }
 
-func GetRegionByID(regionID uint) (*models.Region, error) {
-	var region models.Region
+func GetRegionByID(regionID uint) (*model.Region, error) {
+	var region model.Region
 	if err := utils.DB.First(&region, regionID).Error; err != nil {
 		return nil, err
 	}

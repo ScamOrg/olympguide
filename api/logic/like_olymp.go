@@ -1,9 +1,9 @@
 package logic
 
 import (
-	"api/constants"
-	"api/models"
+	"api/model"
 	"api/utils"
+	"api/utils/constants"
 )
 
 func ServiceLikeOlympiad(olympiadID string, userID uint) (bool, error) {
@@ -30,15 +30,15 @@ func IsUserLikedOlympiad(userID any, olympiadID uint) bool {
 	if !ok {
 		return false
 	}
-	var likedOlymp models.LikedOlympiads
+	var likedOlymp model.LikedOlympiads
 	if err := utils.DB.Where("olympiad_id = ? AND user_id = ?", olympiadID, uintUserID).First(&likedOlymp).Error; err == nil {
 		return true
 	}
 	return false
 }
 
-func GetLikedOlympiads(userID uint) ([]models.Olympiad, error) {
-	var olympiads []models.Olympiad
+func GetLikedOlympiads(userID uint) ([]model.Olympiad, error) {
+	var olympiads []model.Olympiad
 
 	if err := utils.DB.
 		Joins("JOIN olympguide.liked_olympiads AS lo ON olympiad.olympiad_id = lo.olympiad_id").
@@ -51,7 +51,7 @@ func GetLikedOlympiads(userID uint) ([]models.Olympiad, error) {
 }
 
 func LikeOlympiad(userID uint, olympiadID uint) error {
-	likedOlympiads := models.LikedOlympiads{
+	likedOlympiads := model.LikedOlympiads{
 		OlympiadID: olympiadID,
 		UserID:     userID,
 	}
@@ -60,7 +60,7 @@ func LikeOlympiad(userID uint, olympiadID uint) error {
 }
 
 func UnlikeOlympiad(userID uint, olympiadID uint) error {
-	likedOlympiads := models.LikedOlympiads{
+	likedOlympiads := model.LikedOlympiads{
 		OlympiadID: olympiadID,
 		UserID:     userID,
 	}

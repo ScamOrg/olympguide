@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"api/models"
+	"api/model"
 	"api/utils"
 )
 
@@ -9,17 +9,17 @@ type OlympService struct {
 	repo
 }
 
-func (s *OlympService) GetOlympiadByID(olympiadID string) (*models.Olympiad, error) {
-	var olympiad models.Olympiad
+func (s *OlympService) GetOlympiadByID(olympiadID string) (*model.Olympiad, error) {
+	var olympiad model.Olympiad
 	if err := utils.DB.First(&olympiad, olympiadID).Error; err != nil {
 		return nil, err
 	}
 	return &olympiad, nil
 }
 
-func GetOlympiads(levels []string, profiles []string, name string, sortBy string, order string) ([]models.Olympiad, error) {
-	var olympiads []models.Olympiad
-	query := utils.DB.Model(&models.Olympiad{})
+func GetOlympiads(levels []string, profiles []string, name string, sortBy string, order string) ([]model.Olympiad, error) {
+	var olympiads []model.Olympiad
+	query := utils.DB.Model(&model.Olympiad{})
 
 	if len(levels) > 0 {
 		query = query.Where("level IN (?)", levels)
@@ -53,7 +53,7 @@ func GetOlympiads(levels []string, profiles []string, name string, sortBy string
 	return olympiads, nil
 }
 
-func ChangeOlympiadPopularity(olympiad *models.Olympiad, value int) {
+func ChangeOlympiadPopularity(olympiad *model.Olympiad, value int) {
 	olympiad.Popularity += value
 	utils.DB.Save(olympiad)
 }

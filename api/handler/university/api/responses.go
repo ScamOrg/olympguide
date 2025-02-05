@@ -2,25 +2,10 @@ package api
 
 import (
 	"api/logic"
-	"api/models"
+	"api/model"
 )
 
-type UniversityShortResponse struct {
-	UniversityID uint   `json:"university_id"`
-	Name         string `json:"name"`
-	Logo         string `json:"logo"`
-	Region       string `json:"region"`
-	Like         bool   `json:"like"`
-}
-
-type UniversityResponse struct {
-	Email       string `json:"email"`
-	Site        string `json:"site"`
-	Description string `json:"description"`
-	UniversityShortResponse
-}
-
-func CreateUniversityResponse(university *models.University, userID any) UniversityResponse {
+func CreateUniversityResponse(university *model.University, userID any) UniversityResponse {
 	like := logic.IsUserLikedUniversity(userID, university.UniversityID)
 
 	return UniversityResponse{
@@ -37,7 +22,7 @@ func CreateUniversityResponse(university *models.University, userID any) Univers
 	}
 }
 
-func CreateUniversitiesResponse(universities []models.University, userID any) []UniversityShortResponse {
+func CreateUniversitiesResponse(universities []model.University, userID any) []UniversityShortResponse {
 	var response []UniversityShortResponse
 
 	for _, university := range universities {
@@ -54,7 +39,7 @@ func CreateUniversitiesResponse(universities []models.University, userID any) []
 	return response
 }
 
-func CreateLikedUniversitiesResponse(universities []models.University) []UniversityShortResponse {
+func CreateLikedUniversitiesResponse(universities []model.University) []UniversityShortResponse {
 	var response []UniversityShortResponse
 	for _, university := range universities {
 		response = append(response, UniversityShortResponse{

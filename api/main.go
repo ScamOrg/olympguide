@@ -1,16 +1,12 @@
 package main
 
 import (
-	"api/config"
-	"api/handler/auth"
-	"api/middleware"
+	"api/handler"
 	"api/repository"
 	"api/service"
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"log"
 
 	"api/router"
@@ -18,7 +14,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.LoadConfig()
+	cfg, err := utils.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
@@ -29,15 +25,18 @@ func main() {
 
 	codeRepo := repository.NewRedisCodeRepo(redis)
 	userRepo := repository.NewPgUserRepo(db)
+	regionRepo := repository.NewPgRegionRepo(db)
+	univerRepo := repository.NewPgUniverRepo(db)
 
-	codeService := service.NewCodeService(codeRepo)
-	userService := service.NewUserService(userRepo)
+	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
+	univerService := service.NewUniverService(univerRepo)
 
-	authHandler := auth.NewHandler(userService, codeService)
+	authHandler := handler.NewAuthHandler(authService)
+	univerHandler := handler.NewUniverHandler(univerService)
 
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))
-	r = router.SetupRoutes(r, authHandler)
+	r = router.SetupRoutes(r, authHandler, univerHandler)
 
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)

@@ -2,7 +2,7 @@ package api
 
 import (
 	"api/logic"
-	"api/models"
+	"api/model"
 )
 
 type OlympiadShortResponse struct {
@@ -19,7 +19,7 @@ type OlympiadResponse struct {
 	Link        string `json:"link"`
 }
 
-func CreateOlympiadsResponse(olympiads []models.Olympiad, userID any) []OlympiadShortResponse {
+func CreateOlympiadsResponse(olympiads []model.Olympiad, userID any) []OlympiadShortResponse {
 	var response []OlympiadShortResponse
 	for _, olympiad := range olympiads {
 		like := logic.IsUserLikedOlympiad(userID, olympiad.OlympiadID)
@@ -34,7 +34,7 @@ func CreateOlympiadsResponse(olympiads []models.Olympiad, userID any) []Olympiad
 	return response
 }
 
-func CreateLikedOlympiadsResponse(olympiads []models.Olympiad) []OlympiadShortResponse {
+func CreateLikedOlympiadsResponse(olympiads []model.Olympiad) []OlympiadShortResponse {
 	var response []OlympiadShortResponse
 	for _, olympiad := range olympiads {
 		response = append(response, OlympiadShortResponse{

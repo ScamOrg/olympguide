@@ -1,4 +1,4 @@
-package models
+package model
 
 type Olympiad struct {
 	OlympiadID  uint `gorm:"primaryKey"`
@@ -29,6 +29,7 @@ type University struct {
 	RegionID     uint
 	Popularity   int
 	Region       Region `gorm:"foreignKey:RegionID;references:RegionID"`
+	Like         bool   `gorm:"column:like"`
 }
 
 type Faculty struct {

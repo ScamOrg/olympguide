@@ -1,4 +1,4 @@
-package models
+package model
 
 type GroupField struct {
 	GroupID uint

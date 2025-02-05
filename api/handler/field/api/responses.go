@@ -2,7 +2,7 @@ package api
 
 import (
 	"api/logic"
-	"api/models"
+	"api/model"
 )
 
 type FieldShortInfo struct {
@@ -32,7 +32,7 @@ type FieldResponse struct {
 	Group   GroupShortInfo `json:"group"`
 }
 
-func CreateGroupResponse(groups []models.GroupField, userID any) []GroupResponse {
+func CreateGroupResponse(groups []model.GroupField, userID any) []GroupResponse {
 	var response []GroupResponse
 
 	for _, group := range groups {
@@ -59,7 +59,7 @@ func CreateGroupResponse(groups []models.GroupField, userID any) []GroupResponse
 	return response
 }
 
-func CreateLikedGroupResponse(groups []models.GroupField) []GroupResponse {
+func CreateLikedGroupResponse(groups []model.GroupField) []GroupResponse {
 	var response []GroupResponse
 
 	for _, group := range groups {
@@ -85,7 +85,7 @@ func CreateLikedGroupResponse(groups []models.GroupField) []GroupResponse {
 	return response
 }
 
-func CreateFieldResponse(field *models.Field, userID any) FieldResponse {
+func CreateFieldResponse(field *model.Field, userID any) FieldResponse {
 	like := logic.IsUserLikedField(userID, field.FieldID)
 	return FieldResponse{
 		FieldID: field.FieldID,

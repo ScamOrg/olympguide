@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"api/models"
+	"api/model"
 	"gorm.io/gorm"
 )
 
 type IUserRepo interface {
-	GetAll() ([]models.User, error)
-	Create(user models.User) error
+	CreateUser(user *model.User) (uint, error)
+	GetUserByEmail(email string) (*model.User, error)
 }
 
 type PgUserRepo struct {
@@ -16,4 +16,19 @@ type PgUserRepo struct {
 
 func NewPgUserRepo(db *gorm.DB) *PgUserRepo {
 	return &PgUserRepo{db: db}
+}
+
+func (u *PgUserRepo) CreateUser(user *model.User) (uint, error) {
+	if err := u.db.Create(&user).Error; err != nil {
+		return 0, err
+	}
+	return user.UserID, nil
+}
+
+func (u *PgUserRepo) GetUserByEmail(email string) (*model.User, error) {
+	var user model.User
+	if err := u.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

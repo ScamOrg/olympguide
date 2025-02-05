@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"api/config"
 	"fmt"
 	"log"
 
@@ -9,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ConnectPostgres(cfg *config.Config) *gorm.DB {
+func ConnectPostgres(cfg *Config) *gorm.DB {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 

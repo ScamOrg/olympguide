@@ -1,7 +1,9 @@
 package constants
 
+import "time"
+
 const (
-	EmailCodeTtl          = 3
+	EmailCodeTtl          = 3 * time.Minute
 	MaxVerifyCodeAttempts = 3
 )
 const MaxSessionConn = 10

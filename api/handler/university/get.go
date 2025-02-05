@@ -8,20 +8,6 @@ import (
 	"net/http"
 )
 
-func GetUniversity(c *gin.Context) {
-	universityID := c.Param("id")
-	userID, _ := c.Get("user_id")
-
-	university, err := logic.GetUniversityByID(universityID)
-	if err != nil {
-		err.HandleUnknownError(c, err)
-		return
-	}
-
-	response := api.CreateUniversityResponse(university, userID)
-	c.JSON(http.StatusOK, response)
-}
-
 func GetUniversities(c *gin.Context) {
 	regionIDs := c.QueryArray("region_id")
 	fromMyRegion := c.Query("from_my_region") == "true"

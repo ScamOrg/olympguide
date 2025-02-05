@@ -1,9 +1,7 @@
-package config
+package utils
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
-	"log"
 	"os"
 	"strconv"
 )
@@ -20,11 +18,6 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Println("Error loading .env file")
-	}
-
 	dbPortStr := os.Getenv("DB_PORT")
 	serverPortStr := os.Getenv("API_PORT")
 	redisPortStr := os.Getenv("REDIS_PORT")
