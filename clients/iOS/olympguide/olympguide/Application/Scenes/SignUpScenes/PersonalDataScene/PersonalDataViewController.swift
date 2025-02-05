@@ -14,7 +14,6 @@ final class PersonalDataViewController: UIViewController {
     /// Флаг, показывающий, отображается ли поле «Отчество»
     private var hasSecondName: Bool = true
     
-    /// ScrollView для управления смещением при появлении клавиатуры
     private let scrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.translatesAutoresizingMaskIntoConstraints = false
@@ -34,12 +33,13 @@ final class PersonalDataViewController: UIViewController {
     /// Сделали var, чтобы можно было удалять/добавлять поле при переключении
     var secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     
-    let toggleSecondNameButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Нет отчества", for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
+    let toggleSecondNameButton: UIButton = UIButton(type: .system)
+//    {
+//        let button = UIButton(type: .system)
+//        button.setTitle("Нет отчества", for: .normal)
+//        button.translatesAutoresizingMaskIntoConstraints = false
+//        return button
+//    }()
     
     let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
     
@@ -65,14 +65,12 @@ final class PersonalDataViewController: UIViewController {
     let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
     
     // MARK: Свойства данных
-    var lastName = ""
-    var name = ""
-    var secondName = ""
-    var birthday = ""
-    var region = ""
-    var password = ""
-    var confirmPassword = ""
-    
+    var lastName: String = ""
+    var name: String = ""
+    var secondName: String = ""
+    var birthday: String = ""
+    var region: String = ""
+    var password: String = ""
     
     // MARK: - Инициализация
     
@@ -94,26 +92,29 @@ final class PersonalDataViewController: UIViewController {
         view.backgroundColor = .white
         title = "Личные данные"
         
-        // Добавляем scrollView на основной view
         setupScrollView()
-        // Компонуем элементы по порядку
         configureUI()
         
-        // Обработчик нажатия для переключения состояния поля «Отчество»
         toggleSecondNameButton.addTarget(self, action: #selector(toggleSecondNameTapped), for: .touchUpInside)
         
-        // Установим делегаты для отслеживания ввода
         lastNameTextField.delegate = self
         nameTextField.delegate = self
         secondNameTextField.delegate = self
         passwordTextField.delegate = self
         
-        // Присваиваем теги (опционально, если нужно где-то в логике)
         nameTextField.tag = 1
         secondNameTextField.tag = 2
         lastNameTextField.tag = 3
         birthdayPicker.tag = 4
         regionTextField.tag = 5
+        passwordTextField.tag = 6
+        
+        if let navigationController = self.navigationController {
+            let viewControllers = navigationController.viewControllers
+            if let rootViewController = viewControllers.first {
+                navigationController.setViewControllers([rootViewController, self], animated: true)
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -196,6 +197,19 @@ final class PersonalDataViewController: UIViewController {
     
     private func configureToggleSecondNameButton() {
         scrollView.addSubview(toggleSecondNameButton)
+        
+        var config = UIButton.Configuration.plain()
+        config.title = "Нет отчества"
+        config.image = UIImage(systemName: "circle")
+        config.baseForegroundColor = .black // Цвет текста и иконки
+        
+        // Настраиваем размещение текста и изображения
+        config.imagePlacement = .trailing // Изображение справа от текста
+        config.imagePadding = 10 // Отступ между текстом и изображением
+
+        toggleSecondNameButton.configuration = config
+        toggleSecondNameButton.translatesAutoresizingMaskIntoConstraints = false
+        
         // При добавлении кнопки смотрим, есть ли поле «Отчество»
         if hasSecondName {
             // Если отчество есть, то кнопка под ним
@@ -270,7 +284,7 @@ final class PersonalDataViewController: UIViewController {
             )
             toggleButtonTopConstraint?.isActive = true
             
-            toggleSecondNameButton.setTitle("Есть отчество", for: .normal)
+//            toggleSecondNameButton.setTitle("Есть отчество", for: .normal)
         } else {
             // Показываем поле «Отчество»
             hasSecondName = true
@@ -290,7 +304,7 @@ final class PersonalDataViewController: UIViewController {
             )
             toggleButtonTopConstraint?.isActive = true
             
-            toggleSecondNameButton.setTitle("Нет отчества", for: .normal)
+//            toggleSecondNameButton.setTitle("Нет отчества", for: .normal)
         }
         
         UIView.animate(withDuration: 0.3) {
@@ -339,7 +353,13 @@ final class PersonalDataViewController: UIViewController {
             if bottomOfTextField > topOfKeyboard {
                 let offset = bottomOfTextField - topOfKeyboard + 10
                 self.view.frame.origin.y = -offset
+            } else {
+                self.view.frame.origin.y = 0
             }
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
         }
     }
     
@@ -365,6 +385,8 @@ extension PersonalDataViewController: CustomTextFieldDelegate {
             birthday = text
         case 5:
             region = text
+        case 6:
+            password = text
         default:
             break
         }
@@ -373,7 +395,7 @@ extension PersonalDataViewController: CustomTextFieldDelegate {
 
 extension PersonalDataViewController: RegionTextFieldDelegate {
     func regionTextFieldDidSelect(region: String) {
-        // Обработка выбора региона
+        self.region = region
     }
     
     func regionTextFieldWillSelect(with optionsVC: OptionsViewController) {
