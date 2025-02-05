@@ -4,18 +4,28 @@ import (
 	"api/dto"
 	"api/model"
 	"api/repository"
+	"api/utils/constants"
+	"strconv"
 )
 
 type IUniverService interface {
 	GetUniver(universityID string, userID any) (*dto.UniversityResponse, error)
+	GetUnivers(params *dto.UniversityQueryParams) ([]dto.UniversityShortResponse, error)
+	GetLikedUnivers(userID uint) ([]dto.UniversityShortResponse, error)
+	NewUniver(request *dto.UniversityRequest) (uint, error)
+	UpdateUniver(request *dto.UniversityRequest, universityID string) (uint, error)
+	DeleteUniver(universityID string) error
+	LikeUniver(universityID string, userID uint) (bool, error)
+	DislikeUniver(universityID string, userID uint) (bool, error)
 }
 
 type UniverService struct {
 	univerRepo repository.IUniverRepo
+	regionRepo repository.IRegionRepo
 }
 
-func NewUniverService(univerRepo repository.IUniverRepo) *UniverService {
-	return &UniverService{univerRepo: univerRepo}
+func NewUniverService(univerRepo repository.IUniverRepo, regionRepo repository.IRegionRepo) *UniverService {
+	return &UniverService{univerRepo: univerRepo, regionRepo: regionRepo}
 }
 
 func (u *UniverService) GetUniver(universityID string, userID any) (*dto.UniversityResponse, error) {
@@ -23,10 +33,119 @@ func (u *UniverService) GetUniver(universityID string, userID any) (*dto.Univers
 	if err != nil {
 		return nil, err
 	}
-	return newUniversityResponse(univer), nil
+	return newUniverResponse(univer), nil
 }
 
-func newUniversityResponse(univer *model.University) *dto.UniversityResponse {
+func (u *UniverService) GetUnivers(params *dto.UniversityQueryParams) ([]dto.UniversityShortResponse, error) {
+	if uintUserID, ok := params.UserID.(uint); ok && params.FromMyRegion {
+		regionID, err := u.regionRepo.GetUserRegionID(uintUserID)
+		if err != nil {
+			return nil, err
+		}
+		params.RegionIDs = []string{strconv.Itoa(int(regionID))}
+	}
+
+	univers, err := u.univerRepo.GetUnivers(params.Search, params.RegionIDs, params.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return newUniversShortResponse(univers), nil
+}
+
+func (u *UniverService) GetLikedUnivers(userID uint) ([]dto.UniversityShortResponse, error) {
+	univers, err := u.univerRepo.GetLikedUnivers(userID)
+	if err != nil {
+		return nil, err
+	}
+	return newUniversShortResponse(univers), nil
+}
+
+func (u *UniverService) NewUniver(request *dto.UniversityRequest) (uint, error) {
+	univerModel := newUniverModel(request)
+	id, err := u.univerRepo.NewUniver(univerModel)
+	if err != nil {
+		return 0, err
+	}
+	return uint(id), nil
+}
+
+func (u *UniverService) UpdateUniver(request *dto.UniversityRequest, universityID string) (uint, error) {
+	university, err := u.univerRepo.GetUniver(universityID, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	univerModel := newUniverModel(request)
+	univerModel.UniversityID = university.UniversityID
+	err = u.univerRepo.UpdateUniver(univerModel)
+
+	if err != nil {
+		return 0, err
+	}
+	return university.UniversityID, nil
+}
+
+func (u *UniverService) DeleteUniver(universityID string) error {
+	univer, err := u.univerRepo.GetUniver(universityID, nil)
+	if err != nil {
+		return err
+	}
+	err = u.univerRepo.DeleteUniver(univer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *UniverService) LikeUniver(universityID string, userID uint) (bool, error) {
+	university, err := u.univerRepo.GetUniver(universityID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	if university.Like {
+		return false, nil
+	}
+
+	err = u.univerRepo.LikeUniver(university.UniversityID, userID)
+	if err != nil {
+		return false, err
+	}
+	u.univerRepo.ChangeUniverPopularity(university, constants.LikePopularityIncrease)
+	return true, nil
+}
+
+func (u *UniverService) DislikeUniver(universityID string, userID uint) (bool, error) {
+	university, err := u.univerRepo.GetUniver(universityID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	if !university.Like {
+		return false, nil
+	}
+
+	err = u.univerRepo.DislikeUniver(university.UniversityID, userID)
+	if err != nil {
+		return false, err
+	}
+	u.univerRepo.ChangeUniverPopularity(university, constants.LikePopularityDecrease)
+	return true, nil
+}
+
+func newUniverModel(request *dto.UniversityRequest) *model.University {
+	return &model.University{
+		Name:        request.Name,
+		Logo:        request.Logo,
+		Site:        request.Site,
+		Email:       request.Email,
+		Description: request.Description,
+		RegionID:    request.RegionID,
+	}
+}
+
+func newUniverResponse(univer *model.University) *dto.UniversityResponse {
 	return &dto.UniversityResponse{
 		Email:       univer.Email,
 		Site:        univer.Site,
@@ -39,4 +158,20 @@ func newUniversityResponse(univer *model.University) *dto.UniversityResponse {
 			Like:         univer.Like,
 		},
 	}
+}
+
+func newUniversShortResponse(univers []model.University) []dto.UniversityShortResponse {
+	var response []dto.UniversityShortResponse
+
+	for _, univer := range univers {
+		response = append(response, dto.UniversityShortResponse{
+			UniversityID: univer.UniversityID,
+			Name:         univer.Name,
+			Logo:         univer.Logo,
+			Region:       univer.Region.Name,
+			Like:         univer.Like,
+		})
+	}
+
+	return response
 }

@@ -29,7 +29,7 @@ func main() {
 	univerRepo := repository.NewPgUniverRepo(db)
 
 	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
-	univerService := service.NewUniverService(univerRepo)
+	univerService := service.NewUniverService(univerRepo, regionRepo)
 
 	authHandler := handler.NewAuthHandler(authService)
 	univerHandler := handler.NewUniverHandler(univerService)

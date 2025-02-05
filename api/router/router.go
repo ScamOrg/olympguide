@@ -12,11 +12,12 @@ func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, univerHandler 
 
 	setupAuthRoutes(r, authHandler)
 	setupUniversityRoutes(r, univerHandler)
+	setupUserRoutes(r, univerHandler)
+
 	//setupOlympiadRoutes(r)
 	//setupFieldRoutes(r)
 
 	//setupRegionRoutes(r)
-	//setupUserRoutes(r)
 
 	return r
 }
@@ -31,17 +32,18 @@ func setupAuthRoutes(r *gin.Engine, authHandler *handler.AuthHandler) {
 }
 
 func setupUniversityRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) {
-	//r.GET("/universities")
+	r.GET("/universities", univerHandler.GetUnivers)
 	universityGroup := r.Group("/university")
 	{
 		universityGroup.GET("/:id", univerHandler.GetUniver)
-		//universitySecurityGroup := universityGroup.Group("/")
-		//universitySecurityGroup.Use(middleware.AuthMiddleware(), middleware.UniversityMiddleware())
-		//{
-		//	universitySecurityGroup.POST("/", university.CreateUniversity)
-		//	universitySecurityGroup.PUT("/:id", university.UpdateUniversity)
-		//	universitySecurityGroup.DELETE("/:id", university.DeleteUniversity)
-		//}
+		universitySecurityGroup := universityGroup.Group("/")
+		// подключить проверку ролей
+		universitySecurityGroup.Use(middleware.AuthMiddleware())
+		{
+			universitySecurityGroup.POST("/", univerHandler.NewUniver)
+			universitySecurityGroup.PUT("/:id", univerHandler.UpdateUniver)
+			universitySecurityGroup.DELETE("/:id", univerHandler.DeleteUniver)
+		}
 	}
 }
 
@@ -59,24 +61,22 @@ func setupUniversityRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) 
 //}
 //
 
-//
-//func setupUserRoutes(r *gin.Engine) {
-//	userGroup := r.Group("/user", middleware.AuthMiddleware())
-//	{
-//		userGroup.GET("/region", user.GetRegion)
-//		favouriteGroup := userGroup.Group("/favourite")
-//		{
-//			favouriteGroup.GET("/university", university.GetLikedUniversities)
-//			favouriteGroup.POST("/university/:id", user.LikeUniversity)
-//			favouriteGroup.DELETE("/university/:id", user.UnlikeUniversity)
-//
-//			favouriteGroup.GET("/olympiad", olympiad.GetLikedOlympiads)
-//			favouriteGroup.POST("/olympiad/:id", user.LikeOlympiad)
-//			favouriteGroup.DELETE("/olympiad/:id", user.UnlikeOlympiad)
-//
-//			favouriteGroup.GET("/field", field.GetLikedFields)
-//			favouriteGroup.POST("/field/:id", user.LikeField)
-//			favouriteGroup.DELETE("/field/:id", user.UnlikeField)
-//		}
-//	}
-//}
+func setupUserRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) {
+	userGroup := r.Group("/user", middleware.AuthMiddleware())
+	{
+		//userGroup.GET("/region", user.GetRegion)
+		favouriteGroup := userGroup.Group("/favourite")
+		{
+			favouriteGroup.GET("/university", univerHandler.GetLikedUnivers)
+			favouriteGroup.POST("/university/:id", univerHandler.LikeUniver)
+			favouriteGroup.DELETE("/university/:id", univerHandler.DislikeUniver)
+			//favouriteGroup.GET("/olympiad", olympiad.GetLikedOlympiads)
+			//favouriteGroup.POST("/olympiad/:id", user.LikeOlympiad)
+			//favouriteGroup.DELETE("/olympiad/:id", user.UnlikeOlympiad)
+			//
+			//favouriteGroup.GET("/field", field.GetLikedFields)
+			//favouriteGroup.POST("/field/:id", user.LikeField)
+			//favouriteGroup.DELETE("/field/:id", user.UnlikeField)
+		}
+	}
+}

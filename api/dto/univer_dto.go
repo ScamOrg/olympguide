@@ -17,6 +17,13 @@ type UniversityShortResponse struct {
 	Like         bool   `json:"like"`
 }
 
+type UniversityQueryParams struct {
+	RegionIDs    []string `form:"region_id"`
+	FromMyRegion bool     `form:"from_my_region"`
+	Search       string   `form:"search"`
+	UserID       any
+}
+
 type UniversityResponse struct {
 	Email       string `json:"email"`
 	Site        string `json:"site"`
