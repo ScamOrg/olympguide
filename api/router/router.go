@@ -67,7 +67,7 @@ func setupUserRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) {
 		//userGroup.GET("/region", user.GetRegion)
 		favouriteGroup := userGroup.Group("/favourite")
 		{
-			favouriteGroup.GET("/university", univerHandler.GetLikedUnivers)
+			favouriteGroup.GET("/universities", univerHandler.GetLikedUnivers)
 			favouriteGroup.POST("/university/:id", univerHandler.LikeUniver)
 			favouriteGroup.DELETE("/university/:id", univerHandler.DislikeUniver)
 			//favouriteGroup.GET("/olympiad", olympiad.GetLikedOlympiads)
