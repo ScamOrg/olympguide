@@ -5,9 +5,6 @@
 //  Created by Tom Tim on 21.01.2025.
 //
 
-import Foundation
-import UIKit
-
 // MARK: - Business Logic
 protocol EnterEmailBusinessLogic {
     func sendCode(request: EnterEmailModels.SendCode.Request)
