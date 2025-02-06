@@ -11,17 +11,8 @@ final class PersonalDataViewController: UIViewController {
     
     // MARK: - Свойства
     private var userEmail: String = ""
-    /// Флаг, показывающий, отображается ли поле «Отчество»
     private var hasSecondName: Bool = true
     
-    private let scrollView: UIScrollView = {
-        let sv = UIScrollView()
-        sv.translatesAutoresizingMaskIntoConstraints = false
-        sv.keyboardDismissMode = .interactive
-        return sv
-    }()
-    
-    // Эти две констрейнты будем переустанавливать при скрытии/показе отчества
     private var toggleButtonTopConstraint: NSLayoutConstraint?
     private var birthdayTopConstraint: NSLayoutConstraint?
     
@@ -30,16 +21,9 @@ final class PersonalDataViewController: UIViewController {
     let lastNameTextField: CustomInputDataField = CustomInputDataField(with: "Фамилия")
     let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
     
-    /// Сделали var, чтобы можно было удалять/добавлять поле при переключении
     var secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     
-    let toggleSecondNameButton: UIButton = CircleToggleButton(frame: .zero)
-//    {
-//        let button = UIButton(type: .system)
-//        button.setTitle("Нет отчества", for: .normal)
-//        button.translatesAutoresizingMaskIntoConstraints = false
-//        return button
-//    }()
+    let toggleSecondNameButton: HasSecondNameButton = HasSecondNameButton(frame: .zero)
     
     let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
     
@@ -92,7 +76,6 @@ final class PersonalDataViewController: UIViewController {
         view.backgroundColor = .white
         title = "Личные данные"
         
-        setupScrollView()
         configureUI()
         
         toggleSecondNameButton.addTarget(self, action: #selector(toggleSecondNameTapped), for: .touchUpInside)
@@ -137,16 +120,6 @@ final class PersonalDataViewController: UIViewController {
     
     // MARK: - Настройка UI
     
-    private func setupScrollView() {
-        view.addSubview(scrollView)
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
     private func configureUI() {
         // 1. Фамилия
         configureLastNameTextField()
@@ -167,52 +140,38 @@ final class PersonalDataViewController: UIViewController {
     }
     
     private func configureLastNameTextField() {
-        scrollView.addSubview(lastNameTextField)
-        lastNameTextField.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            lastNameTextField.topAnchor.constraint(equalTo: scrollView.safeAreaLayoutGuide.topAnchor, constant: 16),
-            lastNameTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
-        ])
+        view.addSubview(lastNameTextField)
+        
+        lastNameTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 16)
+        lastNameTextField.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configureNameTextField() {
-        scrollView.addSubview(nameTextField)
-        nameTextField.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            nameTextField.topAnchor.constraint(equalTo: lastNameTextField.bottomAnchor, constant: 24),
-            nameTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
-        ])
+        view.addSubview(nameTextField)
+        
+        nameTextField.pinTop(to: lastNameTextField.bottomAnchor, 24)
+        nameTextField.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configureSecondNameTextField() {
-        scrollView.addSubview(secondNameTextField)
-        secondNameTextField.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(secondNameTextField)
         
-        // Отчество идёт сразу под «Имя»
-        NSLayoutConstraint.activate([
-            secondNameTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24),
-            secondNameTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
-        ])
+        secondNameTextField.pinTop(to: nameTextField.bottomAnchor, 24)
+        secondNameTextField.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configureToggleSecondNameButton() {
-        scrollView.addSubview(toggleSecondNameButton)
+        view.addSubview(toggleSecondNameButton)
+        toggleSecondNameButton.text = "Нет отчества"
 
-        toggleSecondNameButton.setTitle("Нет отчества", for: .normal)
-        toggleSecondNameButton.setImage(UIImage(systemName: "circle"), for: .normal)
-        toggleSecondNameButton.semanticContentAttribute = .forceRightToLeft
         toggleSecondNameButton.translatesAutoresizingMaskIntoConstraints = false
         
-        
-        // При добавлении кнопки смотрим, есть ли поле «Отчество»
         if hasSecondName {
-            // Если отчество есть, то кнопка под ним
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
                 equalTo: secondNameTextField.bottomAnchor,
                 constant: 24
             )
         } else {
-            // Если отчества нет, кнопка располагается под «Имя»
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
                 equalTo: nameTextField.bottomAnchor,
                 constant: 24
@@ -220,46 +179,33 @@ final class PersonalDataViewController: UIViewController {
         }
         toggleButtonTopConstraint?.isActive = true
         
-        NSLayoutConstraint.activate([
-            toggleSecondNameButton.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
-            toggleSecondNameButton.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20)
-        ])
+        toggleSecondNameButton.pinLeft(to: view.leadingAnchor)
+        toggleSecondNameButton.pinRight(to: view.trailingAnchor)
     }
     
     private func configureBirthdayPicker() {
-        scrollView.addSubview(birthdayPicker)
+        view.addSubview(birthdayPicker)
         birthdayPicker.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Пикер даты располагаем под кнопкой
         birthdayTopConstraint = birthdayPicker.topAnchor.constraint(equalTo: toggleSecondNameButton.bottomAnchor, constant: 24)
         birthdayTopConstraint?.isActive = true
         
-        NSLayoutConstraint.activate([
-            birthdayPicker.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
-        ])
+        birthdayPicker.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configureRegionTextField() {
-        scrollView.addSubview(regionTextField)
-        regionTextField.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(regionTextField)
         
-        // Топ у regionTextField привязываем к нижней границе пикера дня рождения
-        NSLayoutConstraint.activate([
-            regionTextField.topAnchor.constraint(equalTo: birthdayPicker.bottomAnchor, constant: 24),
-            regionTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
-        ])
+        regionTextField.pinTop(to: birthdayPicker.bottomAnchor, 24)
+        regionTextField.pinLeft(to: view.leadingAnchor, 20)
         
         regionTextField.regionDelegate = self
     }
     
     private func configurePasswordTextField() {
-        scrollView.addSubview(passwordTextField)
-        passwordTextField.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            passwordTextField.topAnchor.constraint(equalTo: regionTextField.bottomAnchor, constant: 24),
-            passwordTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
-            passwordTextField.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20)
-        ])
+        view.addSubview(passwordTextField)
+        
+        passwordTextField.pinTop(to: regionTextField.bottomAnchor, 24)
+        passwordTextField.pinLeft(to: view.leadingAnchor, 20)
     }
     
     
@@ -267,11 +213,9 @@ final class PersonalDataViewController: UIViewController {
     
     @objc private func toggleSecondNameTapped() {
         if hasSecondName {
-            // Скрываем поле «Отчество»
             hasSecondName = false
             secondNameTextField.removeFromSuperview()
             
-            // Обновляем привязку кнопки (теперь к нижней границе поля «Имя»)
             toggleButtonTopConstraint?.isActive = false
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
                 equalTo: nameTextField.bottomAnchor,
@@ -279,19 +223,15 @@ final class PersonalDataViewController: UIViewController {
             )
             toggleButtonTopConstraint?.isActive = true
             toggleSecondNameButton.setImage(UIImage(systemName: "inset.filled.circle"), for: .normal)
-//            toggleSecondNameButton.setTitle("Есть отчество", for: .normal)
         } else {
-            // Показываем поле «Отчество»
             hasSecondName = true
-            // Добавляем на скролл снова
-            scrollView.addSubview(secondNameTextField)
+            view.addSubview(secondNameTextField)
             secondNameTextField.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 secondNameTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24),
-                secondNameTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
+                secondNameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
             ])
             
-            // Обновляем привязку кнопки (теперь к нижней границе поля «Отчество»)
             toggleButtonTopConstraint?.isActive = false
             toggleButtonTopConstraint = toggleSecondNameButton.topAnchor.constraint(
                 equalTo: secondNameTextField.bottomAnchor,
@@ -299,11 +239,10 @@ final class PersonalDataViewController: UIViewController {
             )
             toggleButtonTopConstraint?.isActive = true
             toggleSecondNameButton.setImage(UIImage(systemName: "circle"), for: .normal)
-//            toggleSecondNameButton.setTitle("Нет отчества", for: .normal)
         }
         
-        UIView.animate(withDuration: 0.3) { [weak self] in
-            self?.scrollView.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) {[weak self] in
+            self?.view.layoutIfNeeded()
             self?.secondNameTextField.alpha = self?.hasSecondName ?? false ? 1 : 0
         }
     }
@@ -360,14 +299,12 @@ final class PersonalDataViewController: UIViewController {
     }
     
     @objc private func keyboardWillHide(_ notification: Notification) {
-        // Возвращаем в исходное положение
         self.view.frame.origin.y = 0
     }
 }
 
 
 // MARK: - Делегаты для кастомных текстовых полей
-
 extension PersonalDataViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
         switch searchBar.tag {
@@ -403,35 +340,5 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
     
     func dissmissKeyboard() {
         view.endEditing(true)
-    }
-}
-
-
-import UIKit
-
-class CustomCheckButton: UIButton {
-    
-    private let normalImageName = "circle"
-    private let selectedImageName = "inset.filled.circle"
-    
-    
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configureButton()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        configureButton()
-    }
-    
-    private func configureButton() {
-        // Настраиваем начальные состояния
-        setTitle("Нет отчества", for: .normal)
-        setTitleColor(.black, for: .normal)
-        setImage(UIImage(systemName: normalImageName), for: .normal)
-        
-        // Подписываемся на нажатие
     }
 }
