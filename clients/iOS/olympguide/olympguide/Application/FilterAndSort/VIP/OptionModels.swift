@@ -17,6 +17,20 @@ enum Options {
             let options: [OptionModel]
         }
     }
+    
+    enum FetchOptions {
+        struct Request {
+            let endPoint: String
+        }
+        
+        struct Response {
+            let options: [Option]
+        }
+        
+        struct ViewModel {
+            
+        }
+    }
 }
 
 class OptionModel {
@@ -30,3 +44,27 @@ class OptionModel {
         self.currentIndex = currentIndex
     }
 }
+
+enum OptionsModels {
+    enum Region {
+        struct ResponseModel : Codable {
+            let name: String
+            let id: Int
+            enum CodingKeys: String, CodingKey {
+                case id = "region_id"
+                case name
+            }
+        }
+        
+        struct ViewModel : Option {
+            var id: Int
+            var name: String
+        }
+    }
+}
+
+struct Option {
+    var id: Int
+    var name: String
+}
+
