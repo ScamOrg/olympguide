@@ -50,7 +50,7 @@ class CustomTextField: UIView {
     weak var delegate: (any CustomTextFieldDelegate)?
     
     private let titleLabel = UILabel()
-    private let textField = UITextField()
+    /*private*/ let textField = UITextField()
     private let actionButton = UIButton()
     var isActive = false
     
@@ -253,7 +253,6 @@ class CustomTextField: UIView {
 }
 
 // MARK: - UITextFieldDelegate
-
 extension CustomTextField: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         didTapSearchBar()

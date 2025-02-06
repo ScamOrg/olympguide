@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        _ = NetworkMonitor.shared
+//        _ = NetworkMonitor.shared
         let tabBar = TabBarViewController()
         let uiwindow = UIWindow(windowScene: windowScene)
         window = uiwindow

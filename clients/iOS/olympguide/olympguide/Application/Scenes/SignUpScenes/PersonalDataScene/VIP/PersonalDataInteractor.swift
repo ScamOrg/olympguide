@@ -1,38 +1,37 @@
 //
-//  EnterEmailProtocols.swift
+//  PersonalDataInteractor.swift
 //  olympguide
 //
-//  Created by Tom Tim on 21.01.2025.
+//  Created by Tom Tim on 05.02.2025.
 //
 
 // MARK: - Business Logic
-protocol EnterEmailBusinessLogic {
+protocol PersonalDataBusinessLogic {
     func sendCode(request: EnterEmailModels.SendCode.Request)
 }
 
 // MARK: - Data Store
-// Храним данные, которые могут потребоваться при переходе на другой экран
-protocol EnterEmailDataStore {
+protocol PersonalDataEmailDataStore {
     var email: String? { get set }
     var time: Int? { get set }
 }
 
 // MARK: - Presentation Logic
-protocol EnterEmailPresentationLogic {
+protocol PersonalDataPresentationLogic {
     func presentSendCode(response: EnterEmailModels.SendCode.Response)
 }
 
 // MARK: - Display Logic
-protocol EnterEmailDisplayLogic: AnyObject {
+protocol PersonalDataDisplayLogic: AnyObject {
     func displaySendCodeResult(viewModel: EnterEmailModels.SendCode.ViewModel)
 }
 
 // MARK: - Routing Logic
-protocol EnterEmailRoutingLogic {
+protocol PersonalDataRoutingLogic {
     func routeToVerifyCode()
 }
 
 // MARK: - Data Passing
-protocol EnterEmailDataPassing {
+protocol PersonalDataDataPassing {
     var dataStore: EnterEmailDataStore? { get }
 }

@@ -93,12 +93,12 @@ protocol OptionsViewControllerDelegate: AnyObject {
 }
 
 final class OptionsViewController: UIViewController {
-
+    
     // MARK: - Properties
-
+    
     weak var delegate: OptionsViewControllerDelegate?
     var interactor: (OptionsDataStore & OptionsBusinessLogic)?
-
+    
     private var items: [OptionModel] = []
     private var currentItems: [OptionModel] = []
     
@@ -122,9 +122,17 @@ final class OptionsViewController: UIViewController {
     private var isMultipleChoice: Bool
     lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
     private let tableView: UITableView = UITableView()
-
+    
+    private let selectedScrollContainer: UIView = {
+        $0.clipsToBounds = true
+        return $0
+    }(UIView())
+    private var containerHeightConstraint: NSLayoutConstraint!
+    
+    private let selectedScrollView: SelectedScrollView = SelectedScrollView(selectedOptions: [])
+    
     // MARK: - Initializers
-
+    
     init(items: [String], title: String, isMultipleChoice: Bool) {
         for (index, value) in items.enumerated() {
             let option = OptionModel(
@@ -174,9 +182,9 @@ final class OptionsViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.modalPresentationStyle = .overFullScreen
@@ -185,7 +193,7 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Setup
-
+    
     func setup() {
         let viewController = self
         let interactor = OptionsViewInteractor()
@@ -198,7 +206,7 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Gesture Configuration
-
+    
     private func configureGesture() {
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
         containerView.addGestureRecognizer(panGesture)
@@ -213,6 +221,10 @@ final class OptionsViewController: UIViewController {
         configureTitleLabel()
         configureCancelButton()
         configureSaveButton()
+        if items.count >= Constants.Numbers.rowsLimit {
+            configureSearchBar()
+        }
+        configureSelectedScrollContainer()
         configureTableView()
     }
     
@@ -227,8 +239,8 @@ final class OptionsViewController: UIViewController {
     
     private func configureContainerView() {
         let sheetHeight: CGFloat = items.count > Constants.Numbers.rowsLimit
-            ? view.bounds.height - Constants.Dimensions.sheetHeightOffset
-            : Constants.Dimensions.sheetHeightSmall + Constants.Dimensions.rowHeight * CGFloat(items.count)
+        ? view.bounds.height - Constants.Dimensions.sheetHeightOffset
+        : Constants.Dimensions.sheetHeightSmall + Constants.Dimensions.rowHeight * CGFloat(items.count)
         
         containerView.frame = CGRect(
             x: Constants.Dimensions.containerX,
@@ -301,14 +313,31 @@ final class OptionsViewController: UIViewController {
         saveButton.pinLeft(to: containerView.centerXAnchor, Constants.Dimensions.buttonSpacing)
     }
     
+    private func configureSelectedScrollContainer() {
+        containerView.addSubview(selectedScrollContainer)
+        containerHeightConstraint = selectedScrollContainer.heightAnchor.constraint(equalToConstant: 0)
+        containerHeightConstraint.isActive = true
+        
+        selectedScrollContainer.pinTop(to: searchBar.bottomAnchor)
+        selectedScrollContainer.pinLeft(to: containerView.leadingAnchor)
+        selectedScrollContainer.pinRight(to: containerView.trailingAnchor)
+        
+        selectedScrollContainer.addSubview(selectedScrollView)
+        selectedScrollView.pinLeft(to: containerView.leadingAnchor)
+        selectedScrollView.pinRight(to: containerView.trailingAnchor)
+        selectedScrollView.pinTop(to: selectedScrollContainer, 9)
+        
+        selectedScrollView.alpha = 0
+        selectedScrollView.delegate = self
+    }
+    
     private func configureTableView() {
         tableView.register(OptionsTableViewCell.self, forCellReuseIdentifier: OptionsTableViewCell.identifier)
         tableView.separatorStyle = .none
         
         containerView.addSubview(tableView)
         if items.count >= Constants.Numbers.rowsLimit {
-            configureSearchBar()
-            tableView.pinTop(to: searchBar.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
+            tableView.pinTop(to: selectedScrollContainer.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
         } else {
             tableView.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
         }
@@ -331,7 +360,7 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Animation
-
+    
     func animateShow() {
         UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
             self.containerView.frame.origin.y = self.finalY
@@ -362,7 +391,7 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Pan Gesture Handling
-
+    
     @objc
     private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
@@ -414,13 +443,13 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // MARK: UITableViewDataSource
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return currentItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        
         guard let cell = tableView.dequeueReusableCell(withIdentifier: OptionsTableViewCell.identifier, for: indexPath) as? OptionsTableViewCell else {
             return UITableViewCell()
         }
@@ -447,19 +476,20 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // MARK: UITableViewDelegate
-
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         handleButtonTap(at: indexPath)
     }
     
     // MARK: - Selection Handling
-
+    
     private func handleButtonTap(at indexPath: IndexPath) {
         if currentSelectedIndices.contains(indexPath.row) {
             currentSelectedIndices.remove(indexPath.row)
             tableView.reloadRows(at: [indexPath], with: .automatic)
             if let originIndex = currentToAll[indexPath.row] {
                 selectedIndices.remove(originIndex)
+                selectedScrollView.removeButtons(with: originIndex)
             }
             return
         }
@@ -467,6 +497,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
         currentSelectedIndices.insert(indexPath.row)
         if let originIndex = currentToAll[indexPath.row] {
             selectedIndices.insert(originIndex)
+            selectedScrollView.addButtonToStackView(with: items[originIndex].title, tag: originIndex)
         }
         tableView.reloadRows(at: [indexPath], with: .automatic)
         
@@ -477,6 +508,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
                         currentSelectedIndices.remove(currentIndex)
                         tableView.reloadRows(at: [IndexPath(row: currentIndex, section: 0)], with: .automatic)
                     }
+                    selectedScrollView.removeButtons(with: number)
                     selectedIndices.remove(number)
                     break
                 }
@@ -485,7 +517,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // MARK: - Button Actions
-
+    
     @objc
     private func buttonTouchDown(_ sender: UIButton) {
         UIView.animate(withDuration: 0.1,
@@ -550,5 +582,34 @@ extension OptionsViewController: OptionsDisplayLogic {
         
         currentItems = viewModel.options
         tableView.reloadData()
+    }
+}
+
+extension OptionsViewController : SelectedBarDelegate {
+    func toggleCustomTextField() {
+        if containerHeightConstraint.constant == 0 {
+            UIView.animate(withDuration: 0.3) {
+                self.containerHeightConstraint.constant = self.selectedScrollView.bounds.height + 12
+                self.selectedScrollView.alpha = 1
+                self.view.layoutIfNeeded()
+            }
+        } else {
+            UIView.animate(withDuration: 0.3) {
+                self.containerHeightConstraint.constant = 0
+                self.selectedScrollView.alpha = 0
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
+    func unselectOption(at index: Int) {
+        if selectedIndices.contains(index) {
+            selectedIndices.remove(index)
+            if let currentIndex = allToCurrent[index] {
+                currentSelectedIndices.remove(currentIndex)
+                tableView.reloadRows(at: [IndexPath(row: currentIndex, section: 0)], with: .automatic)
+            }
+            return
+        }
     }
 }
