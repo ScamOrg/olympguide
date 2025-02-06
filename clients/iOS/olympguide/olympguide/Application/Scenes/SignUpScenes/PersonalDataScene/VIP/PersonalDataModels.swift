@@ -26,4 +26,14 @@ enum PersonalData {
             let name: String
         }
     }
+    
+    enum LoadRegions {
+        struct Response {
+            let regions: [OptionsModels.Region.ResponseModel]
+        }
+        struct ViewModel {
+            let regions: [OptionsModels.Region.ViewModel]
+        }
+    }
+    
 }
