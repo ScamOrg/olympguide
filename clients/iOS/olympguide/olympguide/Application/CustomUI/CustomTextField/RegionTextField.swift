@@ -15,9 +15,9 @@ protocol RegionTextFieldDelegate: AnyObject {
 
 final class RegionTextField: CustomTextField {
     weak var regionDelegate: RegionTextFieldDelegate?
-    var regions: [String] = []
+    var regions: [Option] = []
     var selectedIndecies: Set<Int> = []
-    init(with title: String, regions: [String]) {
+    init(with title: String, regions: [Option]) {
         self.regions = regions
         super.init(with: title)
         isUserInteractionEnabled(false)
@@ -63,7 +63,7 @@ extension RegionTextField : OptionsViewControllerDelegate {
         if options.isEmpty {
             setTextFieldText("")
         } else {
-            setTextFieldText(regions[options[0]])
+            setTextFieldText(regions[options[0]].name)
         }
         textFieldSendAction(for: .editingChanged)
     }
