@@ -106,6 +106,7 @@ final class OptionsViewController: UIViewController {
     private let containerView = UIView()
     private var panGesture: UIPanGestureRecognizer!
     private var finalY: CGFloat = 0
+    private var endPoint: String = ""
     
     private var initialSelectedIndices: Set<Int> = []
     var selectedIndices: Set<Int> = []
@@ -122,6 +123,7 @@ final class OptionsViewController: UIViewController {
     private var isMultipleChoice: Bool
     lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
     private let tableView: UITableView = UITableView()
+    
     
     private let selectedScrollContainer: UIView = {
         $0.clipsToBounds = true
@@ -149,15 +151,25 @@ final class OptionsViewController: UIViewController {
         self.currentSelectedIndices = self.selectedIndices
     }
     
-    init(items: [String], title: String, isMultipleChoice: Bool, selectedIndices: Set<Int>) {
-        for (index, value) in items.enumerated() {
+    init(
+        items: [Option],
+        title: String,
+        isMultipleChoice: Bool,
+        selectedIndices: Set<Int>,
+        count: Int,
+        endPoint: String
+    ) {
+        
+        for value in items {
             let option = OptionModel(
-                title: value,
-                realIndex: index,
-                currentIndex: index
+                title: value.name,
+                realIndex: value.id,
+                currentIndex: value.id
             )
             self.items.append(option)
         }
+        
+        self.items.sort { $0.realIndex < $1.realIndex }
         
         self.titleLabel.text = title
         self.isMultipleChoice = isMultipleChoice
@@ -562,7 +574,6 @@ extension OptionsViewController: CustomTextFieldDelegate {
 }
 
 // MARK: - OptionsDisplayLogic
-
 extension OptionsViewController: OptionsDisplayLogic {
     func displayTextDidChange(viewModel: Options.TextDidChange.ViewModel) {
         currentToAll.removeAll()
@@ -582,6 +593,10 @@ extension OptionsViewController: OptionsDisplayLogic {
         
         currentItems = viewModel.options
         tableView.reloadData()
+    }
+    
+    func displayOptions() {
+        
     }
 }
 
