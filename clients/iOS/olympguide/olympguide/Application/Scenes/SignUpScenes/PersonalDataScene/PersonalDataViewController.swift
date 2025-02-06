@@ -33,7 +33,7 @@ final class PersonalDataViewController: UIViewController {
     /// Сделали var, чтобы можно было удалять/добавлять поле при переключении
     var secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
     
-    let toggleSecondNameButton: UIButton = UIButton(type: .system)
+    let toggleSecondNameButton: UIButton = CircleToggleButton(frame: .zero)
 //    {
 //        let button = UIButton(type: .system)
 //        button.setTitle("Нет отчества", for: .normal)
@@ -197,18 +197,12 @@ final class PersonalDataViewController: UIViewController {
     
     private func configureToggleSecondNameButton() {
         scrollView.addSubview(toggleSecondNameButton)
-        
-        var config = UIButton.Configuration.plain()
-        config.title = "Нет отчества"
-        config.image = UIImage(systemName: "circle")
-        config.baseForegroundColor = .black // Цвет текста и иконки
-        
-        // Настраиваем размещение текста и изображения
-        config.imagePlacement = .trailing // Изображение справа от текста
-        config.imagePadding = 10 // Отступ между текстом и изображением
 
-        toggleSecondNameButton.configuration = config
+        toggleSecondNameButton.setTitle("Нет отчества", for: .normal)
+        toggleSecondNameButton.setImage(UIImage(systemName: "circle"), for: .normal)
+        toggleSecondNameButton.semanticContentAttribute = .forceRightToLeft
         toggleSecondNameButton.translatesAutoresizingMaskIntoConstraints = false
+        
         
         // При добавлении кнопки смотрим, есть ли поле «Отчество»
         if hasSecondName {
@@ -227,7 +221,8 @@ final class PersonalDataViewController: UIViewController {
         toggleButtonTopConstraint?.isActive = true
         
         NSLayoutConstraint.activate([
-            toggleSecondNameButton.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20)
+            toggleSecondNameButton.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+            toggleSecondNameButton.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20)
         ])
     }
     
@@ -283,7 +278,7 @@ final class PersonalDataViewController: UIViewController {
                 constant: 24
             )
             toggleButtonTopConstraint?.isActive = true
-            
+            toggleSecondNameButton.setImage(UIImage(systemName: "inset.filled.circle"), for: .normal)
 //            toggleSecondNameButton.setTitle("Есть отчество", for: .normal)
         } else {
             // Показываем поле «Отчество»
@@ -303,12 +298,13 @@ final class PersonalDataViewController: UIViewController {
                 constant: 24
             )
             toggleButtonTopConstraint?.isActive = true
-            
+            toggleSecondNameButton.setImage(UIImage(systemName: "circle"), for: .normal)
 //            toggleSecondNameButton.setTitle("Нет отчества", for: .normal)
         }
         
-        UIView.animate(withDuration: 0.3) {
-            self.scrollView.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.scrollView.layoutIfNeeded()
+            self?.secondNameTextField.alpha = self?.hasSecondName ?? false ? 1 : 0
         }
     }
     
@@ -407,5 +403,35 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
     
     func dissmissKeyboard() {
         view.endEditing(true)
+    }
+}
+
+
+import UIKit
+
+class CustomCheckButton: UIButton {
+    
+    private let normalImageName = "circle"
+    private let selectedImageName = "inset.filled.circle"
+    
+    
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureButton()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configureButton()
+    }
+    
+    private func configureButton() {
+        // Настраиваем начальные состояния
+        setTitle("Нет отчества", for: .normal)
+        setTitleColor(.black, for: .normal)
+        setImage(UIImage(systemName: normalImageName), for: .normal)
+        
+        // Подписываемся на нажатие
     }
 }
