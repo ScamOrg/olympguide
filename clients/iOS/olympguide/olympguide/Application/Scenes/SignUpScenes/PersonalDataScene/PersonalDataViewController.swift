@@ -17,7 +17,6 @@ final class PersonalDataViewController: UIViewController {
     private var birthdayTopConstraint: NSLayoutConstraint?
     
     // MARK: UI Элементы
-    
     let lastNameTextField: CustomInputDataField = CustomInputDataField(with: "Фамилия")
     let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
     
