@@ -40,7 +40,6 @@ final class EnterEmailInteractor: EnterEmailBusinessLogic, EnterEmailDataStore {
                 self.presenter?.presentSendCode(response: response)
                 
             case .failure(let networkError):
-                // Проверяем, вдруг это .previousCodeNotExpired?
                 switch networkError {
                 case .previousCodeNotExpired(let time):
                     self.time = time
