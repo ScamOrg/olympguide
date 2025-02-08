@@ -28,21 +28,7 @@ final class PersonalDataViewController: UIViewController {
     
     let regionTextField: RegionTextField = RegionTextField(
         with: "Регион",
-        regions: [
-            "Москва",
-            "Санкт-Петербург",
-            "Йошкар-Ола",
-            "Екатеринбург",
-            "Петрозаводск",
-            "Казань",
-            "Новосибирск",
-            "Нижний Новгород",
-            "Омск",
-            "Ростов-на-Дону",
-            "Самара",
-            "Саратов",
-            "Ульяновск"
-        ]
+        endPoint: "/regions"
     )
     
     let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
