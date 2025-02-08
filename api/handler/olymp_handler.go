@@ -2,8 +2,6 @@ package handler
 
 import (
 	"api/dto"
-	"api/handler/olympiad/api"
-	"api/logic"
 	"api/service"
 	"api/utils/errs"
 	"github.com/gin-gonic/gin"
@@ -26,7 +24,7 @@ func (o *OlympHandler) GetOlympiads(c *gin.Context) {
 	}
 	queryParams.UserID, _ = c.Get("user_id")
 
-	olymps, err := o.olympService.GetOlymps(queryParams)
+	olymps, err := o.olympService.GetOlymps(&queryParams)
 
 	if err != nil {
 		errs.HandleError(c, err)
@@ -39,7 +37,7 @@ func (o *OlympHandler) GetOlympiads(c *gin.Context) {
 func (o *OlympHandler) GetLikedOlympiads(c *gin.Context) {
 	userID, _ := c.MustGet("user_id").(uint)
 
-	olymps, err := o.olympService.GetLikedUnivers()
+	olymps, err := o.olympService.GetLikedOlymps(userID)
 	if err != nil {
 		errs.HandleError(c, err)
 		return
