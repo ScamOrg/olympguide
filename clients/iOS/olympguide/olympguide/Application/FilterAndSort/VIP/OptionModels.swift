@@ -11,10 +11,20 @@ enum Options {
             let query: String
         }
         struct Response {
-            let options: [OptionModel]
+            struct Dependencies {
+                let realIndex: Int
+                let currentIndex: Int
+            }
+            
+            let options: [Dependencies]
         }
         struct ViewModel {
-            let options: [OptionModel]
+            struct DependenciesViewModel {
+                let realIndex: Int
+                let currentIndex: Int
+            }
+            
+            let dependencies: [DependenciesViewModel]
         }
     }
     
@@ -24,47 +34,57 @@ enum Options {
         }
         
         struct Response {
-            let options: [Option]
+            let options: [DynamicOption]
         }
         
         struct ViewModel {
+            struct OptionViewModel {
+                let id: Int
+                let name: String
+            }
             
+            let options: [OptionViewModel]
         }
     }
 }
 
-class OptionModel {
-    let title: String
-    let realIndex: Int
-    var currentIndex: Int
+struct DynamicCodingKeys: CodingKey {
+    var stringValue: String
+    init?(stringValue: String) { self.stringValue = stringValue }
     
-    init(title: String, realIndex: Int, currentIndex: Int) {
-        self.title = title
-        self.realIndex = realIndex
-        self.currentIndex = currentIndex
-    }
+    var intValue: Int? { return nil }
+    init?(intValue: Int) { return nil }
 }
 
-enum OptionsModels {
-    enum Region {
-        struct ResponseModel : Codable {
-            let name: String
-            let id: Int
-            enum CodingKeys: String, CodingKey {
-                case id = "region_id"
-                case name
+struct DynamicOption: Decodable {
+    let id: Int
+    let name: String
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+        
+        var idValue: Int?
+        var nameValue: String?
+        
+        for key in container.allKeys {
+            if key.stringValue == "name" {
+                nameValue = try container.decode(String.self, forKey: key)
+            } else if key.stringValue.hasSuffix("_id") {
+                idValue = try container.decode(Int.self, forKey: key)
             }
         }
         
-        struct ViewModel : Option {
-            var id: Int
-            var name: String
+        guard let idValue, let nameValue else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "Отсутствует один из необходимых ключей: id или name"
+                )
+            )
         }
+        
+        self.id = idValue
+        self.name = nameValue
     }
-}
-
-struct Option {
-    var id: Int
-    var name: String
 }
 
