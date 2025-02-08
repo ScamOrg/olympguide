@@ -15,10 +15,11 @@ protocol RegionTextFieldDelegate: AnyObject {
 
 final class RegionTextField: CustomTextField {
     weak var regionDelegate: RegionTextFieldDelegate?
-    var regions: [Option] = []
     var selectedIndecies: Set<Int> = []
-    init(with title: String, regions: [Option]) {
-        self.regions = regions
+    private var endPoint: String = ""
+    
+    init(with title: String, endPoint: String) {
+        self.endPoint = endPoint
         super.init(with: title)
         isUserInteractionEnabled(false)
     }
@@ -46,10 +47,11 @@ final class RegionTextField: CustomTextField {
     
     private func presentOptions() {
         let optionVC = OptionsViewController(
-            items: regions,
             title: "Регион",
             isMultipleChoice: false,
-            selectedIndices: selectedIndecies
+            selectedIndices: selectedIndecies,
+            count: 87,
+            endPoint: endPoint
         )
         optionVC.delegate = self
         regionDelegate?.regionTextFieldWillSelect(with: optionVC)
@@ -58,12 +60,12 @@ final class RegionTextField: CustomTextField {
 }
 
 extension RegionTextField : OptionsViewControllerDelegate {
-    func didSelectOption(_ options: [Int]) {
-        selectedIndecies = Set(options)
-        if options.isEmpty {
+    func didSelectOption(_ optionsIndicies: [Int], _ optionsNames: [String]) {
+        selectedIndecies = Set(optionsIndicies)
+        if optionsIndicies.isEmpty {
             setTextFieldText("")
         } else {
-            setTextFieldText(regions[options[0]].name)
+            setTextFieldText(optionsNames[0])
         }
         textFieldSendAction(for: .editingChanged)
     }
