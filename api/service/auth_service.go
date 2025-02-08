@@ -37,11 +37,11 @@ func (s *AuthService) SendCode(email string) error {
 	}
 
 	if exists {
-		time, err := s.codeRepo.GetCodeTTL(context.Background(), email)
+		ttl, err := s.codeRepo.GetCodeTTL(context.Background(), email)
 		if err != nil {
 			return err
 		}
-		details := map[string]interface{}{"time": time.Seconds()}
+		details := map[string]interface{}{"ttl": ttl.Seconds()}
 		return errs.PreviousCodeNotExpired.WithAdditional(details)
 	}
 

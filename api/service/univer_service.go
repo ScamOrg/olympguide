@@ -67,7 +67,7 @@ func (u *UniverService) NewUniver(request *dto.UniversityRequest) (uint, error) 
 	if err != nil {
 		return 0, err
 	}
-	return uint(id), nil
+	return id, nil
 }
 
 func (u *UniverService) UpdateUniver(request *dto.UniversityRequest, universityID string) (uint, error) {

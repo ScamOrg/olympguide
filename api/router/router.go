@@ -6,17 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, univerHandler *handler.UniverHandler) *gin.Engine {
+func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, univerHandler *handler.UniverHandler, fieldHandler *handler.FieldHandler) *gin.Engine {
 	r.Use(middleware.SessionMiddleware())
 	r.Use(middleware.ValidateID())
 
 	setupAuthRoutes(r, authHandler)
 	setupUniversityRoutes(r, univerHandler)
 	setupUserRoutes(r, univerHandler)
+	setupFieldRoutes(r, fieldHandler)
 
 	//setupOlympiadRoutes(r)
-	//setupFieldRoutes(r)
-
 	//setupRegionRoutes(r)
 
 	return r
@@ -47,17 +46,17 @@ func setupUniversityRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) 
 	}
 }
 
+func setupFieldRoutes(r *gin.Engine, fieldHandler *handler.FieldHandler) {
+	r.GET("/field", fieldHandler.GetGroups)
+	r.GET("/field/:id", fieldHandler.GetField)
+}
+
 //func setupOlympiadRoutes(r *gin.Engine) {
 //	r.GET("/olympiad", olympiad.GetOlympiads)
 //}
 //
 //func setupRegionRoutes(r *gin.Engine) {
 //	r.GET("/region", region.GetRegions)
-//}
-//
-//func setupFieldRoutes(r *gin.Engine) {
-//	r.GET("/field", field.GetFields)
-//	r.GET("/field/:id", field.GetFieldByID)
 //}
 //
 
@@ -70,13 +69,12 @@ func setupUserRoutes(r *gin.Engine, univerHandler *handler.UniverHandler) {
 			favouriteGroup.GET("/universities", univerHandler.GetLikedUnivers)
 			favouriteGroup.POST("/university/:id", univerHandler.LikeUniver)
 			favouriteGroup.DELETE("/university/:id", univerHandler.DislikeUniver)
+
 			//favouriteGroup.GET("/olympiad", olympiad.GetLikedOlympiads)
 			//favouriteGroup.POST("/olympiad/:id", user.LikeOlympiad)
 			//favouriteGroup.DELETE("/olympiad/:id", user.UnlikeOlympiad)
 			//
-			//favouriteGroup.GET("/field", field.GetLikedFields)
-			//favouriteGroup.POST("/field/:id", user.LikeField)
-			//favouriteGroup.DELETE("/field/:id", user.UnlikeField)
+
 		}
 	}
 }
