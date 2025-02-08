@@ -162,7 +162,6 @@ func newUniverResponse(univer *model.University) *dto.UniversityResponse {
 
 func newUniversShortResponse(univers []model.University) []dto.UniversityShortResponse {
 	var response []dto.UniversityShortResponse
-
 	for _, univer := range univers {
 		response = append(response, dto.UniversityShortResponse{
 			UniversityID: univer.UniversityID,
@@ -172,6 +171,5 @@ func newUniversShortResponse(univers []model.University) []dto.UniversityShortRe
 			Like:         univer.Like,
 		})
 	}
-
 	return response
 }

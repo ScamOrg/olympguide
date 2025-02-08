@@ -36,7 +36,7 @@ func (h *FieldHandler) GetGroups(c *gin.Context) {
 		return
 	}
 
-	groups, err := h.fieldService.GetGroups(queryParams)
+	groups, err := h.fieldService.GetGroups(&queryParams)
 
 	if err != nil {
 		errs.HandleError(c, err)

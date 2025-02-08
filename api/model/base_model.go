@@ -8,6 +8,7 @@ type Olympiad struct {
 	Profile     string
 	Link        string
 	Popularity  int
+	Like        bool `gorm:"column:like;->"`
 }
 
 type Field struct {

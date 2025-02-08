@@ -8,7 +8,7 @@ import (
 
 type IFieldService interface {
 	GetField(fieldID string) (*dto.FieldResponse, error)
-	GetGroups(params dto.GroupQueryParams) ([]dto.GroupResponse, error)
+	GetGroups(params *dto.GroupQueryParams) ([]dto.GroupResponse, error)
 }
 
 type FieldService struct {
@@ -27,7 +27,7 @@ func (s *FieldService) GetField(fieldID string) (*dto.FieldResponse, error) {
 	return newFieldResponse(field), nil
 }
 
-func (s *FieldService) GetGroups(params dto.GroupQueryParams) ([]dto.GroupResponse, error) {
+func (s *FieldService) GetGroups(params *dto.GroupQueryParams) ([]dto.GroupResponse, error) {
 	groups, err := s.fieldRepo.GetGroups(params.Search, params.Degrees)
 	if err != nil {
 		return nil, err
