@@ -88,7 +88,7 @@ fileprivate enum Constants {
 
 
 protocol OptionsViewControllerDelegate: AnyObject {
-    func didSelectOption(_ options: [Int])
+    func didSelectOption(_ options: [Int], _ optionsNames: [String])
     func didCancle()
 }
 
@@ -99,8 +99,7 @@ final class OptionsViewController: UIViewController {
     weak var delegate: OptionsViewControllerDelegate?
     var interactor: (OptionsDataStore & OptionsBusinessLogic)?
     
-    private var items: [OptionModel] = []
-    private var currentItems: [OptionModel] = []
+    private var options: [Options.FetchOptions.ViewModel.OptionViewModel] = []
     
     private let dimmingView = UIView()
     private let containerView = UIView()
@@ -124,6 +123,8 @@ final class OptionsViewController: UIViewController {
     lazy var searchBar: CustomTextField = CustomTextField(with: "Поиск")
     private let tableView: UITableView = UITableView()
     
+    private var count: Int = 0
+    private var currentCount = 10
     
     private let selectedScrollContainer: UIView = {
         $0.clipsToBounds = true
@@ -134,25 +135,21 @@ final class OptionsViewController: UIViewController {
     private let selectedScrollView: SelectedScrollView = SelectedScrollView(selectedOptions: [])
     
     // MARK: - Initializers
-    
     init(items: [String], title: String, isMultipleChoice: Bool) {
-        for (index, value) in items.enumerated() {
-            let option = OptionModel(
-                title: value,
-                realIndex: index,
-                currentIndex: index
-            )
-            self.items.append(option)
-        }
+//        for (index, value) in items.enumerated() {
+//            let option = OptionModel(
+//                title: value,
+//                currentIndex: index
+//            )
+////            self.items.append(option)
+//        }
         self.titleLabel.text = title
         self.isMultipleChoice = isMultipleChoice
         super.init(nibName: nil, bundle: nil)
-        self.currentItems = self.items
         self.currentSelectedIndices = self.selectedIndices
     }
     
     init(
-        items: [Option],
         title: String,
         isMultipleChoice: Bool,
         selectedIndices: Set<Int>,
@@ -160,32 +157,27 @@ final class OptionsViewController: UIViewController {
         endPoint: String
     ) {
         
-        for value in items {
-            let option = OptionModel(
-                title: value.name,
-                realIndex: value.id,
-                currentIndex: value.id
-            )
-            self.items.append(option)
-        }
+//        for value in items {
+//            let option = OptionModel(
+//                title: value.name,
+//                realIndex: value.id,
+//                currentIndex: value.id
+//            )
+//            self.items.append(option)
+//        }
         
-        self.items.sort { $0.realIndex < $1.realIndex }
-        
+//        self.items.sort { $0.realIndex < $1.realIndex }
+        self.count = count
+        self.endPoint = endPoint
         self.titleLabel.text = title
         self.isMultipleChoice = isMultipleChoice
         super.init(nibName: nil, bundle: nil)
         
-        self.currentItems = self.items
-        self.selectedIndices = selectedIndices
+        self.selectedIndices = currentSelectedIndices
         self.currentSelectedIndices = self.selectedIndices
         
-        for index in selectedIndices {
+        for index in currentSelectedIndices {
             tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        }
-        
-        for i in 0..<items.count {
-            currentToAll[i] = i
-            allToCurrent[i] = i
         }
         
         setup()
@@ -202,6 +194,8 @@ final class OptionsViewController: UIViewController {
         self.modalPresentationStyle = .overFullScreen
         configureGesture()
         configureUI()
+        
+        interactor?.loadOptions(request: Options.FetchOptions.Request(endPoint: endPoint))
     }
     
     // MARK: - Setup
@@ -214,7 +208,6 @@ final class OptionsViewController: UIViewController {
         viewController.interactor = interactor
         interactor.presenter = presenter
         presenter.viewController = viewController
-        interactor.items = items
     }
     
     // MARK: - Gesture Configuration
@@ -233,7 +226,7 @@ final class OptionsViewController: UIViewController {
         configureTitleLabel()
         configureCancelButton()
         configureSaveButton()
-        if items.count >= Constants.Numbers.rowsLimit {
+        if count >= Constants.Numbers.rowsLimit {
             configureSearchBar()
         }
         configureSelectedScrollContainer()
@@ -250,9 +243,9 @@ final class OptionsViewController: UIViewController {
     }
     
     private func configureContainerView() {
-        let sheetHeight: CGFloat = items.count > Constants.Numbers.rowsLimit
+        let sheetHeight: CGFloat = count > Constants.Numbers.rowsLimit
         ? view.bounds.height - Constants.Dimensions.sheetHeightOffset
-        : Constants.Dimensions.sheetHeightSmall + Constants.Dimensions.rowHeight * CGFloat(items.count)
+        : Constants.Dimensions.sheetHeightSmall + Constants.Dimensions.rowHeight * CGFloat(count)
         
         containerView.frame = CGRect(
             x: Constants.Dimensions.containerX,
@@ -348,7 +341,7 @@ final class OptionsViewController: UIViewController {
         tableView.separatorStyle = .none
         
         containerView.addSubview(tableView)
-        if items.count >= Constants.Numbers.rowsLimit {
+        if count >= Constants.Numbers.rowsLimit {
             tableView.pinTop(to: selectedScrollContainer.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
         } else {
             tableView.pinTop(to: titleLabel.bottomAnchor, Constants.Dimensions.tableViewTopMargin)
@@ -359,7 +352,7 @@ final class OptionsViewController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.isScrollEnabled = items.count >= Constants.Numbers.rowsLimit
+        tableView.isScrollEnabled = count >= Constants.Numbers.rowsLimit
         
         containerView.backgroundColor = Constants.Colors.containerBackgroundColor
     }
@@ -451,13 +444,14 @@ final class OptionsViewController: UIViewController {
 extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     private func calculateTableHeight() -> CGFloat {
-        return CGFloat(min(currentItems.count, Constants.Numbers.rowsLimit)) * Constants.Dimensions.rowHeight
+        return CGFloat(min(currentSelectedIndices.count, Constants.Numbers.rowsLimit)) * Constants.Dimensions.rowHeight
     }
     
     // MARK: UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return currentItems.count
+        currentCount
+//        return currentSelectedIndices.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -466,8 +460,9 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             return UITableViewCell()
         }
         
-        let item = currentItems[indexPath.row]
-        cell.titleLabel.text = item.title
+        guard let index = currentToAll[indexPath.row] else { return UITableViewCell()}
+        let item = options[index]
+        cell.titleLabel.text = item.name
         
         if isMultipleChoice {
             let imageName = currentSelectedIndices.contains(indexPath.row) ? Constants.Images.filledSquare : Constants.Images.square
@@ -481,7 +476,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             self?.handleButtonTap(at: indexPath)
         }
         
-        let isLastCell = indexPath.row == currentItems.count - 1
+        let isLastCell = indexPath.row == currentCount - 1
         cell.hideSeparator(isLastCell)
         
         return cell
@@ -509,7 +504,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
         currentSelectedIndices.insert(indexPath.row)
         if let originIndex = currentToAll[indexPath.row] {
             selectedIndices.insert(originIndex)
-            selectedScrollView.addButtonToStackView(with: items[originIndex].title, tag: originIndex)
+            selectedScrollView.addButtonToStackView(with: options[originIndex].name, tag: originIndex)
         }
         tableView.reloadRows(at: [indexPath], with: .automatic)
         
@@ -557,7 +552,11 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     func saveButtonTouchUp(_ sender: UIButton) {
         buttonTouchUp(sender)
         initialSelectedIndices = selectedIndices
-        delegate?.didSelectOption(Array(selectedIndices))
+        var names: [String] = []
+        for index in selectedIndices {
+            names.append(options[index].name)
+        }
+        delegate?.didSelectOption(Array(selectedIndices), names)
         animateDismiss {
             self.dismiss(animated: false)
         }
@@ -580,7 +579,7 @@ extension OptionsViewController: OptionsDisplayLogic {
         allToCurrent.removeAll()
         currentSelectedIndices.removeAll()
         
-        for item in viewModel.options {
+        for item in viewModel.dependencies {
             currentToAll[item.currentIndex] = item.realIndex
             allToCurrent[item.realIndex] = item.currentIndex
         }
@@ -590,14 +589,24 @@ extension OptionsViewController: OptionsDisplayLogic {
                 currentSelectedIndices.insert(currentIndex)
             }
         }
-        
-        currentItems = viewModel.options
-        tableView.reloadData()
+        currentCount = currentToAll.count
+        DispatchQueue.main.async {[weak self] in
+            self?.tableView.reloadData()
+        }
     }
     
-    func displayOptions() {
-        
+    func displayFetchOptions(viewModel: Options.FetchOptions.ViewModel) {
+        self.options = viewModel.options
+        for i in 0..<self.options.count {
+            allToCurrent[i] = i
+            currentToAll[i] = i
+        }
+        currentCount = self.options.count
+        DispatchQueue.main.async {[weak self] in
+            self?.tableView.reloadData()
+        }
     }
+    
 }
 
 extension OptionsViewController : SelectedBarDelegate {
