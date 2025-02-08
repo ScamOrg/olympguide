@@ -57,7 +57,6 @@ final class VerifyEmailInteractor: VerifyEmailBusinessLogic, VerifyEmailDataStor
                 self.presenter?.presentResendCode(response: response)
                 
             case .failure(let networkError):
-                // Проверяем, вдруг это .previousCodeNotExpired?
                 switch networkError {
                 case .previousCodeNotExpired(let time):
                     self.time = time
