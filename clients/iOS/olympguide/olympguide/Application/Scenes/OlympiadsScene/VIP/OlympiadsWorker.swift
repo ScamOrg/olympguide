@@ -11,15 +11,16 @@ class OlympiadsWorker {
     
     private let networkService: NetworkServiceProtocol
     
-    // Если нужно, чтобы базовый URL отличался от того, что в Info.plist,
-    // можно завести отдельный init(...) или сделать второй сервис
-    // либо передать в NetworkService другой baseURL при инициализации.
-    // Но для примера оставим как есть:
     init(networkService: NetworkServiceProtocol = NetworkService()) {
         self.networkService = networkService
     }
 
-    func fetchOlympiads(levels: [Int]?, sort: String?, search: String?, completion: @escaping (Result<[OlympiadModel], Error>) -> Void) {
+    func fetchOlympiads(
+        levels: [Int]?,
+        sort: String?,
+        search: String?,
+        completion: @escaping (Result<[OlympiadModel], Error>) -> Void
+    ) {
         var queryItems = [URLQueryItem]()
         if let levels = levels {
             for level in levels {
