@@ -46,8 +46,9 @@ func (r *PgRegionRepo) GetRegions() ([]model.Region, error) {
 func (r *PgRegionRepo) GetUniversityRegions() ([]model.Region, error) {
 	var regions []model.Region
 	err := r.db.Model(&model.University{}).
-		Select("DISTINCT olympguide.region.*").
+		Select("DISTINCT r.*").
 		Joins("JOIN olympguide.region AS r ON olympguide.university.region_id = r.region_id").
+		Order("region_id").
 		Find(&regions).Error
 
 	if err != nil {

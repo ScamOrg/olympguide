@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"api/service"
+	"api/utils/constants"
 	"api/utils/errs"
 	"api/utils/role"
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ func (mw *Mw) RolesMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			}
 		}
 
-		userID, exists := c.Get("user_id")
+		userID, exists := c.Get(constants.ContextUserID)
 		if !exists {
 			errs.HandleError(c, errs.Unauthorized)
 			c.Abort()
@@ -34,7 +35,7 @@ func (mw *Mw) RolesMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		}
 
 		var universityID uint
-		if uniID, ok := c.Get("university_id"); ok {
+		if uniID, ok := c.Get(constants.ContextUniverID); ok {
 			universityID = uniID.(uint)
 		}
 

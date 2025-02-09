@@ -2,6 +2,7 @@ package handler
 
 import (
 	"api/service"
+	"api/utils/constants"
 	"api/utils/errs"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -16,7 +17,7 @@ func NewUserHandler(userService service.IUserService) *UserHandler {
 }
 
 func (u *UserHandler) GetUserData(c *gin.Context) {
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	user, err := u.userService.GetUserData(userID)
 	if err != nil {

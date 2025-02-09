@@ -3,6 +3,7 @@ package handler
 import (
 	"api/dto"
 	"api/service"
+	"api/utils/constants"
 	"api/utils/errs"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -84,7 +85,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	session := sessions.Default(c)
-	session.Set("user_id", userID)
+	session.Set(constants.ContextUserID, userID)
 
 	if err = session.Save(); err != nil {
 		errs.HandleError(c, err)

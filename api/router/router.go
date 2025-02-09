@@ -56,6 +56,7 @@ func (rt *Router) setupUniverRoutes(r *gin.Engine) {
 	r.GET("/universities", rt.univerHandler.GetUnivers)
 	university := r.Group("/university")
 	{
+		university.GET("/:id", rt.univerHandler.GetUniver)
 		university.POST("/", rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService), rt.univerHandler.NewUniver)
 
 		universityWithID := university.Group("/:id", rt.mw.UniversityIdSetter())
@@ -86,7 +87,7 @@ func (rt *Router) setupUserRoutes(r *gin.Engine) {
 			favourite.POST("/university/:id", rt.univerHandler.LikeUniver)
 			favourite.DELETE("/university/:id", rt.univerHandler.DislikeUniver)
 
-			favourite.GET("/olympiad", rt.olympHandler.GetLikedOlympiads)
+			favourite.GET("/olympiads", rt.olympHandler.GetLikedOlympiads)
 			favourite.POST("/olympiad/:id", rt.olympHandler.LikeOlymp)
 			favourite.DELETE("/olympiad/:id", rt.olympHandler.DislikeOlymp)
 		}

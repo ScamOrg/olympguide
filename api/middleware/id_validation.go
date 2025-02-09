@@ -8,8 +8,8 @@ import (
 
 func (mw *Mw) ValidateID() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fieldID := c.Param("id")
-		if _, err := strconv.Atoi(fieldID); fieldID != "" && err != nil {
+		id := c.Param("id")
+		if _, err := strconv.Atoi(id); id != "" && err != nil {
 			errs.HandleError(c, errs.InvalidID)
 			c.Abort()
 			return

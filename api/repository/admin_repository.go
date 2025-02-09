@@ -19,7 +19,7 @@ func NewPgAdminRepo(db *gorm.DB) *PgAdminRepo {
 
 func (p *PgAdminRepo) GetAdminUserByID(userID uint) (*model.AdminUser, error) {
 	var adminUser model.AdminUser
-	err := p.db.First(&adminUser, "id = ?", userID).Error
+	err := p.db.First(&adminUser, "user_id = ?", userID).Error
 	if err != nil {
 		return nil, err
 	}

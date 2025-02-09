@@ -18,3 +18,7 @@ const (
 const (
 	EmailCodeTopic = "email_codes"
 )
+const (
+	ContextUserID   = "user_id"
+	ContextUniverID = "university_id"
+)

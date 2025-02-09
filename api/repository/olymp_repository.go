@@ -92,7 +92,10 @@ func (r *PgOlympRepo) DislikeOlymp(olympiadID uint, userID uint) error {
 
 func (r *PgOlympRepo) GetOlympiadProfiles() ([]string, error) {
 	var profiles []string
-	err := r.db.Model(&model.Olympiad{}).Distinct().Pluck("profile", &profiles).Error
+	err := r.db.Model(&model.Olympiad{}).
+		Distinct().
+		Order("profile ASC").
+		Pluck("profile", &profiles).Error
 	return profiles, err
 }
 

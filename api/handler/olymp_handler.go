@@ -3,6 +3,7 @@ package handler
 import (
 	"api/dto"
 	"api/service"
+	"api/utils/constants"
 	"api/utils/errs"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -22,7 +23,7 @@ func (o *OlympHandler) GetOlympiads(c *gin.Context) {
 		errs.HandleError(c, errs.InvalidRequest)
 		return
 	}
-	queryParams.UserID, _ = c.Get("user_id")
+	queryParams.UserID, _ = c.Get(constants.ContextUserID)
 
 	olymps, err := o.olympService.GetOlymps(&queryParams)
 
@@ -35,7 +36,7 @@ func (o *OlympHandler) GetOlympiads(c *gin.Context) {
 }
 
 func (o *OlympHandler) GetLikedOlympiads(c *gin.Context) {
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	olymps, err := o.olympService.GetLikedOlymps(userID)
 	if err != nil {
@@ -48,7 +49,7 @@ func (o *OlympHandler) GetLikedOlympiads(c *gin.Context) {
 
 func (o *OlympHandler) LikeOlymp(c *gin.Context) {
 	olympID := c.Param("id")
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	liked, err := o.olympService.LikeOlymp(olympID, userID)
 	if err != nil {
@@ -65,7 +66,7 @@ func (o *OlympHandler) LikeOlymp(c *gin.Context) {
 
 func (o *OlympHandler) DislikeOlymp(c *gin.Context) {
 	olympID := c.Param("id")
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	disliked, err := o.olympService.DislikeOlymp(olympID, userID)
 	if err != nil {

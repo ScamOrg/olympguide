@@ -22,7 +22,6 @@ func (s *AdminService) HasPermission(userID uint, allowedRoles []string, univers
 	if err != nil {
 		return false
 	}
-
 	for _, allowedRole := range allowedRoles {
 		switch allowedRole {
 		case role.Founder:

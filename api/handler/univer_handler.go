@@ -3,6 +3,7 @@ package handler
 import (
 	"api/dto"
 	"api/service"
+	"api/utils/constants"
 	"api/utils/errs"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,7 +19,7 @@ func NewUniverHandler(univerService service.IUniverService) *UniverHandler {
 
 func (u *UniverHandler) GetUniver(c *gin.Context) {
 	universityID := c.Param("id")
-	userID, _ := c.Get("user_id")
+	userID, _ := c.Get(constants.ContextUserID)
 
 	university, err := u.univerService.GetUniver(universityID, userID)
 	if err != nil {
@@ -35,7 +36,7 @@ func (u *UniverHandler) GetUnivers(c *gin.Context) {
 		errs.HandleError(c, errs.InvalidRequest)
 		return
 	}
-	queryParams.UserID, _ = c.Get("user_id")
+	queryParams.UserID, _ = c.Get(constants.ContextUserID)
 
 	univers, err := u.univerService.GetUnivers(&queryParams)
 	if err != nil {
@@ -47,7 +48,7 @@ func (u *UniverHandler) GetUnivers(c *gin.Context) {
 }
 
 func (u *UniverHandler) GetLikedUnivers(c *gin.Context) {
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	univers, err := u.univerService.GetLikedUnivers(userID)
 	if err != nil {
@@ -105,7 +106,7 @@ func (u *UniverHandler) DeleteUniver(c *gin.Context) {
 
 func (u *UniverHandler) LikeUniver(c *gin.Context) {
 	universityID := c.Param("id")
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	liked, err := u.univerService.LikeUniver(universityID, userID)
 	if err != nil {
@@ -122,7 +123,7 @@ func (u *UniverHandler) LikeUniver(c *gin.Context) {
 
 func (u *UniverHandler) DislikeUniver(c *gin.Context) {
 	universityID := c.Param("id")
-	userID, _ := c.MustGet("user_id").(uint)
+	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
 	disliked, err := u.univerService.DislikeUniver(universityID, userID)
 	if err != nil {

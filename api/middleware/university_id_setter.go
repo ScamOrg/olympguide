@@ -1,14 +1,15 @@
 package middleware
 
 import (
-	"github.com/gin-contrib/sessions"
+	"api/utils/constants"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func (mw *Mw) UniversityIdSetter() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		session.Set("university_id", c.Param("id"))
+		intID, _ := strconv.Atoi(c.Param("id"))
+		c.Set(constants.ContextUniverID, uint(intID))
 		c.Next()
 	}
 }
