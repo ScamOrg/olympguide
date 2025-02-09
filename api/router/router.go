@@ -12,16 +12,19 @@ type Router struct {
 	fieldHandler  *handler.FieldHandler
 	olympHandler  *handler.OlympHandler
 	metaHandler   *handler.MetaHandler
+	userHandler   *handler.UserHandler
 }
 
 func NewRouter(auth *handler.AuthHandler, univer *handler.UniverHandler,
-	field *handler.FieldHandler, olymp *handler.OlympHandler, meta *handler.MetaHandler) *Router {
+	field *handler.FieldHandler, olymp *handler.OlympHandler,
+	meta *handler.MetaHandler, user *handler.UserHandler) *Router {
 	return &Router{
 		authHandler:   auth,
 		univerHandler: univer,
 		fieldHandler:  field,
 		olympHandler:  olymp,
 		metaHandler:   meta,
+		userHandler:   user,
 	}
 }
 
@@ -71,7 +74,7 @@ func (rt *Router) setupOlympRoutes(r *gin.Engine) {
 func (rt *Router) setupUserRoutes(r *gin.Engine) {
 	user := r.Group("/user", middleware.AuthMiddleware())
 	{
-		//userGroup.GET("/region", user.GetRegion)
+		user.GET("/data", rt.userHandler.GetUserData)
 		favourite := user.Group("/favourite")
 		{
 			favourite.GET("/universities", rt.univerHandler.GetLikedUnivers)

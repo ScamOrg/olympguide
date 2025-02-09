@@ -35,14 +35,17 @@ func main() {
 	fieldService := service.NewFieldService(fieldRepo)
 	olympService := service.NewOlympService(olympRepo)
 	metaService := service.NewMetaService(regionRepo, olympRepo)
+	userService := service.NewUserService(userRepo)
 
 	authHandler := handler.NewAuthHandler(authService)
 	univerHandler := handler.NewUniverHandler(univerService)
 	fieldHandler := handler.NewFieldHandler(fieldService)
 	olympHandler := handler.NewOlympHandler(olympService)
 	metaHandler := handler.NewMetaHandler(metaService)
+	userHandler := handler.NewUserHandler(userService)
 
-	mainRouter := router.NewRouter(authHandler, univerHandler, fieldHandler, olympHandler, metaHandler)
+	mainRouter := router.NewRouter(authHandler, univerHandler, fieldHandler,
+		olympHandler, metaHandler, userHandler)
 
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))
