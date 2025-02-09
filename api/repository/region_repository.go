@@ -7,7 +7,9 @@ import (
 
 type IRegionRepo interface {
 	RegionExists(regionID uint) bool
-	GetUserRegionID(userID uint) (uint, error)
+	GetUserRegion(userID uint) (*model.Region, error)
+	GetRegions() ([]model.Region, error)
+	GetUniversityRegions() ([]model.Region, error)
 }
 
 type PgRegionRepo struct {
@@ -24,10 +26,32 @@ func (r *PgRegionRepo) RegionExists(regionID uint) bool {
 	return regionExists
 }
 
-func (r *PgRegionRepo) GetUserRegionID(userID uint) (uint, error) {
+func (r *PgRegionRepo) GetUserRegion(userID uint) (*model.Region, error) {
 	var user model.User
-	if err := r.db.Where("user_id = ?", userID).First(&user).Error; err != nil {
-		return 0, err
+	err := r.db.Preload("Region").First(&user, userID).Error
+	if err != nil {
+		return nil, err
 	}
-	return user.RegionID, nil
+	return &user.Region, nil
+}
+
+func (r *PgRegionRepo) GetRegions() ([]model.Region, error) {
+	var regions []model.Region
+	if err := r.db.Find(&regions).Error; err != nil {
+		return nil, err
+	}
+	return regions, nil
+}
+
+func (r *PgRegionRepo) GetUniversityRegions() ([]model.Region, error) {
+	var regions []model.Region
+	err := r.db.Model(&model.University{}).
+		Select("DISTINCT olympguide.region.*").
+		Joins("JOIN olympguide.region AS r ON olympguide.university.region_id = r.region_id").
+		Find(&regions).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return regions, nil
 }

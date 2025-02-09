@@ -7,9 +7,13 @@ import (
 )
 
 type IOlympRepo interface {
-	GetOlympiads(params *dto.OlympQueryParams) ([]model.Olympiad, error)
+	GetOlymps(params *dto.OlympQueryParams) ([]model.Olympiad, error)
+	GetOlymp(olympiadID string, userID any) (*model.Olympiad, error)
 	GetLikedOlymps(userID uint) ([]model.Olympiad, error)
+	LikeOlymp(olympiadID uint, userID uint) error
+	DislikeOlymp(olympiadID uint, userID uint) error
 	ChangeOlympPopularity(olymp *model.Olympiad, value int)
+	GetOlympiadProfiles() ([]string, error)
 }
 type PgOlympRepo struct {
 	db *gorm.DB
@@ -19,7 +23,7 @@ func NewPgOlympRepo(db *gorm.DB) *PgOlympRepo {
 	return &PgOlympRepo{db: db}
 }
 
-func (r *PgOlympRepo) GetOlympiads(params *dto.OlympQueryParams) ([]model.Olympiad, error) {
+func (r *PgOlympRepo) GetOlymps(params *dto.OlympQueryParams) ([]model.Olympiad, error) {
 	var olympiads []model.Olympiad
 
 	query := r.db.Debug().
@@ -33,6 +37,19 @@ func (r *PgOlympRepo) GetOlympiads(params *dto.OlympQueryParams) ([]model.Olympi
 	}
 
 	return olympiads, nil
+}
+
+func (r *PgOlympRepo) GetOlymp(olympiadID string, userID any) (*model.Olympiad, error) {
+	var olymp model.Olympiad
+	err := r.db.Debug().
+		Joins("LEFT JOIN olympguide.liked_olympiads lo ON lo.olympiad_id = olympguide.olympiad.olympiad_id AND lo.user_id = ?", userID).
+		Select("olympguide.olympiad.*, CASE WHEN lo.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
+		Where("olympguide.olympiad.olympiad_id = ?", olympiadID).
+		First(&olymp).Error
+	if err != nil {
+		return nil, err
+	}
+	return &olymp, nil
 }
 
 func (r *PgOlympRepo) GetLikedOlymps(userID uint) ([]model.Olympiad, error) {
@@ -53,6 +70,30 @@ func (r *PgOlympRepo) GetLikedOlymps(userID uint) ([]model.Olympiad, error) {
 func (r *PgOlympRepo) ChangeOlympPopularity(olymp *model.Olympiad, value int) {
 	olymp.Popularity += value
 	r.db.Save(olymp)
+}
+
+func (r *PgOlympRepo) LikeOlymp(olympiadID uint, userID uint) error {
+	likedOlymp := model.LikedOlympiads{
+		OlympiadID: olympiadID,
+		UserID:     userID,
+	}
+	err := r.db.Create(&likedOlymp).Error
+	return err
+}
+
+func (r *PgOlympRepo) DislikeOlymp(olympiadID uint, userID uint) error {
+	likedOlymp := model.LikedOlympiads{
+		OlympiadID: olympiadID,
+		UserID:     userID,
+	}
+	err := r.db.Delete(&likedOlymp).Error
+	return err
+}
+
+func (r *PgOlympRepo) GetOlympiadProfiles() ([]string, error) {
+	var profiles []string
+	err := r.db.Model(&model.Olympiad{}).Distinct().Pluck("profile", &profiles).Error
+	return profiles, err
 }
 
 func applyFilters(query *gorm.DB, levels, profiles []string, search string) *gorm.DB {

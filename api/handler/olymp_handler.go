@@ -45,3 +45,37 @@ func (o *OlympHandler) GetLikedOlympiads(c *gin.Context) {
 
 	c.JSON(http.StatusOK, olymps)
 }
+
+func (o *OlympHandler) LikeOlymp(c *gin.Context) {
+	olympID := c.Param("id")
+	userID, _ := c.MustGet("user_id").(uint)
+
+	liked, err := o.olympService.LikeOlymp(olympID, userID)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	if liked {
+		c.JSON(http.StatusOK, gin.H{"message": "Liked"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "Already liked"})
+	}
+}
+
+func (o *OlympHandler) DislikeOlymp(c *gin.Context) {
+	olympID := c.Param("id")
+	userID, _ := c.MustGet("user_id").(uint)
+
+	disliked, err := o.olympService.DislikeOlymp(olympID, userID)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	if disliked {
+		c.JSON(http.StatusOK, gin.H{"message": "Disliked"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "Already disliked"})
+	}
+}

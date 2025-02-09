@@ -38,11 +38,11 @@ func (u *UniverService) GetUniver(universityID string, userID any) (*dto.Univers
 
 func (u *UniverService) GetUnivers(params *dto.UniversityQueryParams) ([]dto.UniversityShortResponse, error) {
 	if uintUserID, ok := params.UserID.(uint); ok && params.FromMyRegion {
-		regionID, err := u.regionRepo.GetUserRegionID(uintUserID)
+		region, err := u.regionRepo.GetUserRegion(uintUserID)
 		if err != nil {
 			return nil, err
 		}
-		params.RegionIDs = []string{strconv.Itoa(int(regionID))}
+		params.RegionIDs = []string{strconv.Itoa(int(region.RegionID))}
 	}
 
 	univers, err := u.univerRepo.GetUnivers(params.Search, params.RegionIDs, params.UserID)

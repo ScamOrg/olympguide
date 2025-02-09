@@ -28,18 +28,26 @@ func main() {
 	regionRepo := repository.NewPgRegionRepo(db)
 	univerRepo := repository.NewPgUniverRepo(db)
 	fieldRepo := repository.NewPgFieldRepo(db)
+	olympRepo := repository.NewPgOlympRepo(db)
 
 	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
 	univerService := service.NewUniverService(univerRepo, regionRepo)
 	fieldService := service.NewFieldService(fieldRepo)
+	olympService := service.NewOlympService(olympRepo)
+	metaService := service.NewMetaService(regionRepo, olympRepo)
 
 	authHandler := handler.NewAuthHandler(authService)
 	univerHandler := handler.NewUniverHandler(univerService)
 	fieldHandler := handler.NewFieldHandler(fieldService)
+	olympHandler := handler.NewOlympHandler(olympService)
+	metaHandler := handler.NewMetaHandler(metaService)
+
+	mainRouter := router.NewRouter(authHandler, univerHandler, fieldHandler, olympHandler, metaHandler)
 
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))
-	r = router.SetupRoutes(r, authHandler, univerHandler, fieldHandler)
+
+	mainRouter.SetupRoutes(r)
 
 	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
 	log.Printf("Server listening on %s", serverAddress)

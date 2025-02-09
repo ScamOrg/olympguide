@@ -11,6 +11,7 @@ type User struct {
 	Birthday     time.Time
 	PasswordHash string
 	RegionID     uint
+	Region       Region `gorm:"foreignKey:RegionID;references:RegionID"`
 }
 
 type AdminUser struct {
