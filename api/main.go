@@ -2,6 +2,7 @@ package main
 
 import (
 	"api/handler"
+	"api/middleware"
 	"api/repository"
 	"api/service"
 	"fmt"
@@ -29,6 +30,7 @@ func main() {
 	univerRepo := repository.NewPgUniverRepo(db)
 	fieldRepo := repository.NewPgFieldRepo(db)
 	olympRepo := repository.NewPgOlympRepo(db)
+	adminRepo := repository.NewPgAdminRepo(db)
 
 	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
 	univerService := service.NewUniverService(univerRepo, regionRepo)
@@ -36,6 +38,7 @@ func main() {
 	olympService := service.NewOlympService(olympRepo)
 	metaService := service.NewMetaService(regionRepo, olympRepo)
 	userService := service.NewUserService(userRepo)
+	adminService := service.NewAdminService(adminRepo)
 
 	authHandler := handler.NewAuthHandler(authService)
 	univerHandler := handler.NewUniverHandler(univerService)
@@ -44,8 +47,10 @@ func main() {
 	metaHandler := handler.NewMetaHandler(metaService)
 	userHandler := handler.NewUserHandler(userService)
 
+	mw := middleware.NewMw(adminService)
+
 	mainRouter := router.NewRouter(authHandler, univerHandler, fieldHandler,
-		olympHandler, metaHandler, userHandler)
+		olympHandler, metaHandler, userHandler, mw)
 
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))

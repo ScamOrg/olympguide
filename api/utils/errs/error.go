@@ -27,7 +27,6 @@ var (
 	UserNotFound           = AppError{404, "UserNotFound", "User with this email not found", nil}
 	CodeNotFoundOrExpired  = AppError{404, "CodeNotFoundOrExpired", "Code not found or expired", nil}
 	NotEnoughRights        = AppError{403, "NotEnoughRights", "User does not haves enough rights", nil}
-	UserNotAdmin           = AppError{403, "UserNotAdmin", "User is not an administrator", nil}
 	TooManyAttempts        = AppError{429, "TooManyAttempts", "Too many attempts", nil}
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
 )

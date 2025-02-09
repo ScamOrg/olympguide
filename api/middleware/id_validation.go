@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func ValidateID() gin.HandlerFunc {
+func (mw *Mw) ValidateID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fieldID := c.Param("id")
 		if _, err := strconv.Atoi(fieldID); fieldID != "" && err != nil {

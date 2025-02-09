@@ -3,6 +3,7 @@ package router
 import (
 	"api/handler"
 	"api/middleware"
+	"api/utils/role"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,11 +14,12 @@ type Router struct {
 	olympHandler  *handler.OlympHandler
 	metaHandler   *handler.MetaHandler
 	userHandler   *handler.UserHandler
+	mw            *middleware.Mw
 }
 
 func NewRouter(auth *handler.AuthHandler, univer *handler.UniverHandler,
 	field *handler.FieldHandler, olymp *handler.OlympHandler,
-	meta *handler.MetaHandler, user *handler.UserHandler) *Router {
+	meta *handler.MetaHandler, user *handler.UserHandler, mw *middleware.Mw) *Router {
 	return &Router{
 		authHandler:   auth,
 		univerHandler: univer,
@@ -25,12 +27,13 @@ func NewRouter(auth *handler.AuthHandler, univer *handler.UniverHandler,
 		olympHandler:  olymp,
 		metaHandler:   meta,
 		userHandler:   user,
+		mw:            mw,
 	}
 }
 
 func (rt *Router) SetupRoutes(r *gin.Engine) {
-	r.Use(middleware.SessionMiddleware())
-	r.Use(middleware.ValidateID())
+	r.Use(rt.mw.SessionMiddleware())
+	r.Use(rt.mw.ValidateID())
 
 	rt.setupAuthRoutes(r)
 	rt.setupUniverRoutes(r)
@@ -53,11 +56,13 @@ func (rt *Router) setupUniverRoutes(r *gin.Engine) {
 	r.GET("/universities", rt.univerHandler.GetUnivers)
 	university := r.Group("/university")
 	{
-		secured := university.Group("/", middleware.AuthMiddleware())
+		university.POST("/", rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService), rt.univerHandler.NewUniver)
+
+		universityWithID := university.Group("/:id", rt.mw.UniversityIdSetter())
+		universityWithID.Use(rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService, role.UniverEditor))
 		{
-			secured.POST("/", rt.univerHandler.NewUniver)
-			secured.PUT("/:id", rt.univerHandler.UpdateUniver)
-			secured.DELETE("/:id", rt.univerHandler.DeleteUniver)
+			universityWithID.PUT("", rt.univerHandler.UpdateUniver)
+			universityWithID.DELETE("", rt.univerHandler.DeleteUniver)
 		}
 	}
 }
@@ -72,7 +77,7 @@ func (rt *Router) setupOlympRoutes(r *gin.Engine) {
 }
 
 func (rt *Router) setupUserRoutes(r *gin.Engine) {
-	user := r.Group("/user", middleware.AuthMiddleware())
+	user := r.Group("/user", rt.mw.UserMiddleware())
 	{
 		user.GET("/data", rt.userHandler.GetUserData)
 		favourite := user.Group("/favourite")
