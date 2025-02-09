@@ -1,16 +1,16 @@
 package middleware
 
 import (
-	"api/controllers/handlers"
+	"api/utils/errs"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-func ValidateID() gin.HandlerFunc {
+func (mw *Mw) ValidateID() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fieldID := c.Param("id")
-		if _, err := strconv.Atoi(fieldID); fieldID != "" && err != nil {
-			handlers.HandleAppError(c, handlers.InvalidID)
+		id := c.Param("id")
+		if _, err := strconv.Atoi(id); id != "" && err != nil {
+			errs.HandleError(c, errs.InvalidID)
 			c.Abort()
 			return
 		}

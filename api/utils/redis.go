@@ -1,19 +1,16 @@
 package utils
 
 import (
-	"api/config"
+	"api/utils/constants"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"log"
 )
 
-var Redis *redis.Client
-
-func ConnectRedis(cfg *config.Config) {
+func ConnectRedis(cfg *Config) *redis.Client {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
-	Redis = redis.NewClient(&redis.Options{
+	redisDB := redis.NewClient(&redis.Options{
 		Addr: redisAddress,
-		DB:   0,
+		DB:   constants.RedisDBNum,
 	})
-	log.Println("Connected to Redis")
+	return redisDB
 }
