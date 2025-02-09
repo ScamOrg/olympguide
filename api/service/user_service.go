@@ -32,7 +32,7 @@ func newUserDataResponse(user *model.User) *dto.UserDataResponse {
 		FirstName:  user.FirstName,
 		LastName:   user.LastName,
 		SecondName: user.SecondName,
-		Birthday:   user.Birthday,
+		Birthday:   user.Birthday.Format("02.01.2006"),
 		Region: dto.RegionResponse{
 			RegionID: user.RegionID,
 			Name:     user.Region.Name,

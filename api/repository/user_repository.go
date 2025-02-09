@@ -36,7 +36,7 @@ func (u *PgUserRepo) GetUserByEmail(email string) (*model.User, error) {
 
 func (u *PgUserRepo) GetUserByID(userID uint) (*model.User, error) {
 	var user model.User
-	if err := u.db.Where("user_id = ?", userID).First(&user).Error; err != nil {
+	if err := u.db.Preload("Region").Where("user_id = ?", userID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
