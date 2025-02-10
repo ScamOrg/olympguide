@@ -5,33 +5,59 @@
 //  Created by Tom Tim on 05.02.2025.
 //
 
-// MARK: - Business Logic
-protocol PersonalDataBusinessLogic {
-    func sendCode(request: EnterEmailModels.SendCode.Request)
-}
+import Foundation
 
-// MARK: - Data Store
-protocol PersonalDataEmailDataStore {
-    var email: String? { get set }
-    var time: Int? { get set }
-}
-
-// MARK: - Presentation Logic
-protocol PersonalDataPresentationLogic {
-    func presentSendCode(response: EnterEmailModels.SendCode.Response)
-}
-
-// MARK: - Display Logic
-protocol PersonalDataDisplayLogic: AnyObject {
-    func displaySendCodeResult(viewModel: EnterEmailModels.SendCode.ViewModel)
-}
-
-// MARK: - Routing Logic
-protocol PersonalDataRoutingLogic {
-    func routeToVerifyCode()
-}
-
-// MARK: - Data Passing
-protocol PersonalDataDataPassing {
-    var dataStore: EnterEmailDataStore? { get }
+final class PersonalDataInteractor : PersonalDataBusinessLogic {
+    var presenter: PersonalDataPresentationLogic?
+    private let worker = PersonalDataWorker()
+    
+    func signUp(request: PersonalData.SignUp.Request) {
+        guard
+            let email = request.email?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
+            let password = request.password?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty,
+            let firstName = request.firstName?.trimmingCharacters(in: .whitespacesAndNewlines), !firstName.isEmpty,
+            let lastName = request.lastName?.trimmingCharacters(in: .whitespacesAndNewlines), !lastName.isEmpty,
+            let birthday = request.birthday?.trimmingCharacters(in: .whitespacesAndNewlines), !birthday.isEmpty,
+            let regionId = request.regionId
+        else {
+            presenter?.presentError(message: "")
+            return
+        }
+        
+        let secondName = request.secondName ?? ""
+        
+        guard request.secondName == nil || !secondName.isEmpty else {
+            presenter?.presentError(message: "")
+            return
+        }
+        
+        worker.signUp(
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            secondName: secondName,
+            birthday: birthday,
+            regionId: regionId
+        )
+        { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(_):
+                let response = PersonalData.SignUp.Response(
+                    success: true,
+                    error: nil
+                )
+                self.presenter?.presentSignUp(response: response)
+                
+            case .failure(let networkError):
+                let response = PersonalData.SignUp.Response(
+                    success: false,
+                    error: networkError as NSError
+                )
+                self.presenter?.presentSignUp(response: response)
+            }
+        }
+    }
 }

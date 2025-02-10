@@ -17,7 +17,6 @@ final class PersonalDataViewController: UIViewController {
     private var birthdayTopConstraint: NSLayoutConstraint?
     
     // MARK: UI Элементы
-    
     let lastNameTextField: CustomInputDataField = CustomInputDataField(with: "Фамилия")
     let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
     
@@ -29,21 +28,7 @@ final class PersonalDataViewController: UIViewController {
     
     let regionTextField: RegionTextField = RegionTextField(
         with: "Регион",
-        regions: [
-            "Москва",
-            "Санкт-Петербург",
-            "Йошкар-Ола",
-            "Екатеринбург",
-            "Петрозаводск",
-            "Казань",
-            "Новосибирск",
-            "Нижний Новгород",
-            "Омск",
-            "Ростов-на-Дону",
-            "Самара",
-            "Саратов",
-            "Ульяновск"
-        ]
+        endPoint: "/regions"
     )
     
     let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")

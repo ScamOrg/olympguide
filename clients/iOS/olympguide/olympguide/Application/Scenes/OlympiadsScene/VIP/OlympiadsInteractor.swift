@@ -12,7 +12,11 @@ final class OlympiadsInteractor: OlympiadsBusinessLogic, OlympiadsDataStore {
     var olympiads: [OlympiadModel] = []
 
     func loadOlympiads(_ request: Olympiads.Load.Request) {
-        worker.fetchOlympiads(levels: request.levels, sort: request.sortOption?.rawValue, search: request.searchQuery) { [weak self] result in
+        worker.fetchOlympiads(
+            levels: request.levels,
+            sort: request.sortOption?.rawValue,
+            search: request.searchQuery
+        ) { [weak self] result in
             switch result {
             case .success(let olympiads):
                 self?.olympiads = olympiads

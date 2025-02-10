@@ -38,7 +38,7 @@ fileprivate enum Constants {
     }
 }
 
-class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic, MainVC {
+class UniversitiesViewController: UIViewController, MainVC {
     
     // MARK: - VIP
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
@@ -84,14 +84,6 @@ class UniversitiesViewController: UIViewController, UniversitiesDisplayLogic, Ma
     
     
     // MARK: - Methods
-    func displayUniversities(viewModel: Universities.Load.ViewModel) {
-        universities = viewModel.universities
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-            self.refreshControl.endRefreshing()
-        }
-    }
-    
     func displayError(message: String) {
         print("Error: \(message)")
     }
@@ -231,6 +223,16 @@ extension UniversitiesViewController: FilterSortViewDelegate {
             }
         default:
             break
+        }
+    }
+}
+
+extension UniversitiesViewController: UniversitiesDisplayLogic {
+    func displayUniversities(viewModel: Universities.Load.ViewModel) {
+        universities = viewModel.universities
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
         }
     }
 }

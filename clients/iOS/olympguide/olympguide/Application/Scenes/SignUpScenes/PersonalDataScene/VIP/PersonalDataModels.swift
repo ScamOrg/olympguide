@@ -6,7 +6,7 @@
 //
 
 enum PersonalData {
-    enum signUP {
+    enum SignUp {
         struct Request {
             let email: String?
             let password: String?
@@ -14,7 +14,7 @@ enum PersonalData {
             let lastName: String?
             let secondName: String?
             let birthday: String?
-            let region_id: Int?
+            let regionId: Int?
         }
         
         struct Response {
@@ -23,7 +23,7 @@ enum PersonalData {
         }
         
         struct ViewModel {
-            let name: String
+            let errorMessage: String?
         }
     }
 }

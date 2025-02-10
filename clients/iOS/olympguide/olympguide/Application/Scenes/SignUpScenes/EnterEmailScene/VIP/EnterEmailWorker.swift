@@ -21,15 +21,17 @@ final class EnterEmailWorker: EnterEmailWorkerLogic {
         self.networkService = networkService
     }
     
-    func sendCode(email: String, completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void) {
+    func sendCode(
+        email: String,
+        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+    ) {
         let endpoint = "/auth/send_code"
         let body: [String: Any] = ["email": email]
         
-        // Вызываем наш универсальный метод
         networkService.request(
             endpoint: endpoint,
             method: .post,
-            queryItems: nil, // в данном случае не нужны
+            queryItems: nil,
             body: body
         ) { (result: Result<BaseServerResponse, NetworkError>) in
             switch result {
