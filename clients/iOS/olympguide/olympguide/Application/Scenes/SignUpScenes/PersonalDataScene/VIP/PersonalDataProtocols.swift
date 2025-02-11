@@ -19,7 +19,7 @@ protocol PersonalDataBusinessLogic {
 // MARK: - Presentation Logic
 protocol PersonalDataPresentationLogic {
     func presentSignUp(response: PersonalData.SignUp.Response)
-    func presentError(message: String)
+    func presentError(with error: Error)
 }
 
 // MARK: - Display Logic
