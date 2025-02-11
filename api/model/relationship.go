@@ -21,8 +21,8 @@ type ProgramRequiredSubjects struct {
 }
 
 type ProgramOptionalSubjects struct {
-	ProgramID uint `gorm:"primaryKey"`
-	SubjectID uint `gorm:"primaryKey"`
+	ProgramID uint `gorm:"primaryKey, column:program_id"`
+	SubjectID uint `gorm:"primaryKey, column:subject_id"`
 }
 
 func (LikedPrograms) TableName() string           { return "olympguide.liked_programs" }

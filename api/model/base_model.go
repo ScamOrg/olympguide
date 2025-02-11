@@ -46,8 +46,8 @@ type Program struct {
 	University       University `gorm:"foreignKey:UniversityID;references:UniversityID"`
 	Faculty          Faculty    `gorm:"foreignKey:FacultyID;references:FacultyID"`
 	Field            Field      `gorm:"foreignKey:FieldID;references:FieldID"`
-	OptionalSubjects []Subject  `gorm:"many2many:program_optional_subjects;"`
-	RequiredSubjects []Subject  `gorm:"many2many:program_required_subjects;"`
+	OptionalSubjects []Subject  `gorm:"many2many:olympguide.program_optional_subjects;foreignKey:ProgramID;joinForeignKey:ProgramID;References:SubjectID;joinReferences:SubjectID"`
+	RequiredSubjects []Subject  `gorm:"many2many:olympguide.program_required_subjects;foreignKey:ProgramID;joinForeignKey:ProgramID;References:SubjectID;joinReferences:SubjectID"`
 	Like             bool       `gorm:"column:like;->"`
 }
 

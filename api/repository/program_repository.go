@@ -33,10 +33,10 @@ func (p *PgProgramRepo) GetProgram(programID string, userID any) (*model.Program
 
 func (p *PgProgramRepo) GetProgramsByFacultyID(facultyID string, userID any) ([]model.Program, error) {
 	var programs []model.Program
-	err := p.db.Debug().Preload("Field").Preload("Subjects").
+	err := p.db.Debug().Preload("OptionalSubjects").Preload("RequiredSubjects").Preload("Field").
 		Joins("LEFT JOIN olympguide.liked_programs lp "+
 			"ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
-		Select("olympguide.program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
+		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
 		Where("faculty_id = ?", facultyID).
 		Find(&programs).Error
 	return programs, err

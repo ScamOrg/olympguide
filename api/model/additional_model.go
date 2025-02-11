@@ -18,7 +18,7 @@ type Faculty struct {
 	Description  string
 	UniversityID uint
 	University   University `gorm:"foreignKey:UniversityID;references:UniversityID"`
-	Programs     []Program  `gorm:"foreignKey:ProgramID;references:ProgramID"`
+	Programs     []Program  `gorm:"foreignKey:FacultyID;references:FacultyID"`
 }
 
 type Subject struct {

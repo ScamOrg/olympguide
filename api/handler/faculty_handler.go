@@ -17,7 +17,7 @@ func NewFacultyHandler(facultyService service.IFacultyService) *FacultyHandler {
 }
 
 func (f *FacultyHandler) NewFaculty(c *gin.Context) {
-	var request dto.FacultyRequest
+	var request dto.FacultyNewRequest
 	if err := c.ShouldBind(&request); err != nil {
 		errs.HandleError(c, errs.InvalidRequest)
 		return
@@ -35,7 +35,7 @@ func (f *FacultyHandler) NewFaculty(c *gin.Context) {
 
 func (f *FacultyHandler) UpdateFaculty(c *gin.Context) {
 	facultyID := c.Param("id")
-	var request dto.FacultyRequest
+	var request dto.FacultyUpdateRequest
 	if err := c.ShouldBind(&request); err != nil {
 		errs.HandleError(c, errs.InvalidRequest)
 		return

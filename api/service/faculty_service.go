@@ -8,8 +8,8 @@ import (
 )
 
 type IFacultyService interface {
-	NewFaculty(request *dto.FacultyRequest) (uint, error)
-	UpdateFaculty(request *dto.FacultyRequest, facultyID string) (uint, error)
+	NewFaculty(request *dto.FacultyNewRequest) (uint, error)
+	UpdateFaculty(request *dto.FacultyUpdateRequest, facultyID string) (uint, error)
 	DeleteFaculty(facultyID string) error
 	GetFaculties(universityID string) ([]dto.FacultyShortResponse, error)
 }
@@ -19,11 +19,11 @@ type FacultyService struct {
 	univerRepo  repository.IUniverRepo
 }
 
-func NewFacultyService(facultyRepo repository.IFacultyRepo) *FacultyService {
-	return &FacultyService{facultyRepo: facultyRepo}
+func NewFacultyService(facultyRepo repository.IFacultyRepo, univerRepo repository.IUniverRepo) *FacultyService {
+	return &FacultyService{facultyRepo: facultyRepo, univerRepo: univerRepo}
 }
 
-func (u *FacultyService) NewFaculty(request *dto.FacultyRequest) (uint, error) {
+func (u *FacultyService) NewFaculty(request *dto.FacultyNewRequest) (uint, error) {
 	facultyModel := newFacultyModel(request)
 	exists := u.univerRepo.UniverExists(facultyModel.UniversityID)
 	if !exists {
@@ -32,15 +32,16 @@ func (u *FacultyService) NewFaculty(request *dto.FacultyRequest) (uint, error) {
 	return u.facultyRepo.NewFaculty(facultyModel)
 }
 
-func (u *FacultyService) UpdateFaculty(request *dto.FacultyRequest, facultyID string) (uint, error) {
+func (u *FacultyService) UpdateFaculty(request *dto.FacultyUpdateRequest, facultyID string) (uint, error) {
 	faculty, err := u.facultyRepo.GetFacultyByID(facultyID)
 	if err != nil {
 		return 0, err
 	}
 
-	facultyModel := newFacultyModel(request)
-	facultyModel.FacultyID = faculty.FacultyID
-	err = u.facultyRepo.UpdateFaculty(facultyModel)
+	faculty.Description = request.Description
+	faculty.Name = request.Name
+
+	err = u.facultyRepo.UpdateFaculty(faculty)
 	if err != nil {
 		return 0, err
 	}
@@ -63,7 +64,7 @@ func (u *FacultyService) GetFaculties(universityID string) ([]dto.FacultyShortRe
 	return newFacultiesShortResponse(faculties), nil
 }
 
-func newFacultyModel(request *dto.FacultyRequest) *model.Faculty {
+func newFacultyModel(request *dto.FacultyNewRequest) *model.Faculty {
 	return &model.Faculty{
 		Name:         request.Name,
 		Description:  request.Description,
