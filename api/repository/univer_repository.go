@@ -6,6 +6,7 @@ import (
 )
 
 type IUniverRepo interface {
+	UniverExists(univerID uint) bool
 	GetUniver(universityID string, userID any) (*model.University, error)
 	GetUnivers(search string, regionIDs []string, userID any) ([]model.University, error)
 	GetLikedUnivers(userID uint) ([]model.University, error)
@@ -23,6 +24,12 @@ type PgUniverRepo struct {
 
 func NewPgUniverRepo(db *gorm.DB) *PgUniverRepo {
 	return &PgUniverRepo{db: db}
+}
+
+func (u *PgUniverRepo) UniverExists(univerID uint) bool {
+	var univerExists bool
+	u.db.Raw("SELECT EXISTS(SELECT 1 FROM olympguide.university WHERE university_id = ?)", univerID).Scan(&univerExists)
+	return univerExists
 }
 
 func (u *PgUniverRepo) GetUniver(universityID string, userID any) (*model.University, error) {
@@ -78,17 +85,11 @@ func (u *PgUniverRepo) NewUniver(univer *model.University) (uint, error) {
 }
 
 func (u *PgUniverRepo) UpdateUniver(univer *model.University) error {
-	if err := u.db.Save(univer).Error; err != nil {
-		return err
-	}
-	return nil
+	return u.db.Save(univer).Error
 }
 
 func (u *PgUniverRepo) DeleteUniver(univer *model.University) error {
-	if err := u.db.Delete(univer).Error; err != nil {
-		return err
-	}
-	return nil
+	return u.db.Delete(univer).Error
 }
 
 func (u *PgUniverRepo) ChangeUniverPopularity(university *model.University, value int) {

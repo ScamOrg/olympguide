@@ -29,6 +29,7 @@ var (
 	NotEnoughRights        = AppError{403, "NotEnoughRights", "User does not haves enough rights", nil}
 	TooManyAttempts        = AppError{429, "TooManyAttempts", "Too many attempts", nil}
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
+	UniversityNotExist     = AppError{400, "UniversityNotExist", "University not exist", nil}
 )
 
 func (e AppError) WithAdditional(data map[string]interface{}) AppError {

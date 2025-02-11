@@ -63,11 +63,7 @@ func (u *UniverService) GetLikedUnivers(userID uint) ([]dto.UniversityShortRespo
 
 func (u *UniverService) NewUniver(request *dto.UniversityRequest) (uint, error) {
 	univerModel := newUniverModel(request)
-	id, err := u.univerRepo.NewUniver(univerModel)
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+	return u.univerRepo.NewUniver(univerModel)
 }
 
 func (u *UniverService) UpdateUniver(request *dto.UniversityRequest, universityID string) (uint, error) {
@@ -91,11 +87,7 @@ func (u *UniverService) DeleteUniver(universityID string) error {
 	if err != nil {
 		return err
 	}
-	err = u.univerRepo.DeleteUniver(univer)
-	if err != nil {
-		return err
-	}
-	return nil
+	return u.univerRepo.DeleteUniver(univer)
 }
 
 func (u *UniverService) LikeUniver(universityID string, userID uint) (bool, error) {
