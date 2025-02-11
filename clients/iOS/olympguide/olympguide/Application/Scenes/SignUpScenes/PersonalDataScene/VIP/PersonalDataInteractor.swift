@@ -20,14 +20,38 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             let birthday = request.birthday?.trimmingCharacters(in: .whitespacesAndNewlines), !birthday.isEmpty,
             let regionId = request.regionId
         else {
-            presenter?.presentError(message: "")
+            var validationErrors: [ValidationError] = []
+            if request.email?.isEmpty ?? true {
+                validationErrors.append(.invalidEmail)
+            }
+            
+            if !isPasswordValid(with: request.password) {
+                validationErrors.append(.weakPassword)
+            }
+            
+            if request.firstName?.isEmpty ?? true {
+                validationErrors.append(.invalidFirstName)
+            }
+            if request.lastName?.isEmpty ?? true {
+                validationErrors.append(.invalidLastName)
+            }
+            if request.birthday?.isEmpty ?? true {
+                validationErrors.append(.invalidBirthay)
+            }
+            if request.regionId == nil {
+                validationErrors.append(.invalidRegion)
+            }
+            
+            presenter?.presentError(with: AppError.validation(validationErrors) as NSError)
             return
         }
         
         let secondName = request.secondName ?? ""
         
         guard request.secondName == nil || !secondName.isEmpty else {
-            presenter?.presentError(message: "")
+            var validationErrors: [ValidationError] = []
+            validationErrors.append(.invalidSecondName)
+            presenter?.presentError(with: AppError.validation(validationErrors) as NSError)
             return
         }
         
@@ -49,15 +73,24 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
                     success: true,
                     error: nil
                 )
-                self.presenter?.presentSignUp(response: response)
                 
-            case .failure(let networkError):
-                let response = PersonalData.SignUp.Response(
-                    success: false,
-                    error: networkError as NSError
-                )
                 self.presenter?.presentSignUp(response: response)
+            case .failure(let networkError):
+                self.presenter?.presentError(with: networkError as NSError)
             }
         }
+    }
+    
+    func isPasswordValid(with password: String?) -> Bool {
+        let passwordRegex = #"^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$"#
+        guard
+            let password = password?.trimmingCharacters(in: .whitespacesAndNewlines),
+            !password.isEmpty,
+            NSPredicate(format: "SELF MATCHES %@", passwordRegex).evaluate(with: password)
+        else {
+            return false
+        }
+        
+        return true
     }
 }
