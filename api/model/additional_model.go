@@ -12,5 +12,21 @@ type Region struct {
 	Name     string
 }
 
+type Faculty struct {
+	FacultyID    uint `gorm:"primaryKey"`
+	Name         string
+	Description  string
+	UniversityID uint
+	University   University `gorm:"foreignKey:UniversityID;references:UniversityID"`
+	Programs     []Program  `gorm:"foreignKey:ProgramID;references:ProgramID"`
+}
+
+type Subject struct {
+	SubjectID uint `gorm:"primaryKey"`
+	Name      string
+}
+
 func (Region) TableName() string     { return "olympguide.region" }
 func (GroupField) TableName() string { return "olympguide.group_of_fields" }
+func (Faculty) TableName() string    { return "olympguide.faculty" }
+func (Subject) TableName() string    { return "olympguide.subject" }

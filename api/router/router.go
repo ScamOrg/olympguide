@@ -8,26 +8,31 @@ import (
 )
 
 type Router struct {
-	authHandler   *handler.AuthHandler
-	univerHandler *handler.UniverHandler
-	fieldHandler  *handler.FieldHandler
-	olympHandler  *handler.OlympHandler
-	metaHandler   *handler.MetaHandler
-	userHandler   *handler.UserHandler
-	mw            *middleware.Mw
+	authHandler    *handler.AuthHandler
+	univerHandler  *handler.UniverHandler
+	fieldHandler   *handler.FieldHandler
+	olympHandler   *handler.OlympHandler
+	metaHandler    *handler.MetaHandler
+	userHandler    *handler.UserHandler
+	facultyHandler *handler.FacultyHandler
+	programHandler *handler.ProgramHandler
+	mw             *middleware.Mw
 }
 
 func NewRouter(auth *handler.AuthHandler, univer *handler.UniverHandler,
 	field *handler.FieldHandler, olymp *handler.OlympHandler,
-	meta *handler.MetaHandler, user *handler.UserHandler, mw *middleware.Mw) *Router {
+	meta *handler.MetaHandler, user *handler.UserHandler,
+	faculty *handler.FacultyHandler, program *handler.ProgramHandler, mw *middleware.Mw) *Router {
 	return &Router{
-		authHandler:   auth,
-		univerHandler: univer,
-		fieldHandler:  field,
-		olympHandler:  olymp,
-		metaHandler:   meta,
-		userHandler:   user,
-		mw:            mw,
+		authHandler:    auth,
+		univerHandler:  univer,
+		fieldHandler:   field,
+		olympHandler:   olymp,
+		metaHandler:    meta,
+		userHandler:    user,
+		facultyHandler: faculty,
+		programHandler: program,
+		mw:             mw,
 	}
 }
 
@@ -41,6 +46,7 @@ func (rt *Router) SetupRoutes(r *gin.Engine) {
 	rt.setupFieldRoutes(r)
 	rt.setupOlympRoutes(r)
 	rt.setupMetaRoutes(r)
+	rt.setupFacultyRoutes(r)
 }
 
 func (rt *Router) setupAuthRoutes(r *gin.Engine) {
@@ -57,6 +63,7 @@ func (rt *Router) setupUniverRoutes(r *gin.Engine) {
 	university := r.Group("/university")
 	{
 		university.GET("/:id", rt.univerHandler.GetUniver)
+		university.GET("/:id/faculties", rt.facultyHandler.GetFaculties)
 		university.POST("/", rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService), rt.univerHandler.NewUniver)
 
 		universityWithID := university.Group("/:id", rt.mw.UniversityIdSetter())
@@ -99,4 +106,18 @@ func (rt *Router) setupMetaRoutes(r *gin.Engine) {
 	meta.GET("/regions", rt.metaHandler.GetRegions)
 	meta.GET("/university-regions", rt.metaHandler.GetUniversityRegions)
 	meta.GET("/olympiad-profiles", rt.metaHandler.GetOlympiadProfiles)
+}
+
+func (rt *Router) setupFacultyRoutes(r *gin.Engine) {
+	faculty := r.Group("/faculty")
+	{
+		faculty.POST("/", rt.facultyHandler.NewFaculty)
+
+		facultyWithID := faculty.Group("/:id")
+		{
+			facultyWithID.PUT("", rt.facultyHandler.UpdateFaculty)
+			facultyWithID.DELETE("", rt.facultyHandler.DeleteFaculty)
+			facultyWithID.GET("/programs", rt.programHandler.GetProgramsByFaculty)
+		}
+	}
 }

@@ -31,6 +31,8 @@ func main() {
 	fieldRepo := repository.NewPgFieldRepo(db)
 	olympRepo := repository.NewPgOlympRepo(db)
 	adminRepo := repository.NewPgAdminRepo(db)
+	facultyRepo := repository.NewPgFacultyRepo(db)
+	programRepo := repository.NewPgProgramRepo(db)
 
 	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
 	univerService := service.NewUniverService(univerRepo, regionRepo)
@@ -39,6 +41,8 @@ func main() {
 	metaService := service.NewMetaService(regionRepo, olympRepo)
 	userService := service.NewUserService(userRepo)
 	adminService := service.NewAdminService(adminRepo)
+	facultyService := service.NewFacultyService(facultyRepo)
+	programService := service.NewProgramService(programRepo)
 
 	authHandler := handler.NewAuthHandler(authService)
 	univerHandler := handler.NewUniverHandler(univerService)
@@ -46,11 +50,14 @@ func main() {
 	olympHandler := handler.NewOlympHandler(olympService)
 	metaHandler := handler.NewMetaHandler(metaService)
 	userHandler := handler.NewUserHandler(userService)
+	facultyHandler := handler.NewFacultyHandler(facultyService)
+	programHandler := handler.NewProgramHandler(programService)
 
 	mw := middleware.NewMw(adminService)
 
 	mainRouter := router.NewRouter(authHandler, univerHandler, fieldHandler,
-		olympHandler, metaHandler, userHandler, mw)
+		olympHandler, metaHandler, userHandler,
+		facultyHandler, programHandler, mw)
 
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))

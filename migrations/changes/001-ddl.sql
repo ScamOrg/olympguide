@@ -230,18 +230,28 @@ ALTER TABLE liked_olympiads ADD FOREIGN KEY (user_id) REFERENCES "user" (user_id
 ALTER TABLE liked_olympiads ADD FOREIGN KEY (olympiad_id) REFERENCES olympiad(olympiad_id) ON DELETE CASCADE;
 
 
-CREATE TABLE IF NOT EXISTS program_subjects
+CREATE TABLE IF NOT EXISTS program_required_subjects
 (
     program_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
-    required BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (program_id, subject_id)
 );
 
-ALTER TABLE program_subjects ADD FOREIGN KEY (program_id) REFERENCES educational_program(program_id) ON DELETE CASCADE;
+ALTER TABLE program_required_subjects ADD FOREIGN KEY (program_id) REFERENCES educational_program(program_id) ON DELETE CASCADE;
 
-ALTER TABLE program_subjects ADD FOREIGN KEY (subject_id) REFERENCES subject(subject_id) ON DELETE CASCADE;
+ALTER TABLE program_required_subjects ADD FOREIGN KEY (subject_id) REFERENCES subject(subject_id) ON DELETE CASCADE;
 
+
+CREATE TABLE IF NOT EXISTS program_optional_subjects
+(
+    program_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    PRIMARY KEY (program_id, subject_id)
+);
+
+ALTER TABLE program_optional_subjects ADD FOREIGN KEY (program_id) REFERENCES educational_program(program_id) ON DELETE CASCADE;
+
+ALTER TABLE program_optional_subjects ADD FOREIGN KEY (subject_id) REFERENCES subject(subject_id) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS confirmation_subjects
 (
