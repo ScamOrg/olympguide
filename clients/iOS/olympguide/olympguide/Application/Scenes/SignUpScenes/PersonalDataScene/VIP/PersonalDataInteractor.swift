@@ -21,6 +21,7 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             let regionId = request.regionId
         else {
             var validationErrors: [ValidationError] = []
+            
             if request.email?.isEmpty ?? true {
                 validationErrors.append(.invalidEmail)
             }
@@ -32,12 +33,15 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             if request.firstName?.isEmpty ?? true {
                 validationErrors.append(.invalidFirstName)
             }
+            
             if request.lastName?.isEmpty ?? true {
                 validationErrors.append(.invalidLastName)
             }
+            
             if request.birthday?.isEmpty ?? true {
                 validationErrors.append(.invalidBirthay)
             }
+            
             if request.regionId == nil {
                 validationErrors.append(.invalidRegion)
             }
