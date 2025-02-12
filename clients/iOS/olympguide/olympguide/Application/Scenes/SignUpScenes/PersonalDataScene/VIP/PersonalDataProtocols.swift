@@ -25,6 +25,7 @@ protocol PersonalDataPresentationLogic {
 // MARK: - Display Logic
 protocol PersonalDataDisplayLogic: AnyObject {
     func displaySignUp(viewModel: PersonalData.SignUp.ViewModel)
+    func displayError(message: String)
 }
 
 // MARK: - Routing Logic
