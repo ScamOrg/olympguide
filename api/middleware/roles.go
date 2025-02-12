@@ -1,29 +1,50 @@
 package middleware
 
 import (
-	"api/constants"
-	"api/models"
-	"api/utils"
-	"fmt"
+	"api/service"
+	"api/utils/constants"
+	"api/utils/errs"
+	"api/utils/role"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"os"
 )
 
-func UniversityMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userID, _ := c.Get("user_id")
-		var adminUser models.AdminUser
-		if err := utils.DB.Where("user_id = ?", userID).First(&adminUser).Error; err != nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": constants.UserNotAdmin})
-			return
-		}
-		universityID := c.Param("id")
-		canEditUniversity := universityID == fmt.Sprint(adminUser.EditUniversityID)
+type Mw struct {
+	adminService service.IAdminService
+}
 
-		if !adminUser.IsAdmin && !adminUser.IsFounder && !canEditUniversity {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": constants.NotEnoughRights})
+func NewMw(adminService service.IAdminService) *Mw {
+	return &Mw{adminService: adminService}
+}
+
+func (mw *Mw) RolesMiddleware(allowedRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		bearerToken := c.GetHeader("Authorization")
+		for _, allowedRole := range allowedRoles {
+			if allowedRole == role.DataLoaderService && bearerToken == "Bearer "+os.Getenv("BEARER_DATA_LOADER_TOKEN") {
+				c.Next()
+				return
+			}
+		}
+
+		userID, exists := c.Get(constants.ContextUserID)
+		if !exists {
+			errs.HandleError(c, errs.Unauthorized)
+			c.Abort()
 			return
 		}
+
+		var universityID uint
+		if uniID, ok := c.Get(constants.ContextUniverID); ok {
+			universityID = uniID.(uint)
+		}
+
+		if !mw.adminService.HasPermission(userID.(uint), allowedRoles, universityID) {
+			errs.HandleError(c, errs.NotEnoughRights)
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }
