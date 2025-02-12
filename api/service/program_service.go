@@ -8,10 +8,15 @@ import (
 
 type IProgramService interface {
 	GetProgramsByFacultyID(facultyID string, userID any) ([]dto.ProgramInUniverResponse, error)
+	LikeProgram(programID string, userID uint) (bool, error)
+	DislikeProgram(programID string, userID uint) (bool, error)
+	GetLikedPrograms(userID uint) ([]dto.ProgramResponse, error)
+	GetProgram(programID string, userID any) (*dto.ProgramResponse, error)
 }
 
 type ProgramService struct {
 	programRepo repository.IProgramRepo
+	univerRepo  repository.IUniverRepo
 }
 
 func NewProgramService(programRepo repository.IProgramRepo) *ProgramService {
@@ -32,6 +37,53 @@ func (p *ProgramService) GetProgram(programID string, userID any) (*dto.ProgramR
 		return nil, err
 	}
 	return newProgramResponse(program), nil
+}
+
+func (p *ProgramService) GetLikedPrograms(userID uint) ([]dto.ProgramResponse, error) {
+	programs, err := p.programRepo.GetLikedPrograms(userID)
+	if err != nil {
+		return nil, err
+	}
+	response := make([]dto.ProgramResponse, len(programs))
+	for i, program := range programs {
+		response[i] = *newProgramResponse(&program)
+	}
+	return response, nil
+}
+
+func (p *ProgramService) LikeProgram(programID string, userID uint) (bool, error) {
+	program, err := p.programRepo.GetProgram(programID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	if program.Like {
+		return false, nil
+	}
+
+	err = p.programRepo.LikeProgram(program.ProgramID, userID)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (p *ProgramService) DislikeProgram(programID string, userID uint) (bool, error) {
+	program, err := p.programRepo.GetProgram(programID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	if !program.Like {
+		return false, nil
+	}
+
+	err = p.programRepo.DislikeProgram(program.ProgramID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func newProgramInUniverResponse(programs []model.Program) []dto.ProgramInUniverResponse {
@@ -85,6 +137,10 @@ func newProgramResponse(program *model.Program) *dto.ProgramResponse {
 		Like:             program.Like,
 		RequiredSubjects: requiredSubjects,
 		OptionalSubjects: optionalSubjects,
-		University:       *newUniverResponse(&program.University),
+		University: dto.UniversityForProgramInfo{
+			UniversityID: program.UniversityID,
+			Name:         program.University.Name,
+			Logo:         program.University.Logo,
+		},
 	}
 }

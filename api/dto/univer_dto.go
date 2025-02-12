@@ -30,3 +30,9 @@ type UniversityResponse struct {
 	Description string `json:"description"`
 	UniversityShortResponse
 }
+
+type UniversityForProgramInfo struct {
+	UniversityID uint   `json:"university_id"`
+	Name         string `json:"name"`
+	Logo         string `json:"logo"`
+}

@@ -104,7 +104,7 @@ func (u *UniverService) LikeUniver(universityID string, userID uint) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	u.univerRepo.ChangeUniverPopularity(university, constants.LikePopularityIncrease)
+	u.univerRepo.ChangeUniverPopularity(university, constants.LikeUniverPopularIncr)
 	return true, nil
 }
 
@@ -122,7 +122,7 @@ func (u *UniverService) DislikeUniver(universityID string, userID uint) (bool, e
 	if err != nil {
 		return false, err
 	}
-	u.univerRepo.ChangeUniverPopularity(university, constants.LikePopularityDecrease)
+	u.univerRepo.ChangeUniverPopularity(university, constants.LikeUniverPopularDecr)
 	return true, nil
 }
 

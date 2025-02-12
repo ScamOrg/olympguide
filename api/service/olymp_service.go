@@ -52,7 +52,7 @@ func (o *OlympService) LikeOlymp(olympiadID string, userID uint) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	o.olympRepo.ChangeOlympPopularity(olymp, constants.LikePopularityIncrease)
+	o.olympRepo.ChangeOlympPopularity(olymp, constants.LikeOlympPopularIncr)
 	return true, nil
 }
 
@@ -70,7 +70,7 @@ func (o *OlympService) DislikeOlymp(olympiadID string, userID uint) (bool, error
 	if err != nil {
 		return false, err
 	}
-	o.olympRepo.ChangeOlympPopularity(olymp, constants.LikePopularityDecrease)
+	o.olympRepo.ChangeOlympPopularity(olymp, constants.LikeOlympPopularDecr)
 	return true, nil
 }
 
