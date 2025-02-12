@@ -14,15 +14,13 @@ final class VerifyEmailPresenter: VerifyEmailPresentationLogic {
     
     func presentVerifyCode(response: VerifyEmailModels.VerifyCode.Response) {
         if response.success {
-            // Ошибки нет — значит всё ОК
             let viewModel = VerifyEmailModels.VerifyCode.ViewModel(errorMessage: nil)
             viewController?.displayVerifyCodeResult(viewModel: viewModel)
         } else {
-            // Есть ошибка
             let errorMessage: String
             
             if let error = response.error {
-                errorMessage = error.localizedDescription  // <-- используем localizedDescription
+                errorMessage = error.localizedDescription
             } else {
                 errorMessage = "Произошла неизвестная ошибка"
             }
