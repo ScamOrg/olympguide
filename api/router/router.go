@@ -47,6 +47,7 @@ func (rt *Router) SetupRoutes(r *gin.Engine) {
 	rt.setupOlympRoutes(r)
 	rt.setupMetaRoutes(r)
 	rt.setupFacultyRoutes(r)
+	rt.setupProgramRoutes(r)
 }
 
 func (rt *Router) setupAuthRoutes(r *gin.Engine) {
@@ -90,6 +91,10 @@ func (rt *Router) setupUserRoutes(r *gin.Engine) {
 		user.GET("/data", rt.userHandler.GetUserData)
 		favourite := user.Group("/favourite")
 		{
+			favourite.GET("/programs", rt.programHandler.GetLikedPrograms)
+			favourite.POST("/program/:id", rt.programHandler.LikeProgram)
+			favourite.DELETE("/program/:id", rt.programHandler.DislikeProgram)
+
 			favourite.GET("/universities", rt.univerHandler.GetLikedUnivers)
 			favourite.POST("/university/:id", rt.univerHandler.LikeUniver)
 			favourite.DELETE("/university/:id", rt.univerHandler.DislikeUniver)
@@ -118,6 +123,16 @@ func (rt *Router) setupFacultyRoutes(r *gin.Engine) {
 			facultyWithID.PUT("", rt.facultyHandler.UpdateFaculty)
 			facultyWithID.DELETE("", rt.facultyHandler.DeleteFaculty)
 			facultyWithID.GET("/programs", rt.programHandler.GetProgramsByFaculty)
+		}
+	}
+}
+
+func (rt *Router) setupProgramRoutes(r *gin.Engine) {
+	program := r.Group("/program")
+	{
+		programWithID := program.Group("/:id")
+		{
+			programWithID.GET("/", rt.programHandler.GetProgram)
 		}
 	}
 }
