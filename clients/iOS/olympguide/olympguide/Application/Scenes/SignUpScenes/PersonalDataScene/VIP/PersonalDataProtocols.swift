@@ -19,12 +19,13 @@ protocol PersonalDataBusinessLogic {
 // MARK: - Presentation Logic
 protocol PersonalDataPresentationLogic {
     func presentSignUp(response: PersonalData.SignUp.Response)
-    func presentError(message: String)
+    func presentError(with error: Error)
 }
 
 // MARK: - Display Logic
 protocol PersonalDataDisplayLogic: AnyObject {
     func displaySignUp(viewModel: PersonalData.SignUp.ViewModel)
+    func displayError(message: String)
 }
 
 // MARK: - Routing Logic
