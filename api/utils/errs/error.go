@@ -30,6 +30,8 @@ var (
 	TooManyAttempts        = AppError{429, "TooManyAttempts", "Too many attempts", nil}
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
 	UniversityNotExist     = AppError{400, "UniversityNotExist", "University not exist", nil}
+	FacultyErr             = AppError{400, "FacultyNotExistsOrBelongsToAnotherUniver", "Faculty not found or does not belong to the university", nil}
+	FieldNotExist          = AppError{400, "FieldNotExist", "Field not exist", nil}
 )
 
 func (e AppError) WithAdditional(data map[string]interface{}) AppError {

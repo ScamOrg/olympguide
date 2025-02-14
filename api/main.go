@@ -38,11 +38,11 @@ func main() {
 	univerService := service.NewUniverService(univerRepo, regionRepo)
 	fieldService := service.NewFieldService(fieldRepo)
 	olympService := service.NewOlympService(olympRepo)
-	metaService := service.NewMetaService(regionRepo, olympRepo)
+	metaService := service.NewMetaService(regionRepo, olympRepo, programRepo)
 	userService := service.NewUserService(userRepo)
 	adminService := service.NewAdminService(adminRepo)
 	facultyService := service.NewFacultyService(facultyRepo, univerRepo)
-	programService := service.NewProgramService(programRepo)
+	programService := service.NewProgramService(programRepo, univerRepo, facultyRepo, fieldRepo)
 
 	authHandler := handler.NewAuthHandler(authService)
 	univerHandler := handler.NewUniverHandler(univerService)

@@ -111,6 +111,7 @@ func (rt *Router) setupMetaRoutes(r *gin.Engine) {
 	meta.GET("/regions", rt.metaHandler.GetRegions)
 	meta.GET("/university-regions", rt.metaHandler.GetUniversityRegions)
 	meta.GET("/olympiad-profiles", rt.metaHandler.GetOlympiadProfiles)
+	meta.GET("/subjects", rt.metaHandler.GetSubjects)
 }
 
 func (rt *Router) setupFacultyRoutes(r *gin.Engine) {
@@ -129,6 +130,7 @@ func (rt *Router) setupFacultyRoutes(r *gin.Engine) {
 
 func (rt *Router) setupProgramRoutes(r *gin.Engine) {
 	program := r.Group("/program")
+	program.POST("", rt.programHandler.NewProgram)
 	{
 		programWithID := program.Group("/:id")
 		{
