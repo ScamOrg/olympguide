@@ -43,6 +43,17 @@ func (f *PgFieldRepo) GetGroups(search string, degrees []string) ([]model.GroupF
 	return groups, nil
 }
 
+func (f *PgFieldRepo) GetGroupsInUniver(univerID string) ([]model.GroupField, error) {
+	var groups []model.GroupField
+	err := f.db.Debug().
+		Preload("Fields").
+		Joins("JOIN olympguide.field f ON f.group_id = olympguide.group_of_fields.group_id").
+		Joins("JOIN olympguide.educational_program ep ON ep.field_id = f.field_id").
+		Where("ep.university_id = ?", univerID).
+		Find(&groups).Error
+	return groups, err
+}
+
 func (f *PgFieldRepo) Exists(fieldID uint) bool {
 	var count int64
 	f.db.Model(&model.Field{}).Where("field_id = ?", fieldID).Count(&count)
