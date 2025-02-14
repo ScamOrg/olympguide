@@ -8,12 +8,14 @@ import (
 type IProgramRepo interface {
 	GetProgramsByFacultyID(facultyID string, userID any) ([]model.Program, error)
 	GetLikedPrograms(userID uint) ([]model.Program, error)
-	NewProgram(program *model.Program) (uint, error)
+	NewProgram(program *model.Program,
+		optSubjects []uint, reqSubjects []uint) (uint, error)
 	UpdateProgram(program *model.Program) error
 	DeleteProgram(program *model.Program) error
 	GetProgram(programID string, userID any) (*model.Program, error)
 	LikeProgram(programID uint, userID uint) error
 	DislikeProgram(programID uint, userID uint) error
+	GetSubjects() ([]model.Subject, error)
 }
 
 type PgProgramRepo struct {
@@ -67,11 +69,39 @@ func (p *PgProgramRepo) GetLikedPrograms(userID uint) ([]model.Program, error) {
 	return programs, nil
 }
 
-func (p *PgProgramRepo) NewProgram(program *model.Program) (uint, error) {
-	if err := p.db.Create(&program).Error; err != nil {
-		return 0, err
-	}
-	return program.ProgramID, nil
+func (p *PgProgramRepo) NewProgram(program *model.Program,
+	optSubjects []uint, reqSubjects []uint) (uint, error) {
+	err := p.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(program).Error; err != nil {
+			return err
+		}
+		if len(reqSubjects) > 0 {
+			requiredSubjects := make([]model.ProgramRequiredSubjects, len(reqSubjects))
+			for i, subjectID := range reqSubjects {
+				requiredSubjects[i] = model.ProgramRequiredSubjects{
+					ProgramID: program.ProgramID,
+					SubjectID: subjectID,
+				}
+			}
+			if err := tx.Table("olympguide.program_required_subjects").Create(&requiredSubjects).Error; err != nil {
+				return err
+			}
+		}
+		if len(optSubjects) > 0 {
+			optionalSubjects := make([]model.ProgramOptionalSubjects, len(optSubjects))
+			for i, subjectID := range optSubjects {
+				optionalSubjects[i] = model.ProgramOptionalSubjects{
+					ProgramID: program.ProgramID,
+					SubjectID: subjectID,
+				}
+			}
+			if err := tx.Table("olympguide.program_optional_subjects").Create(&optionalSubjects).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return program.ProgramID, err
 }
 
 func (p *PgProgramRepo) UpdateProgram(program *model.Program) error {
@@ -98,4 +128,12 @@ func (p *PgProgramRepo) DislikeProgram(programID uint, userID uint) error {
 	}
 	err := p.db.Delete(&likedPrograms).Error
 	return err
+}
+
+func (p *PgProgramRepo) GetSubjects() ([]model.Subject, error) {
+	var subjects []model.Subject
+	if err := p.db.Find(&subjects).Error; err != nil {
+		return nil, err
+	}
+	return subjects, nil
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"api/dto"
 	"api/service"
 	"api/utils/constants"
 	"api/utils/errs"
@@ -52,6 +53,22 @@ func (p *ProgramHandler) GetLikedPrograms(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, programs)
+}
+
+func (p *ProgramHandler) NewProgram(c *gin.Context) {
+	var request dto.ProgramRequest
+	if err := c.ShouldBind(&request); err != nil {
+		errs.HandleError(c, errs.InvalidRequest)
+		return
+	}
+
+	id, err := p.programService.NewProgram(&request)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"program_id": id})
 }
 
 func (p *ProgramHandler) LikeProgram(c *gin.Context) {

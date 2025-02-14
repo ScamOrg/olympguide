@@ -8,10 +8,10 @@ import (
 )
 
 type MetaHandler struct {
-	metaService *service.MetaService
+	metaService service.IMetaService
 }
 
-func NewMetaHandler(metaService *service.MetaService) *MetaHandler {
+func NewMetaHandler(metaService service.IMetaService) *MetaHandler {
 	return &MetaHandler{metaService: metaService}
 }
 
@@ -40,4 +40,13 @@ func (h *MetaHandler) GetOlympiadProfiles(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, profiles)
+}
+
+func (h *MetaHandler) GetSubjects(c *gin.Context) {
+	subjects, err := h.metaService.GetSubjects()
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, subjects)
 }

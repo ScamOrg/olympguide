@@ -11,6 +11,7 @@
         <sqlFile path="changelog/changes/002-insert_groups_and_fields.sql"/>
         <sqlFile path="changelog/changes/003-insert_olymps.sql"/>
         <sqlFile path="changelog/changes/004-insert_regions.sql"/>
+        <sqlFile path="changelog/changes/005-insert_subjects.sql"/>
     </changeSet>
 
 </databaseChangeLog>

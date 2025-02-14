@@ -8,6 +8,7 @@ import (
 type IFieldRepo interface {
 	GetField(fieldID string) (*model.Field, error)
 	GetGroups(search string, degrees []string) ([]model.GroupField, error)
+	Exists(fieldID uint) bool
 }
 type PgFieldRepo struct {
 	db *gorm.DB
@@ -40,4 +41,10 @@ func (f *PgFieldRepo) GetGroups(search string, degrees []string) ([]model.GroupF
 		return nil, err
 	}
 	return groups, nil
+}
+
+func (f *PgFieldRepo) Exists(fieldID uint) bool {
+	var count int64
+	f.db.Model(&model.Field{}).Where("field_id = ?", fieldID).Count(&count)
+	return count > 0
 }

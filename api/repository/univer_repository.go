@@ -16,6 +16,7 @@ type IUniverRepo interface {
 	ChangeUniverPopularity(university *model.University, value int)
 	LikeUniver(universityID uint, userID uint) error
 	DislikeUniver(universityID uint, userID uint) error
+	Exists(universityID uint) bool
 }
 
 type PgUniverRepo struct {
@@ -113,4 +114,10 @@ func (u *PgUniverRepo) DislikeUniver(universityID uint, userID uint) error {
 	}
 	err := u.db.Delete(&likedUniversity).Error
 	return err
+}
+
+func (u *PgUniverRepo) Exists(universityID uint) bool {
+	var count int64
+	u.db.Model(&model.University{}).Where("university_id = ?", universityID).Count(&count)
+	return count > 0
 }

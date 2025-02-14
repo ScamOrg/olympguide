@@ -7,18 +7,20 @@ import (
 )
 
 type IMetaService interface {
-	GetRegions() ([]model.Region, error)
-	GetUniversityRegions() ([]model.Region, error)
+	GetRegions() ([]dto.RegionResponse, error)
+	GetUniversityRegions() ([]dto.RegionResponse, error)
 	GetOlympiadProfiles() ([]string, error)
+	GetSubjects() ([]dto.SubjectResponse, error)
 }
 
 type MetaService struct {
-	regionRepo repository.IRegionRepo
-	olympRepo  repository.IOlympRepo
+	regionRepo  repository.IRegionRepo
+	olympRepo   repository.IOlympRepo
+	programRepo repository.IProgramRepo
 }
 
-func NewMetaService(regionRepo repository.IRegionRepo, olympRepo repository.IOlympRepo) *MetaService {
-	return &MetaService{regionRepo: regionRepo, olympRepo: olympRepo}
+func NewMetaService(regionRepo repository.IRegionRepo, olympRepo repository.IOlympRepo, programRepo repository.IProgramRepo) *MetaService {
+	return &MetaService{regionRepo: regionRepo, olympRepo: olympRepo, programRepo: programRepo}
 }
 
 func (s *MetaService) GetRegions() ([]dto.RegionResponse, error) {
@@ -41,12 +43,31 @@ func (s *MetaService) GetOlympiadProfiles() ([]string, error) {
 	return s.olympRepo.GetOlympiadProfiles()
 }
 
+func (s *MetaService) GetSubjects() ([]dto.SubjectResponse, error) {
+	subjects, err := s.programRepo.GetSubjects()
+	if err != nil {
+		return nil, err
+	}
+	return newSubjectsResponse(subjects), nil
+}
+
 func newRegionsResponse(regions []model.Region) []dto.RegionResponse {
 	var response []dto.RegionResponse
 	for _, region := range regions {
 		response = append(response, dto.RegionResponse{
 			RegionID: region.RegionID,
 			Name:     region.Name,
+		})
+	}
+	return response
+}
+
+func newSubjectsResponse(subjects []model.Subject) []dto.SubjectResponse {
+	var response []dto.SubjectResponse
+	for _, subject := range subjects {
+		response = append(response, dto.SubjectResponse{
+			SubjectID: subject.SubjectID,
+			Name:      subject.Name,
 		})
 	}
 	return response

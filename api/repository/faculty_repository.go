@@ -11,6 +11,7 @@ type IFacultyRepo interface {
 	DeleteFaculty(faculty *model.Faculty) error
 	GetFacultyByID(facultyID string) (*model.Faculty, error)
 	GetFacultiesByUniversityID(universityID string) ([]model.Faculty, error)
+	ExistsInUniversity(facultyID, universityID uint) bool
 }
 
 type PgFacultyRepo struct {
@@ -49,4 +50,12 @@ func (u *PgFacultyRepo) UpdateFaculty(faculty *model.Faculty) error {
 
 func (u *PgFacultyRepo) DeleteFaculty(faculty *model.Faculty) error {
 	return u.db.Delete(faculty).Error
+}
+
+func (u *PgFacultyRepo) ExistsInUniversity(facultyID, universityID uint) bool {
+	var count int64
+	u.db.Model(&model.Faculty{}).
+		Where("faculty_id = ? AND university_id = ?", facultyID, universityID).
+		Count(&count)
+	return count > 0
 }
