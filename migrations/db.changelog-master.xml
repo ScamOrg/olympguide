@@ -13,5 +13,8 @@
         <sqlFile path="changelog/changes/004-insert_regions.sql"/>
         <sqlFile path="changelog/changes/005-insert_subjects.sql"/>
     </changeSet>
+    <changeSet id="3" author="titarenko">
+        <sqlFile path="changelog/changes/006-add_constraints.sql"/>
+    </changeSet>
 
 </databaseChangeLog>

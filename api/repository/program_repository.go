@@ -52,6 +52,19 @@ func (p *PgProgramRepo) GetProgramsByFacultyID(facultyID string, userID any) ([]
 	return programs, err
 }
 
+func (p *PgProgramRepo) GetProgramsByUniverIDAndGroupID(univerID string, groupID string, userID any) ([]model.Program, error) {
+	var programs []model.Program
+	err := p.db.Debug().Preload("OptionalSubjects").
+		Preload("RequiredSubjects").
+		Preload("Field").
+		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
+		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
+		Where("university_id = ?", univerID).
+		Where("field_id IN (SELECT field_id FROM olympguide.field WHERE group_id = ?)", groupID).
+		Find(&programs).Error
+	return programs, err
+}
+
 func (p *PgProgramRepo) GetLikedPrograms(userID uint) ([]model.Program, error) {
 	var programs []model.Program
 	err := p.db.Debug().
