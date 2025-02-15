@@ -1,0 +1,50 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+
+      - name: Deploy Application
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          set -e  # Остановить выполнение при ошибке
+          cd ${{ secrets.WORK_DIR }}
+
+          echo "Pulling latest code..."
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only HEAD origin/main)
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changes detected, skipping deployment."
+            exit 0
+          fi
+          
+          git switch main
+          git pull
+          
+          echo "Restarting application with Docker Compose..."
+          docker-compose pull
+          docker-compose up -d --build
+          docker system prune -f
+
+          echo "Deployment completed successfully!"
+          EOF
+
+      - name: Clean Up
+        run: rm -rf ~/.ssh
