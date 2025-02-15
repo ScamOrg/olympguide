@@ -30,6 +30,30 @@ func (p *ProgramHandler) GetProgramsByFaculty(c *gin.Context) {
 	c.JSON(http.StatusOK, programs)
 }
 
+func (p *ProgramHandler) GetUniverProgramsWithFaculty(c *gin.Context) {
+	univerID := c.Param("id")
+	userID, _ := c.Get(constants.ContextUserID)
+
+	facultyTree, err := p.programService.GetUniverProgramsByFaculty(univerID, userID)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, facultyTree)
+}
+
+func (p *ProgramHandler) GetUniverProgramsWithGroup(c *gin.Context) {
+	univerID := c.Param("id")
+	userID, _ := c.Get(constants.ContextUserID)
+
+	groupTree, err := p.programService.GetUniverProgramsByField(univerID, userID)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, groupTree)
+}
+
 func (p *ProgramHandler) GetProgram(c *gin.Context) {
 	programID := c.Param("id")
 	userID, _ := c.Get(constants.ContextUserID)

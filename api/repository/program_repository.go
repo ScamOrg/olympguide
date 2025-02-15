@@ -16,6 +16,8 @@ type IProgramRepo interface {
 	LikeProgram(programID uint, userID uint) error
 	DislikeProgram(programID uint, userID uint) error
 	GetSubjects() ([]model.Subject, error)
+	GetUniverProgramsWithFaculty(univerID string, userID any) ([]model.Program, error)
+	GetUniverProgramsWithGroup(univerID string, userID any) ([]model.Program, error)
 }
 
 type PgProgramRepo struct {
@@ -52,15 +54,30 @@ func (p *PgProgramRepo) GetProgramsByFacultyID(facultyID string, userID any) ([]
 	return programs, err
 }
 
-func (p *PgProgramRepo) GetProgramsByUniverIDAndGroupID(univerID string, groupID string, userID any) ([]model.Program, error) {
+func (p *PgProgramRepo) GetUniverProgramsWithFaculty(univerID string, userID any) ([]model.Program, error) {
 	var programs []model.Program
-	err := p.db.Debug().Preload("OptionalSubjects").
+	err := p.db.Preload("OptionalSubjects").
 		Preload("RequiredSubjects").
 		Preload("Field").
+		Preload("Faculty").
 		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
 		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
 		Where("university_id = ?", univerID).
-		Where("field_id IN (SELECT field_id FROM olympguide.field WHERE group_id = ?)", groupID).
+		Order("field_id").
+		Find(&programs).Error
+	return programs, err
+}
+
+func (p *PgProgramRepo) GetUniverProgramsWithGroup(univerID string, userID any) ([]model.Program, error) {
+	var programs []model.Program
+	err := p.db.Preload("OptionalSubjects").
+		Preload("RequiredSubjects").
+		Preload("Field").
+		Preload("Field.Group").
+		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
+		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
+		Where("university_id = ?", univerID).
+		Order("field_id").
 		Find(&programs).Error
 	return programs, err
 }

@@ -14,3 +14,9 @@ type FacultyShortResponse struct {
 	FacultyID uint   `json:"faculty_id"`
 	Name      string `json:"name"`
 }
+
+type FacultyProgramTree struct {
+	FacultyID uint                   `json:"faculty_id"`
+	Name      string                 `json:"name"`
+	Programs  []ProgramShortResponse `json:"programs"`
+}
