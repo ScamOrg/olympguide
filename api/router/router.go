@@ -57,21 +57,28 @@ func (rt *Router) setupAuthRoutes(r *gin.Engine) {
 	authGroup.POST("/sign-up", rt.authHandler.SignUp)
 	authGroup.POST("/login", rt.authHandler.Login)
 	authGroup.POST("/logout", rt.authHandler.Logout)
+	authGroup.GET("/check-session", rt.authHandler.CheckSession)
 }
 
 func (rt *Router) setupUniverRoutes(r *gin.Engine) {
 	r.GET("/universities", rt.univerHandler.GetUnivers)
 	university := r.Group("/university")
 	{
-		university.GET("/:id", rt.univerHandler.GetUniver)
-		university.GET("/:id/faculties", rt.facultyHandler.GetFaculties)
 		university.POST("/", rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService), rt.univerHandler.NewUniver)
 
-		universityWithID := university.Group("/:id", rt.mw.UniversityIdSetter())
-		universityWithID.Use(rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService, role.UniverEditor))
+		universityWithID := university.Group("/:id")
 		{
-			universityWithID.PUT("", rt.univerHandler.UpdateUniver)
-			universityWithID.DELETE("", rt.univerHandler.DeleteUniver)
+			universityWithID.GET("/", rt.univerHandler.GetUniver)
+			universityWithID.GET("/faculties", rt.facultyHandler.GetFaculties)
+			universityWithID.GET("/programs/by-faculty", rt.programHandler.GetUniverProgramsWithFaculty)
+			universityWithID.GET("/programs/by-field", rt.programHandler.GetUniverProgramsWithGroup)
+		}
+
+		universityWithID.Use(rt.mw.UniversityIdSetter(),
+			rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService, role.UniverEditor))
+		{
+			universityWithID.PUT("/", rt.univerHandler.UpdateUniver)
+			universityWithID.DELETE("/", rt.univerHandler.DeleteUniver)
 		}
 	}
 }
@@ -116,21 +123,22 @@ func (rt *Router) setupMetaRoutes(r *gin.Engine) {
 
 func (rt *Router) setupFacultyRoutes(r *gin.Engine) {
 	faculty := r.Group("/faculty")
+	faculty.Use(rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService))
 	{
 		faculty.POST("/", rt.facultyHandler.NewFaculty)
 
 		facultyWithID := faculty.Group("/:id")
 		{
-			facultyWithID.PUT("", rt.facultyHandler.UpdateFaculty)
-			facultyWithID.DELETE("", rt.facultyHandler.DeleteFaculty)
-			facultyWithID.GET("/programs", rt.programHandler.GetProgramsByFaculty)
+			facultyWithID.PUT("/", rt.facultyHandler.UpdateFaculty)
+			facultyWithID.DELETE("/", rt.facultyHandler.DeleteFaculty)
+			facultyWithID.GET("/programs", rt.mw.NoMiddleware(), rt.programHandler.GetProgramsByFaculty)
 		}
 	}
 }
 
 func (rt *Router) setupProgramRoutes(r *gin.Engine) {
 	program := r.Group("/program")
-	program.POST("", rt.programHandler.NewProgram)
+	program.POST("/", rt.programHandler.NewProgram)
 	{
 		programWithID := program.Group("/:id")
 		{

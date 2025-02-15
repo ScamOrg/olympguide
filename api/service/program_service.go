@@ -9,6 +9,8 @@ import (
 
 type IProgramService interface {
 	GetProgramsByFacultyID(facultyID string, userID any) ([]dto.ProgramShortResponse, error)
+	GetUniverProgramsByFaculty(univerID string, userID any) ([]dto.FacultyProgramTree, error)
+	GetUniverProgramsByField(univerID string, userID any) ([]dto.GroupProgramTree, error)
 	LikeProgram(programID string, userID uint) (bool, error)
 	DislikeProgram(programID string, userID uint) (bool, error)
 	GetLikedPrograms(userID uint) ([]dto.ProgramResponse, error)
@@ -28,18 +30,6 @@ func NewProgramService(programRepo repository.IProgramRepo,
 	facultyRepo repository.IFacultyRepo,
 	fieldRepo repository.IFieldRepo) *ProgramService {
 	return &ProgramService{programRepo: programRepo, univerRepo: univerRepo, facultyRepo: facultyRepo, fieldRepo: fieldRepo}
-}
-
-func (p *ProgramService) GetProgramsByFacultyID(facultyID string, userID any) ([]dto.ProgramShortResponse, error) {
-	programs, err := p.programRepo.GetProgramsByFacultyID(facultyID, userID)
-	if err != nil {
-		return nil, err
-	}
-	response := make([]dto.ProgramShortResponse, len(programs))
-	for i, program := range programs {
-		response[i] = *newProgramShortResponse(&program)
-	}
-	return response, nil
 }
 
 func (p *ProgramService) GetProgram(programID string, userID any) (*dto.ProgramResponse, error) {
@@ -115,6 +105,34 @@ func (p *ProgramService) DislikeProgram(programID string, userID uint) (bool, er
 	return true, nil
 }
 
+func (p *ProgramService) GetProgramsByFacultyID(facultyID string, userID any) ([]dto.ProgramShortResponse, error) {
+	programs, err := p.programRepo.GetProgramsByFacultyID(facultyID, userID)
+	if err != nil {
+		return nil, err
+	}
+	response := make([]dto.ProgramShortResponse, len(programs))
+	for i, program := range programs {
+		response[i] = *newProgramShortResponse(&program)
+	}
+	return response, nil
+}
+
+func (p *ProgramService) GetUniverProgramsByFaculty(univerID string, userID any) ([]dto.FacultyProgramTree, error) {
+	programs, err := p.programRepo.GetUniverProgramsWithFaculty(univerID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return newFacultyProgramTree(programs), nil
+}
+
+func (p *ProgramService) GetUniverProgramsByField(univerID string, userID any) ([]dto.GroupProgramTree, error) {
+	programs, err := p.programRepo.GetUniverProgramsWithGroup(univerID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return newGroupProgramTree(programs), nil
+}
+
 func newProgramShortResponse(program *model.Program) *dto.ProgramShortResponse {
 	requiredSubjects := make([]string, len(program.RequiredSubjects))
 	for i, s := range program.RequiredSubjects {
@@ -172,32 +190,45 @@ func newProgramModel(request *dto.ProgramRequest) *model.Program {
 	}
 }
 
-func newOptionalProgramModels(programID uint, SubjectIDs []uint) []model.ProgramOptionalSubjects {
-	set := make(map[uint]struct{}, len(SubjectIDs))
-	for _, id := range SubjectIDs {
-		set[id] = struct{}{}
+func newFacultyProgramTree(programs []model.Program) []dto.FacultyProgramTree {
+	facultyMap := make(map[uint]*dto.FacultyProgramTree)
+	for i := range programs {
+		if _, ok := facultyMap[programs[i].FacultyID]; !ok {
+			facultyMap[programs[i].FacultyID] = &dto.FacultyProgramTree{
+				FacultyID: programs[i].FacultyID,
+				Name:      programs[i].Faculty.Name,
+				Programs:  []dto.ProgramShortResponse{},
+			}
+		}
+
+		facultyMap[programs[i].FacultyID].Programs = append(facultyMap[programs[i].FacultyID].Programs,
+			*newProgramShortResponse(&programs[i]))
 	}
-	optionalSubjects := make([]model.ProgramOptionalSubjects, 0, len(set))
-	for subjectID := range set {
-		optionalSubjects = append(optionalSubjects, model.ProgramOptionalSubjects{
-			ProgramID: programID,
-			SubjectID: subjectID,
-		})
+	facultyProgramTrees := make([]dto.FacultyProgramTree, 0, len(facultyMap)) // Предварительное выделение памяти
+	for _, facultyResponse := range facultyMap {
+		facultyProgramTrees = append(facultyProgramTrees, *facultyResponse)
 	}
-	return optionalSubjects
+	return facultyProgramTrees
 }
 
-func newRequiredProgramModels(programID uint, subjectIDs []uint) []model.ProgramRequiredSubjects {
-	set := make(map[uint]struct{}, len(subjectIDs))
-	for _, id := range subjectIDs {
-		set[id] = struct{}{}
+func newGroupProgramTree(programs []model.Program) []dto.GroupProgramTree {
+	groupMap := make(map[uint]*dto.GroupProgramTree)
+	for i := range programs {
+		if _, ok := groupMap[programs[i].Field.GroupID]; !ok {
+			groupMap[programs[i].Field.GroupID] = &dto.GroupProgramTree{
+				GroupID:  programs[i].Field.GroupID,
+				Name:     programs[i].Field.Name,
+				Code:     programs[i].Field.Code,
+				Programs: []dto.ProgramShortResponse{},
+			}
+		}
+
+		groupMap[programs[i].Field.GroupID].Programs = append(groupMap[programs[i].Field.GroupID].Programs,
+			*newProgramShortResponse(&programs[i]))
 	}
-	requiredSubjects := make([]model.ProgramRequiredSubjects, 0, len(set))
-	for subjectID := range set {
-		requiredSubjects = append(requiredSubjects, model.ProgramRequiredSubjects{
-			ProgramID: programID,
-			SubjectID: subjectID,
-		})
+	groupProgramTrees := make([]dto.GroupProgramTree, 0, len(groupMap))
+	for _, groupResponse := range groupMap {
+		groupProgramTrees = append(groupProgramTrees, *groupResponse)
 	}
-	return requiredSubjects
+	return groupProgramTrees
 }

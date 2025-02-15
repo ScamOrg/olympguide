@@ -48,3 +48,9 @@ func (mw *Mw) RolesMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func (mw *Mw) NoMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+	}
+}

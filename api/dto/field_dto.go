@@ -29,3 +29,10 @@ type GroupQueryParams struct {
 	Degrees []string `form:"degree"`
 	Search  string   `form:"search"`
 }
+
+type GroupProgramTree struct {
+	GroupID  uint                   `json:"group_id"`
+	Name     string                 `json:"name"`
+	Code     string                 `json:"code"`
+	Programs []ProgramShortResponse `json:"programs"`
+}

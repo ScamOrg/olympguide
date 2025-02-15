@@ -104,3 +104,13 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }
+
+func (h *AuthHandler) CheckSession(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get(constants.ContextUserID)
+	if userID == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Authorized"})
+}
