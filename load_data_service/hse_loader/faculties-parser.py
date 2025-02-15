@@ -22,4 +22,6 @@ def parse_faculty(url: str) -> list:
 
 if __name__ == '__main__':
     url = "https://www.hse.ru/education/faculty/"
-    parse_faculty(url)
+    # parse_faculty(url)
+    for faculty in parse_faculty(url):
+        print(faculty)
