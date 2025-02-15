@@ -1,3 +1,5 @@
+import time
+
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -9,7 +11,7 @@ class EducationalProgram:
         self.faculties = faculties
         self.budget_places = budget_places
         self.paid_places = paid_places
-        self.link = link
+        self.link = link.rstrip('/')
         self.price = None
         self.direction = None
 
@@ -69,6 +71,8 @@ def parse_educational_programs_with_faculties(url: str) -> dict:
                         paid_places = int(places[1]) if places[1].isdigit() else 0
                     else:
                         paid_places = int(places[0]) if places[0].isdigit() else 0
+            if program_name == "Современное искусство":
+                program_href += 'https://design.hse.ru/ba/program/art'
 
             edu_program = EducationalProgram(program_name, budget_places, paid_places, program_href, [faculty_name])
 
@@ -145,34 +149,55 @@ def parse_educational_programs_prices(url):
     return prices, directions
 
 
+def parse_subjects(programs: [EducationalProgram]):
+    subjects = {}
+
+    for name, program in programs.items():
+        program_name = program.link.split('/')[-1]
+        url = 'https://www.hse.ru/ba/' + program_name + '/admission/'
+
+        response = requests.get(url)
+
+        if response.status_code == 404:
+            print(f"Страница {url} не найдена (404)")
+            print(program)
+
+        time.sleep(3)
+
+
+
 if __name__ == '__main__':
     url = 'https://www.hse.ru/education/msk/bachelor/'
     educational_programs = parse_educational_programs_with_faculties(url)
-    url = 'https://ba.hse.ru/price'
-    programs_price1, programs_directions1 = parse_educational_programs_price(url)
-    url = 'https://admissions.hse.ru/undergraduate-apply/fees'
-    programs_price2, programs_directions2 = parse_educational_programs_prices(url)
-
-    for program, price in programs_price1.items():
-        if program in educational_programs:
-            educational_programs[program].price = price
-
-    for program, direction in programs_directions1.items():
-        if program in educational_programs:
-            educational_programs[program].direction = direction
-
-    print()
-    for program, price in programs_price2.items():
-        if program in educational_programs:
-            educational_programs[program].price = price
-
-    for program, direction in programs_directions2.items():
-        if program in educational_programs:
-            educational_programs[program].direction = direction
-    print()
-    for key in list(educational_programs.keys()):
-        if educational_programs[key].price is None or educational_programs[key].direction is None :
-            del educational_programs[key]
-
-    for program, value in educational_programs.items():
-        print(value)
+    parse_subjects(educational_programs)
+    # url = 'https://ba.hse.ru/price'
+    # programs_price1, programs_directions1 = parse_educational_programs_price(url)
+    # url = 'https://admissions.hse.ru/undergraduate-apply/fees'
+    # programs_price2, programs_directions2 = parse_educational_programs_prices(url)
+    #
+    # for program, price in programs_price1.items():
+    #     if program in educational_programs:
+    #         educational_programs[program].price = price
+    #
+    # for program, direction in programs_directions1.items():
+    #     if program in educational_programs:
+    #         educational_programs[program].direction = direction
+    #
+    # print()
+    # for program, price in programs_price2.items():
+    #     if program in educational_programs:
+    #         educational_programs[program].price = price
+    #
+    # for program, direction in programs_directions2.items():
+    #     if program in educational_programs:
+    #         educational_programs[program].direction = direction
+    # print()
+    # for key in list(educational_programs.keys()):
+    #     if educational_programs[key].price is None or educational_programs[key].direction is None :
+    #         del educational_programs[key]
+    #
+    # count = 0
+    # for program, value in educational_programs.items():
+    #     count += 1
+    #     print(value)
+    # print(count)
