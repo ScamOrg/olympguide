@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 )
 
@@ -38,8 +39,11 @@ func (rt *Router) Run(port int) {
 
 func (rt *Router) setupRoutes() {
 	rt.engine.Use(sessions.Sessions("session", rt.store))
+	rt.engine.Use(rt.mw.PrometheusMetrics())
 	rt.engine.Use(rt.mw.SessionMiddleware())
 	rt.engine.Use(rt.mw.ValidateID())
+
+	rt.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	rt.setupAuthRoutes()
 	rt.setupUniverRoutes()
