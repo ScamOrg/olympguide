@@ -32,6 +32,8 @@ var (
 	UniversityNotExist     = AppError{400, "UniversityNotExist", "University not exist", nil}
 	FacultyErr             = AppError{400, "FacultyNotExistsOrBelongsToAnotherUniver", "Faculty not found or does not belong to the university", nil}
 	FieldNotExist          = AppError{400, "FieldNotExist", "Field not exist", nil}
+	UserNotExist           = AppError{400, "UserNotExist", "User not exist", nil}
+	OlympNotExist          = AppError{400, "OlympNotExist", "Olymp not exist", nil}
 )
 
 func (e AppError) WithAdditional(data map[string]interface{}) AppError {

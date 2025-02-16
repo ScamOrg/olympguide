@@ -26,7 +26,17 @@ type Subject struct {
 	Name      string
 }
 
+type Diploma struct {
+	DiplomaID  uint `gorm:"primaryKey"`
+	UserID     uint
+	OlympiadID uint
+	Class      uint
+	Level      uint
+	Olympiad   Olympiad `gorm:"foreignKey:OlympiadID;references:OlympiadID"`
+}
+
 func (Region) TableName() string     { return "olympguide.region" }
 func (GroupField) TableName() string { return "olympguide.group_of_fields" }
 func (Faculty) TableName() string    { return "olympguide.faculty" }
 func (Subject) TableName() string    { return "olympguide.subject" }
+func (Diploma) TableName() string    { return "olympguide.diploma" }

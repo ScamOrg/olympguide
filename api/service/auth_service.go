@@ -50,7 +50,7 @@ func (s *AuthService) SendCode(email string) error {
 	if err := s.codeRepo.SetCode(context.Background(), email, code, constants.MaxVerifyCodeAttempts, constants.EmailCodeTtl); err != nil {
 		return err
 	}
-	if err := s.codeRepo.SendCode(context.Background(), email, code); err != nil {
+	if err := s.codeRepo.PublishEmailCode(context.Background(), email, code); err != nil {
 		return err
 	}
 	return nil

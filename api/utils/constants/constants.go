@@ -20,7 +20,8 @@ const (
 )
 
 const (
-	EmailCodeTopic = "email_codes"
+	EmailCodeTopic = "auth.email.code"
+	DiplomaTopic   = "user.diplomas.upload"
 )
 const (
 	ContextUserID   = "user_id"
