@@ -9,6 +9,11 @@ import (
 )
 
 type IDiplomaService interface {
+	NewDiploma(request *dto.DiplomaRequest) error
+	NewDiplomaByUser(request *dto.DiplomaUserRequest, userID uint) error
+	DeleteDiploma(diplomaID string, userID uint) error
+	GetUserDiplomas(userID uint) ([]dto.DiplomaResponse, error)
+	UploadUserDiplomas(userID uint) error
 }
 
 type DiplomaService struct {
@@ -19,6 +24,14 @@ type DiplomaService struct {
 
 func NewDiplomaService(diplomaRepo repository.IDiplomaRepo) *DiplomaService {
 	return &DiplomaService{diplomaRepo: diplomaRepo}
+}
+
+func (d *DiplomaService) NewDiplomaByUser(request *dto.DiplomaUserRequest, userID uint) error {
+	diplomaRequest := dto.DiplomaRequest{
+		UserID:             userID,
+		DiplomaUserRequest: *request,
+	}
+	return d.NewDiploma(&diplomaRequest)
 }
 
 func (d *DiplomaService) NewDiploma(request *dto.DiplomaRequest) error {
@@ -32,10 +45,13 @@ func (d *DiplomaService) NewDiploma(request *dto.DiplomaRequest) error {
 	return d.diplomaRepo.NewDiploma(newDiplomaModel(request))
 }
 
-func (d *DiplomaService) DeleteDiploma(diplomaID string) error {
+func (d *DiplomaService) DeleteDiploma(diplomaID string, userID uint) error {
 	diploma, err := d.diplomaRepo.GetDiplomaByID(diplomaID)
 	if err != nil {
 		return err
+	}
+	if diploma.UserID != userID {
+		return errs.NotEnoughRights
 	}
 	return d.diplomaRepo.DeleteDiploma(diploma)
 }

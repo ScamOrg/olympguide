@@ -1,7 +1,7 @@
 package dto
 
 type DiplomaRequest struct {
-	UserID uint `json:"user_id"`
+	UserID uint `json:"user_id" binding:"required"`
 	DiplomaUserRequest
 }
 
