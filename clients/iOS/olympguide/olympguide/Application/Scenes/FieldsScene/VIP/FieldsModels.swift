@@ -40,12 +40,18 @@ enum Fields {
 
 struct GroupOfFieldsModel: Codable {
     struct FieldModel: Codable {
+        let fieldId: Int
         let name: String
         let code: String
         let degree: String
+        
+        enum CodingKeys: String, CodingKey {
+            case fieldId = "field_id"
+            case name, code, degree
+        }
     }
     
     let name: String
     let code: String
-    let fields: [FieldModel]
+    let field: [FieldModel]
 }
