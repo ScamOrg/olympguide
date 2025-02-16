@@ -16,7 +16,7 @@ final class FieldsPresenter: FieldsPresentationLogic {
             Fields.Load.ViewModel.GroupOfFieldsViewModel(
                 name: groupOfFields.name,
                 code: groupOfFields.code,
-                fields: groupOfFields.fields.map { field in
+                fields: groupOfFields.field.map { field in
                     Fields.Load.ViewModel.GroupOfFieldsViewModel.FieldViewModel(
                         name: field.name,
                         code: field.code
