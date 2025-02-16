@@ -4,7 +4,7 @@ import (
 	"api/model"
 	"api/utils/errs"
 	"errors"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -107,7 +107,7 @@ func (p *PgProgramRepo) NewProgram(program *model.Program,
 	err := p.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Create(program).Error
 		if err != nil {
-			var pgErr *pq.Error
+			var pgErr *pgconn.PgError
 			if errors.As(err, &pgErr) {
 				if pgErr.Code == "23505" {
 					return errs.ProgramAlreadyExists
