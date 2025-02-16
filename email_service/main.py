@@ -31,7 +31,7 @@ def send_code(to_email, code):
 
 def process_message(topic, message):
     data = eval(message)
-    if topic == "email_codes":
+    if topic == constants.EMAIL_CODE_TOPIC:
         send_code(data["email"], data["code"])
     else:
         logger.warning(f"Unknown topic: {topic}")

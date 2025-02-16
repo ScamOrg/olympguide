@@ -5,9 +5,9 @@ import (
 	"api/middleware"
 	"api/repository"
 	"api/service"
-	"fmt"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	"gorm.io/gorm"
 	"log"
 
 	"api/router"
@@ -20,19 +20,31 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	db := utils.ConnectPostgres(cfg)
-	redis := utils.ConnectRedis(cfg)
-	store := utils.ConnectSessionStore(cfg)
+	db, rdb, store := initConnections(cfg)
+	handlers := initHandlers(db, rdb)
+	mw := initMiddleware(db)
 
+	Router := router.NewRouter(handlers, mw, store)
+	Router.Run(cfg.ServerPort)
+}
+
+func initConnections(cfg *utils.Config) (*gorm.DB, *redis.Client, sessions.Store) {
+	db := utils.ConnectPostgres(cfg)
+	rdb := utils.ConnectRedis(cfg)
+	store := utils.ConnectSessionStore(cfg)
+	return db, rdb, store
+}
+
+func initHandlers(db *gorm.DB, redis *redis.Client) *handler.Handlers {
 	codeRepo := repository.NewRedisCodeRepo(redis)
 	userRepo := repository.NewPgUserRepo(db)
 	regionRepo := repository.NewPgRegionRepo(db)
 	univerRepo := repository.NewPgUniverRepo(db)
 	fieldRepo := repository.NewPgFieldRepo(db)
 	olympRepo := repository.NewPgOlympRepo(db)
-	adminRepo := repository.NewPgAdminRepo(db)
 	facultyRepo := repository.NewPgFacultyRepo(db)
 	programRepo := repository.NewPgProgramRepo(db)
+	diplomaRepo := repository.NewDiplomaRepo(db, redis)
 
 	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
 	univerService := service.NewUniverService(univerRepo, regionRepo)
@@ -40,33 +52,25 @@ func main() {
 	olympService := service.NewOlympService(olympRepo)
 	metaService := service.NewMetaService(regionRepo, olympRepo, programRepo)
 	userService := service.NewUserService(userRepo)
-	adminService := service.NewAdminService(adminRepo)
 	facultyService := service.NewFacultyService(facultyRepo, univerRepo)
 	programService := service.NewProgramService(programRepo, univerRepo, facultyRepo, fieldRepo)
+	diplomaService := service.NewDiplomaService(diplomaRepo, userRepo, olympRepo)
 
-	authHandler := handler.NewAuthHandler(authService)
-	univerHandler := handler.NewUniverHandler(univerService)
-	fieldHandler := handler.NewFieldHandler(fieldService)
-	olympHandler := handler.NewOlympHandler(olympService)
-	metaHandler := handler.NewMetaHandler(metaService)
-	userHandler := handler.NewUserHandler(userService)
-	facultyHandler := handler.NewFacultyHandler(facultyService)
-	programHandler := handler.NewProgramHandler(programService)
-
-	mw := middleware.NewMw(adminService)
-
-	mainRouter := router.NewRouter(authHandler, univerHandler, fieldHandler,
-		olympHandler, metaHandler, userHandler,
-		facultyHandler, programHandler, mw)
-
-	r := gin.Default()
-	r.Use(sessions.Sessions("session", store))
-
-	mainRouter.SetupRoutes(r)
-
-	serverAddress := fmt.Sprintf(":%d", cfg.ServerPort)
-	log.Printf("Server listening on %s", serverAddress)
-	if err = r.Run(serverAddress); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	return &handler.Handlers{
+		Auth:    handler.NewAuthHandler(authService),
+		Univer:  handler.NewUniverHandler(univerService),
+		Field:   handler.NewFieldHandler(fieldService),
+		Olymp:   handler.NewOlympHandler(olympService),
+		Meta:    handler.NewMetaHandler(metaService),
+		User:    handler.NewUserHandler(userService),
+		Faculty: handler.NewFacultyHandler(facultyService),
+		Program: handler.NewProgramHandler(programService),
+		Diploma: handler.NewDiplomaHandler(diplomaService),
 	}
+}
+
+func initMiddleware(db *gorm.DB) *middleware.Mw {
+	adminRepo := repository.NewPgAdminRepo(db)
+	adminService := service.NewAdminService(adminRepo)
+	return middleware.NewMw(adminService)
 }

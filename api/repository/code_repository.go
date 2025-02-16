@@ -15,7 +15,7 @@ type ICodeRepo interface {
 	GetCodeInfo(ctx context.Context, email string) (string, int, error)
 	GetCodeTTL(ctx context.Context, email string) (time.Duration, error)
 	DeleteCode(ctx context.Context, email string) error
-	SendCode(ctx context.Context, email, code string) error
+	PublishEmailCode(ctx context.Context, email, code string) error
 	DecreaseCodeAttempt(ctx context.Context, email string) error
 }
 
@@ -69,7 +69,7 @@ func (e *RedisCodeRepo) DeleteCode(ctx context.Context, email string) error {
 	return e.rdb.Del(ctx, email).Err()
 }
 
-func (e *RedisCodeRepo) SendCode(ctx context.Context, email, code string) error {
+func (e *RedisCodeRepo) PublishEmailCode(ctx context.Context, email, code string) error {
 	msg := Message{email, code}
 	msgJSON, _ := json.Marshal(msg)
 	return e.rdb.Publish(ctx, constants.EmailCodeTopic, msgJSON).Err()

@@ -2,7 +2,11 @@ package repository
 
 import (
 	"api/model"
+	"api/utils/errs"
+	"errors"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
+	"log"
 )
 
 type IUniverRepo interface {
@@ -79,7 +83,15 @@ func (u *PgUniverRepo) GetLikedUnivers(userID uint) ([]model.University, error) 
 }
 
 func (u *PgUniverRepo) NewUniver(univer *model.University) (uint, error) {
-	if err := u.db.Create(&univer).Error; err != nil {
+	err := u.db.Create(&univer).Error
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			log.Println("Code:", pgErr.Code)
+			if pgErr.Code == "23505" {
+				return 0, errs.UniverAlreadyExists
+			}
+		}
 		return 0, err
 	}
 	return univer.UniversityID, nil

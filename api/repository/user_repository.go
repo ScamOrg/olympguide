@@ -9,6 +9,7 @@ type IUserRepo interface {
 	CreateUser(user *model.User) (uint, error)
 	GetUserByEmail(email string) (*model.User, error)
 	GetUserByID(userID uint) (*model.User, error)
+	Exists(userID uint) bool
 }
 
 type PgUserRepo struct {
@@ -40,4 +41,10 @@ func (u *PgUserRepo) GetUserByID(userID uint) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (u *PgUserRepo) Exists(userID uint) bool {
+	var count int64
+	u.db.Model(&model.User{}).Where("user_id = ?", userID).Count(&count)
+	return count > 0
 }

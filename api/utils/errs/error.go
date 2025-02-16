@@ -15,23 +15,41 @@ type AppError struct {
 }
 
 var (
-	InternalServerError    = AppError{500, "InternalServerError", "Internal server error", nil}
-	Unauthorized           = AppError{401, "Unauthorized", "Unauthorized", nil}
-	InvalidRequest         = AppError{400, "InvalidRequest", "Invalid request data", nil}
-	InvalidBirthday        = AppError{400, "InvalidBirthday", "Invalid birthday format, use DD.MM.YYYY", nil}
-	InvalidPassword        = AppError{400, "InvalidPassword", "Invalid password", nil}
-	InvalidCode            = AppError{400, "InvalidCode", "Invalid code", nil}
-	InvalidID              = AppError{400, "InvalidID", "Invalid id", nil}
-	DataNotFound           = AppError{404, "DataNotFound", "Data not found", nil}
-	RegionNotFound         = AppError{404, "RegionNotFound", "Region not found", nil}
-	UserNotFound           = AppError{404, "UserNotFound", "User with this email not found", nil}
+	InternalServerError = AppError{500, "InternalServerError", "Internal server error", nil}
+	Unauthorized        = AppError{401, "Unauthorized", "Unauthorized", nil}
+	NotEnoughRights     = AppError{403, "NotEnoughRights", "User does not haves enough rights", nil}
+)
+var (
 	CodeNotFoundOrExpired  = AppError{404, "CodeNotFoundOrExpired", "Code not found or expired", nil}
-	NotEnoughRights        = AppError{403, "NotEnoughRights", "User does not haves enough rights", nil}
 	TooManyAttempts        = AppError{429, "TooManyAttempts", "Too many attempts", nil}
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
-	UniversityNotExist     = AppError{400, "UniversityNotExist", "University not exist", nil}
-	FacultyErr             = AppError{400, "FacultyNotExistsOrBelongsToAnotherUniver", "Faculty not found or does not belong to the university", nil}
-	FieldNotExist          = AppError{400, "FieldNotExist", "Field not exist", nil}
+)
+var (
+	DiplomaAlreadyExists = AppError{409, "DiplomaAlreadyExists", "Diploma with this class, olympiad, user already exists", nil}
+	UniverAlreadyExists  = AppError{409, "UniverAlreadyExists", "Univer with this name already exists", nil}
+	FacultyAlreadyExists = AppError{409, "FacultyAlreadyExists", "Faculty with this name, university already exists", nil}
+	ProgramAlreadyExists = AppError{409, "ProgramAlreadyExists", "Program with this name, university already exists", nil}
+)
+var (
+	InvalidRequest  = AppError{400, "InvalidRequest", "Invalid request data", nil}
+	InvalidBirthday = AppError{400, "InvalidBirthday", "Invalid birthday format, use DD.MM.YYYY", nil}
+	InvalidPassword = AppError{400, "InvalidPassword", "Invalid password", nil}
+	InvalidCode     = AppError{400, "InvalidCode", "Invalid code", nil}
+	InvalidID       = AppError{400, "InvalidID", "Invalid id", nil}
+)
+
+var (
+	DataNotFound   = AppError{404, "DataNotFound", "Data not found", nil}
+	RegionNotFound = AppError{404, "RegionNotFound", "Region not found", nil}
+	UserNotFound   = AppError{404, "UserNotFound", "User with this email not found", nil}
+)
+
+var (
+	UniversityNotExist = AppError{400, "UniversityNotExist", "University not exist", nil}
+	FacultyErr         = AppError{400, "FacultyNotExistsOrBelongsToAnotherUniver", "Faculty not found or does not belong to the university", nil}
+	FieldNotExist      = AppError{400, "FieldNotExist", "Field not exist", nil}
+	UserNotExist       = AppError{400, "UserNotExist", "User not exist", nil}
+	OlympNotExist      = AppError{400, "OlympNotExist", "Olymp not exist", nil}
 )
 
 func (e AppError) WithAdditional(data map[string]interface{}) AppError {

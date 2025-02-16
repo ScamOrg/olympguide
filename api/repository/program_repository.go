@@ -2,6 +2,9 @@ package repository
 
 import (
 	"api/model"
+	"api/utils/errs"
+	"errors"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -102,7 +105,14 @@ func (p *PgProgramRepo) GetLikedPrograms(userID uint) ([]model.Program, error) {
 func (p *PgProgramRepo) NewProgram(program *model.Program,
 	optSubjects []uint, reqSubjects []uint) (uint, error) {
 	err := p.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(program).Error; err != nil {
+		err := tx.Create(program).Error
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) {
+				if pgErr.Code == "23505" {
+					return errs.ProgramAlreadyExists
+				}
+			}
 			return err
 		}
 		if len(reqSubjects) > 0 {

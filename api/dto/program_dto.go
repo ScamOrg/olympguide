@@ -15,6 +15,7 @@ type ProgramShortResponse struct {
 type ProgramResponse struct {
 	ProgramShortResponse
 	University UniversityForProgramInfo `json:"university"`
+	Link       string                   `json:"link"`
 }
 
 type ProgramRequest struct {

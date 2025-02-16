@@ -14,6 +14,7 @@ type IOlympRepo interface {
 	DislikeOlymp(olympiadID uint, userID uint) error
 	ChangeOlympPopularity(olymp *model.Olympiad, value int)
 	GetOlympiadProfiles() ([]string, error)
+	Exists(olympiadID uint) bool
 }
 type PgOlympRepo struct {
 	db *gorm.DB
@@ -97,6 +98,12 @@ func (r *PgOlympRepo) GetOlympiadProfiles() ([]string, error) {
 		Order("profile ASC").
 		Pluck("profile", &profiles).Error
 	return profiles, err
+}
+
+func (r *PgOlympRepo) Exists(olympiadID uint) bool {
+	var count int64
+	r.db.Model(&model.Olympiad{}).Where("olympiad_id = ?", olympiadID).Count(&count)
+	return count > 0
 }
 
 func applyFilters(query *gorm.DB, levels, profiles []string, search string) *gorm.DB {

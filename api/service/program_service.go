@@ -174,6 +174,7 @@ func newProgramResponse(program *model.Program) *dto.ProgramResponse {
 			Name:         program.University.Name,
 			Logo:         program.University.Logo,
 		},
+		Link: program.Link,
 	}
 }
 

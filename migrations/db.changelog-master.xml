@@ -16,5 +16,8 @@
     <changeSet id="3" author="titarenko">
         <sqlFile path="changelog/changes/006-add_constraints.sql"/>
     </changeSet>
+    <changeSet id="4" author="titarenko">
+        <sqlFile path="changelog/changes/007-diploma_new_table.sql"/>
+    </changeSet>
 
 </databaseChangeLog>
