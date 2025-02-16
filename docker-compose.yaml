@@ -17,6 +17,7 @@ services:
   liquibase:
     image: liquibase/liquibase:latest
     container_name: liquibase
+    restart: on-failure
     volumes:
       - ./migrations:/liquibase/changelog
     environment:

@@ -161,5 +161,5 @@ func (rt *Router) setupProgramRoutes() {
 }
 
 func (rt *Router) setupServiceDiplomaRoutes() {
-	rt.engine.POST("/service/diploma", rt.handlers.Diploma.NewDiplomaByService)
+	rt.engine.POST("/service/diploma", rt.mw.RolesMiddleware(role.DataLoaderService), rt.handlers.Diploma.NewDiplomaByService)
 }
