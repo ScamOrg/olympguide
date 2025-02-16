@@ -20,7 +20,7 @@ jobs:
 
       - name: Test SSH Connection
         run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
-
+          
       - name: Deploy Application
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
@@ -34,7 +34,7 @@ jobs:
             echo "No changes detected, skipping deployment."
             exit 0
           fi
-          
+          echo "${{ secrets.DOT_ENV }}" > .env
           git switch main
           git pull
           
