@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"api/service"
 	"api/utils/constants"
 	"api/utils/errs"
 	"api/utils/role"
