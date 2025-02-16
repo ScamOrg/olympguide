@@ -1,21 +1,12 @@
 package middleware
 
 import (
-	"api/service"
 	"api/utils/constants"
 	"api/utils/errs"
 	"api/utils/role"
 	"github.com/gin-gonic/gin"
 	"os"
 )
-
-type Mw struct {
-	adminService service.IAdminService
-}
-
-func NewMw(adminService service.IAdminService) *Mw {
-	return &Mw{adminService: adminService}
-}
 
 func (mw *Mw) RolesMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
