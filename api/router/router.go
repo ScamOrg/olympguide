@@ -11,15 +11,15 @@ import (
 )
 
 type Router struct {
-	r        *gin.Engine
+	engine   *gin.Engine
 	handlers *handler.Handlers
 	mw       *middleware.Mw
-	store    *sessions.Store
+	store    sessions.Store
 }
 
-func NewRouter(handlers *handler.Handlers, mw *middleware.Mw, store *sessions.Store) *Router {
+func NewRouter(handlers *handler.Handlers, mw *middleware.Mw, store sessions.Store) *Router {
 	return &Router{
-		r:        gin.Default(),
+		engine:   gin.Default(),
 		handlers: handlers,
 		mw:       mw,
 		store:    store,
@@ -31,15 +31,15 @@ func (rt *Router) Run(port int) {
 
 	serverAddress := fmt.Sprintf(":%d", port)
 	log.Printf("Server listening on %s", serverAddress)
-	if err := rt.r.Run(serverAddress); err != nil {
+	if err := rt.engine.Run(serverAddress); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
 
 func (rt *Router) setupRoutes() {
-	rt.r.Use(sessions.Sessions("session", *rt.store))
-	rt.r.Use(rt.mw.SessionMiddleware())
-	rt.r.Use(rt.mw.ValidateID())
+	rt.engine.Use(sessions.Sessions("session", rt.store))
+	rt.engine.Use(rt.mw.SessionMiddleware())
+	rt.engine.Use(rt.mw.ValidateID())
 
 	rt.setupAuthRoutes()
 	rt.setupUniverRoutes()
@@ -49,10 +49,11 @@ func (rt *Router) setupRoutes() {
 	rt.setupMetaRoutes()
 	rt.setupFacultyRoutes()
 	rt.setupProgramRoutes()
+	rt.setupServiceDiplomaRoutes()
 }
 
 func (rt *Router) setupAuthRoutes() {
-	authGroup := rt.r.Group("/auth")
+	authGroup := rt.engine.Group("/auth")
 	authGroup.POST("/send-code", rt.handlers.Auth.SendCode)
 	authGroup.POST("/verify-code", rt.handlers.Auth.VerifyCode)
 	authGroup.POST("/sign-up", rt.handlers.Auth.SignUp)
@@ -62,8 +63,8 @@ func (rt *Router) setupAuthRoutes() {
 }
 
 func (rt *Router) setupUniverRoutes() {
-	rt.r.GET("/universities", rt.handlers.Univer.GetUnivers)
-	university := rt.r.Group("/university")
+	rt.engine.GET("/universities", rt.handlers.Univer.GetUnivers)
+	university := rt.engine.Group("/university")
 	{
 		university.POST("/", rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService), rt.handlers.Univer.NewUniver)
 
@@ -85,18 +86,29 @@ func (rt *Router) setupUniverRoutes() {
 }
 
 func (rt *Router) setupFieldRoutes() {
-	rt.r.GET("/fields", rt.handlers.Field.GetGroups)
-	rt.r.GET("/field/:id", rt.handlers.Field.GetField)
+	rt.engine.GET("/fields", rt.handlers.Field.GetGroups)
+	rt.engine.GET("/field/:id", rt.handlers.Field.GetField)
 }
 
 func (rt *Router) setupOlympRoutes() {
-	rt.r.GET("/olympiads", rt.handlers.Olymp.GetOlympiads)
+	rt.engine.GET("/olympiads", rt.handlers.Olymp.GetOlympiads)
 }
 
 func (rt *Router) setupUserRoutes() {
-	user := rt.r.Group("/user", rt.mw.UserMiddleware())
+	user := rt.engine.Group("/user", rt.mw.UserMiddleware())
 	{
 		user.GET("/data", rt.handlers.User.GetUserData)
+		diplomas := user.Group("/diplomas")
+		{
+			diplomas.GET("/", rt.handlers.Diploma.GetUserDiplomas)
+			diplomas.POST("/sync", rt.handlers.Diploma.SyncUserDiplomas)
+		}
+		diploma := user.Group("/diploma")
+		{
+			diploma.POST("/", rt.handlers.Diploma.NewDiplomaByUser)
+			diploma.DELETE("/:id", rt.handlers.Diploma.DeleteDiploma)
+		}
+
 		favourite := user.Group("/favourite")
 		{
 			favourite.GET("/programs", rt.handlers.Program.GetLikedPrograms)
@@ -115,7 +127,7 @@ func (rt *Router) setupUserRoutes() {
 }
 
 func (rt *Router) setupMetaRoutes() {
-	meta := rt.r.Group("/meta")
+	meta := rt.engine.Group("/meta")
 	meta.GET("/regions", rt.handlers.Meta.GetRegions)
 	meta.GET("/university-regions", rt.handlers.Meta.GetUniversityRegions)
 	meta.GET("/olympiad-profiles", rt.handlers.Meta.GetOlympiadProfiles)
@@ -123,7 +135,7 @@ func (rt *Router) setupMetaRoutes() {
 }
 
 func (rt *Router) setupFacultyRoutes() {
-	faculty := rt.r.Group("/faculty")
+	faculty := rt.engine.Group("/faculty")
 	faculty.Use(rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService))
 	{
 		faculty.POST("/", rt.handlers.Faculty.NewFaculty)
@@ -138,7 +150,7 @@ func (rt *Router) setupFacultyRoutes() {
 }
 
 func (rt *Router) setupProgramRoutes() {
-	program := rt.r.Group("/program")
+	program := rt.engine.Group("/program")
 	program.POST("/", rt.handlers.Program.NewProgram)
 	{
 		programWithID := program.Group("/:id")
@@ -146,4 +158,8 @@ func (rt *Router) setupProgramRoutes() {
 			programWithID.GET("/", rt.handlers.Program.GetProgram)
 		}
 	}
+}
+
+func (rt *Router) setupServiceDiplomaRoutes() {
+	rt.engine.POST("/service/diploma", rt.handlers.Diploma.NewDiplomaByService)
 }

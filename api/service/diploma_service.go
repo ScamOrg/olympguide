@@ -13,7 +13,7 @@ type IDiplomaService interface {
 	NewDiplomaByUser(request *dto.DiplomaUserRequest, userID uint) error
 	DeleteDiploma(diplomaID string, userID uint) error
 	GetUserDiplomas(userID uint) ([]dto.DiplomaResponse, error)
-	UploadUserDiplomas(userID uint) error
+	SyncUserDiplomas(userID uint) error
 }
 
 type DiplomaService struct {
@@ -22,8 +22,8 @@ type DiplomaService struct {
 	olympRepo   repository.IOlympRepo
 }
 
-func NewDiplomaService(diplomaRepo repository.IDiplomaRepo) *DiplomaService {
-	return &DiplomaService{diplomaRepo: diplomaRepo}
+func NewDiplomaService(diplomaRepo repository.IDiplomaRepo, userRepo repository.IUserRepo, olympRepo repository.IOlympRepo) *DiplomaService {
+	return &DiplomaService{diplomaRepo: diplomaRepo, userRepo: userRepo, olympRepo: olympRepo}
 }
 
 func (d *DiplomaService) NewDiplomaByUser(request *dto.DiplomaUserRequest, userID uint) error {
@@ -64,7 +64,7 @@ func (d *DiplomaService) GetUserDiplomas(userID uint) ([]dto.DiplomaResponse, er
 	return newDiplomasResponse(diplomas), nil
 }
 
-func (d *DiplomaService) UploadUserDiplomas(userID uint) error {
+func (d *DiplomaService) SyncUserDiplomas(userID uint) error {
 	user, err := d.userRepo.GetUserByID(userID)
 	if err != nil {
 		return err

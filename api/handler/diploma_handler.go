@@ -42,10 +42,10 @@ func (d *DiplomaHandler) DeleteDiploma(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (d *DiplomaHandler) UploadDiploma(c *gin.Context) {
+func (d *DiplomaHandler) SyncUserDiplomas(c *gin.Context) {
 	userID, _ := c.MustGet(constants.ContextUserID).(uint)
 
-	err := d.diplomaService.UploadUserDiplomas(userID)
+	err := d.diplomaService.SyncUserDiplomas(userID)
 	if err != nil {
 		errs.HandleError(c, err)
 	}

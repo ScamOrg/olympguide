@@ -11,11 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func initConnections(cfg *utils.Config) (*gorm.DB, *redis.Client, *sessions.Store) {
+func initConnections(cfg *utils.Config) (*gorm.DB, *redis.Client, sessions.Store) {
 	db := utils.ConnectPostgres(cfg)
 	rdb := utils.ConnectRedis(cfg)
 	store := utils.ConnectSessionStore(cfg)
-	return db, rdb, &store
+	return db, rdb, store
 }
 
 func initHandlers(db *gorm.DB, redis *redis.Client) *handler.Handlers {
@@ -27,6 +27,7 @@ func initHandlers(db *gorm.DB, redis *redis.Client) *handler.Handlers {
 	olympRepo := repository.NewPgOlympRepo(db)
 	facultyRepo := repository.NewPgFacultyRepo(db)
 	programRepo := repository.NewPgProgramRepo(db)
+	diplomaRepo := repository.NewDiplomaRepo(db, redis)
 
 	authService := service.NewAuthService(codeRepo, userRepo, regionRepo)
 	univerService := service.NewUniverService(univerRepo, regionRepo)
@@ -36,6 +37,7 @@ func initHandlers(db *gorm.DB, redis *redis.Client) *handler.Handlers {
 	userService := service.NewUserService(userRepo)
 	facultyService := service.NewFacultyService(facultyRepo, univerRepo)
 	programService := service.NewProgramService(programRepo, univerRepo, facultyRepo, fieldRepo)
+	diplomaService := service.NewDiplomaService(diplomaRepo, userRepo, olympRepo)
 
 	return &handler.Handlers{
 		Auth:    handler.NewAuthHandler(authService),
@@ -46,6 +48,7 @@ func initHandlers(db *gorm.DB, redis *redis.Client) *handler.Handlers {
 		User:    handler.NewUserHandler(userService),
 		Faculty: handler.NewFacultyHandler(facultyService),
 		Program: handler.NewProgramHandler(programService),
+		Diploma: handler.NewDiplomaHandler(diplomaService),
 	}
 }
 
