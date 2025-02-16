@@ -9,14 +9,6 @@ import (
 	"os"
 )
 
-type Mw struct {
-	adminService service.IAdminService
-}
-
-func NewMw(adminService service.IAdminService) *Mw {
-	return &Mw{adminService: adminService}
-}
-
 func (mw *Mw) RolesMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		bearerToken := c.GetHeader("Authorization")

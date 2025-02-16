@@ -23,6 +23,7 @@ func main() {
 	db, rdb, store := initConnections(cfg)
 	handlers := initHandlers(db, rdb)
 	mw := initMiddleware(db)
+	utils.RegisterMetrics()
 
 	Router := router.NewRouter(handlers, mw, store)
 	Router.Run(cfg.ServerPort)
