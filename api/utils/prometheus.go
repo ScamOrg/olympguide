@@ -47,16 +47,6 @@ var (
 		Name: "cpu_usage_percentage",
 		Help: "CPU usage percentage",
 	})
-
-	goroutines = prometheus.NewGaugeFunc(
-		prometheus.GaugeOpts{
-			Name: "go_goroutines",
-			Help: "Number of goroutines",
-		},
-		func() float64 {
-			return float64(runtime.NumGoroutine())
-		},
-	)
 )
 
 func RegisterMetrics() {
@@ -65,5 +55,4 @@ func RegisterMetrics() {
 	prometheus.MustRegister(FailedRequests)
 	prometheus.MustRegister(memoryUsage)
 	prometheus.MustRegister(cpuUsage)
-	prometheus.MustRegister(goroutines)
 }

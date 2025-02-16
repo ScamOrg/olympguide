@@ -1,6 +1,5 @@
-# PostgreSQL
-postgres-data/
-redis_data/
+# docker data
+data/
 
 # Environment files
 .env
