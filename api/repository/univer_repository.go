@@ -2,6 +2,9 @@ package repository
 
 import (
 	"api/model"
+	"api/utils/errs"
+	"errors"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -79,7 +82,14 @@ func (u *PgUniverRepo) GetLikedUnivers(userID uint) ([]model.University, error) 
 }
 
 func (u *PgUniverRepo) NewUniver(univer *model.University) (uint, error) {
-	if err := u.db.Create(&univer).Error; err != nil {
+	err := u.db.Create(&univer).Error
+	if err != nil {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return 0, errs.UniverAlreadyExists
+			}
+		}
 		return 0, err
 	}
 	return univer.UniversityID, nil

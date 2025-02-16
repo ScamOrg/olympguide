@@ -2,6 +2,9 @@ package repository
 
 import (
 	"api/model"
+	"api/utils/errs"
+	"errors"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -38,7 +41,14 @@ func (u *PgFacultyRepo) GetFacultyByID(facultyID string) (*model.Faculty, error)
 }
 
 func (u *PgFacultyRepo) NewFaculty(faculty *model.Faculty) (uint, error) {
-	if err := u.db.Create(&faculty).Error; err != nil {
+	err := u.db.Create(&faculty).Error
+	if err != nil {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return 0, errs.FacultyAlreadyExists
+			}
+		}
 		return 0, err
 	}
 	return faculty.FacultyID, nil
