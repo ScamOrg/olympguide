@@ -44,13 +44,12 @@ enum Olympiads {
 struct OlympiadModel: Codable {
     let olympiadID: Int
     let name: String
-    let description: String
     let level: Int
     let profile: String
-    let link: String
+    let like: Bool
     
     enum CodingKeys: String, CodingKey {
         case olympiadID = "olympiad_id"
-        case name, profile, level, link, description
+        case name, profile, level, like
     }
 }
