@@ -39,6 +39,7 @@ jobs:
           git pull
           
           echo "Restarting application with Docker Compose..."
+          docker-compose down
           docker-compose pull
           docker-compose up -d --build
           docker system prune -f
