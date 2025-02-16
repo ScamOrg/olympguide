@@ -47,12 +47,7 @@ class UniversitiesViewController: UIViewController, MainVC {
     // MARK: - Variables
     private let tableView = UITableView()
     private let titleLabel: UILabel = UILabel()
-    private let refreshControl: UIRefreshControl = {
-        let refreshControl = UIRefreshControl()
-        refreshControl.tintColor = Constants.Colors.refreshTint
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        return refreshControl
-    }()
+    private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
@@ -71,6 +66,7 @@ class UniversitiesViewController: UIViewController, MainVC {
         setup()
         
         configureNavigationBar()
+        configureRefreshControl()
         configureFilterSortView()
         configureTableView()
         
@@ -107,7 +103,11 @@ class UniversitiesViewController: UIViewController, MainVC {
         if let navigationController = self.navigationController as? NavigationBarViewController {
             navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
         }
-        
+    }
+    
+    func configureRefreshControl() {
+        refreshControl.tintColor = Constants.Colors.refreshTint
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
     }
     
     private func configureFilterSortView() {
