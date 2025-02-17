@@ -28,12 +28,12 @@ type ProgramOptionalSubjects struct {
 type ConfirmationSubjects struct {
 	BenefitID uint `gorm:"primaryKey"`
 	SubjectID uint `gorm:"primaryKey"`
+	Score     uint
 }
 
 type FullScoreSubjects struct {
 	BenefitID uint `gorm:"primaryKey"`
 	SubjectID uint `gorm:"primaryKey"`
-	Score     uint
 }
 
 func (FullScoreSubjects) TableName() string       { return "olympguide.fullscore_subjects" }
