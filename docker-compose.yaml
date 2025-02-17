@@ -21,8 +21,6 @@ services:
     restart: always
     environment:
       DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?sslmode=disable"
-    ports:
-      - ${PG_EXP_PORT}:9187
     depends_on:
       - db
 
@@ -46,8 +44,6 @@ services:
     image: redis:latest
     container_name: redis
     restart: always
-    ports:
-      - ${REDIS_PORT}:6379
     volumes:
       - ./data/redis_data:/data
     command: [ "redis-server", "--appendonly", "yes" ]
@@ -60,7 +56,6 @@ services:
     restart: always
     environment:
       - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     depends_on:
@@ -81,7 +76,6 @@ services:
       - DB_NAME=${DB_NAME}
       - API_PORT=${API_PORT}
       - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
       - BEARER_DATA_LOADER_TOKEN=${BEARER_DATA_LOADER_TOKEN}
     depends_on:
       - db
@@ -94,8 +88,6 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - ${PROMETHEUS_PORT}:9090
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     restart: always
