@@ -82,3 +82,6 @@ test-output/
 
 # Documentation
 *.docset
+
+#python
+*.pyc
