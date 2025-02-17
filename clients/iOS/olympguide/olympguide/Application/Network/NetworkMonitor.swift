@@ -30,11 +30,15 @@ class NetworkMonitor {
     }
 
     private func topMostController() -> UIViewController? {
-        var topController = UIApplication.shared.windows.first(where: \.isKeyWindow)?.rootViewController
-        while let presented = topController?.presentedViewController {
-            topController = presented
+        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = scene.windows.first(where: { $0.isKeyWindow }) {
+            var topController = window.rootViewController
+            while let presented = topController?.presentedViewController {
+                topController = presented
+            }
+            return topController
         }
-        return topController
+        return nil
     }
 
     private func showDisconnectViewController() {

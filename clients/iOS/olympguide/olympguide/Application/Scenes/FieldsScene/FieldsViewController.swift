@@ -46,12 +46,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
     
     // MARK: - Variables
     private let tableView = UITableView()
-    private let refreshControl: UIRefreshControl = {
-        let refreshControl = UIRefreshControl()
-        refreshControl.tintColor = Constants.Colors.refreshTint
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        return refreshControl
-    }()
+    private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
@@ -69,6 +64,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         setup()
         
         configureNavigationBar()
+        configureRefreshControl()
         configureTableView()
         
         interactor?.loadFields(
@@ -121,6 +117,11 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         if let navigationController = self.navigationController as? NavigationBarViewController {
             navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
         }
+    }
+    
+    func configureRefreshControl() {
+        refreshControl.tintColor = Constants.Colors.refreshTint
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
     }
     
     private func configureFilterSortView() {
@@ -211,7 +212,7 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView,
                    didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
+        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].field[indexPath.row] else {
             return
         }
         router?.routeToDetails(for: fieldModel)
