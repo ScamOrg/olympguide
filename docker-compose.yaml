@@ -13,7 +13,7 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
-      - ./data/postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
@@ -45,7 +45,7 @@ services:
     container_name: redis
     restart: always
     volumes:
-      - ./data/redis_data:/data
+      - redis_data:/data
     command: [ "redis-server", "--appendonly", "yes" ]
 
   email_service:
@@ -103,7 +103,7 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:
-      - ./data/grafana-data:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
     restart: always
@@ -111,3 +111,8 @@ services:
 networks:
   default:
     name: olympguide_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:

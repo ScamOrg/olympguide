@@ -25,6 +25,19 @@ type ProgramOptionalSubjects struct {
 	SubjectID uint `gorm:"primaryKey, column:subject_id"`
 }
 
+type ConfirmationSubjects struct {
+	BenefitID uint `gorm:"primaryKey"`
+	SubjectID uint `gorm:"primaryKey"`
+}
+
+type FullScoreSubjects struct {
+	BenefitID uint `gorm:"primaryKey"`
+	SubjectID uint `gorm:"primaryKey"`
+	Score     uint
+}
+
+func (FullScoreSubjects) TableName() string       { return "olympguide.fullscore_subjects" }
+func (ConfirmationSubjects) TableName() string    { return "olympguide.confirmation_subjects" }
 func (LikedPrograms) TableName() string           { return "olympguide.liked_programs" }
 func (LikedUniversities) TableName() string       { return "olympguide.liked_universities" }
 func (LikedOlympiads) TableName() string          { return "olympguide.liked_olympiads" }
