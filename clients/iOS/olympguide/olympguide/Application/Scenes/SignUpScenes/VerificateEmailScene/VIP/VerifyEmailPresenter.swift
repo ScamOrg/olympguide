@@ -45,7 +45,7 @@ final class VerifyEmailPresenter: VerifyEmailPresentationLogic {
                 errorMessage = "Произошла неизвестная ошибка"
             }
             
-            let viewModel = EnterEmailModels.SendCode.ViewModel(errorMessage: errorMessage)
+            _ = EnterEmailModels.SendCode.ViewModel(errorMessage: errorMessage)
             viewController?.showAlert(with: errorMessage)
         }
     }
