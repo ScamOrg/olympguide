@@ -7,7 +7,9 @@
 
 import UIKit
 
-class CustomPasswordField: CustomTextField {
+class CustomPasswordField: CustomTextField, HighlightableField {
+    var isWrong: Bool = false
+    
     var savedText: String? = nil
     
     override init(with title: String) {

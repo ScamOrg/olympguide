@@ -8,15 +8,8 @@
 import UIKit
 
 // MARK: - CustomSearchBar
-final class CustomInputDataField : CustomTextField {
-    private var isWrong = false
-    
-    func makeRed() {
-        UIView.animate(withDuration: 0.3) {
-            self.backgroundColor = UIColor(hex: "#FFCDCD")
-        }
-        isWrong = true
-    }
+final class CustomInputDataField : CustomTextField, HighlightableField {
+    var isWrong: Bool = false
     
     override func textFieldDidChange(_ textField: UITextField) {
         super.textFieldDidChange(textField)

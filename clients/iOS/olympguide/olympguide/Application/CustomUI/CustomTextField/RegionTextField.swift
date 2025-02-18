@@ -8,12 +8,18 @@
 import UIKit
 
 protocol RegionTextFieldDelegate: AnyObject {
-    func regionTextFieldDidSelect(region: String)
+    func regionTextFieldDidSelect(region: Int)
     func regionTextFieldWillSelect(with optionsVC: OptionsViewController)
     func dissmissKeyboard()
 }
 
-final class RegionTextField: CustomTextField {
+protocol RegionDelegateOwner: AnyObject {
+    var regionDelegate: RegionTextFieldDelegate? { get set }
+}
+
+final class RegionTextField: CustomTextField, HighlightableField, RegionDelegateOwner {
+    var isWrong: Bool = false
+    
     weak var regionDelegate: RegionTextFieldDelegate?
     var selectedIndecies: Set<Int> = []
     private var endPoint: String = ""
@@ -60,12 +66,13 @@ final class RegionTextField: CustomTextField {
 }
 
 extension RegionTextField : OptionsViewControllerDelegate {
-    func didSelectOption(_ optionsIndicies: [Int], _ optionsNames: [String]) {
-        selectedIndecies = Set(optionsIndicies)
+    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [Options.FetchOptions.ViewModel.OptionViewModel]) {
+        selectedIndecies = optionsIndicies
         if optionsIndicies.isEmpty {
             setTextFieldText("")
         } else {
-            setTextFieldText(optionsNames[0])
+            setTextFieldText(optionsNames[0].name)
+            regionDelegate?.regionTextFieldDidSelect(region: optionsNames[0].id)
         }
         textFieldSendAction(for: .editingChanged)
     }

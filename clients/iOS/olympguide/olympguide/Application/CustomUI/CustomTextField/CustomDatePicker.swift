@@ -8,7 +8,9 @@
 import UIKit
 
 // MARK: - CustomDatePicker
-final class CustomDatePicker: CustomTextField {
+final class CustomDatePicker: CustomTextField, HighlightableField {
+    var isWrong: Bool = false
+    
     private let datePicker: UIDatePicker = UIDatePicker()
     
     override init(with title: String) {
