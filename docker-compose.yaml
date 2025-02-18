@@ -67,11 +67,11 @@ services:
     depends_on:
       - redis
 
-  load_diploma_servise:
+  diploma_loader_service:
     build:
-      context: ./load_diploma_servise
+      context: diploma_loader_service
       dockerfile: Dockerfile
-    container_name: load_diploma_servise
+    container_name: diploma_loader_service
     restart: always
     environment:
       - REDIS_HOST=redis

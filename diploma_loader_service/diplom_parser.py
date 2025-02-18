@@ -5,6 +5,7 @@ import re
 import hashlib
 import requests
 import demjson3
+import datetime
 from logging_config.setup_logging import setup_logging
 import clients.get_client
 import clients.post_client
@@ -13,9 +14,12 @@ from Diploma import Diploma
 setup_logging()
 logger = logging.getLogger(__name__)
 
-redis_client = redis.StrictRedis(host=constants.REDIS_HOST,
-                                 port=constants.REDIS_PORT,
-                                 decode_responses=True)
+redis_client = redis.StrictRedis(
+    host=constants.REDIS_HOST,
+    port=constants.REDIS_PORT,
+    password=constants.REDIS_PASSWORD,
+    decode_responses=True
+)
 
 
 def make_namestring(last_name, first_name, middle_name, year, month, day):
@@ -119,7 +123,7 @@ def process_diplomas(diplomas: list[str], user_id: int):
 
 def process_diploma_loader(topic, message):
     data = eval(message)
-    if topic == constants.EMAIL_CODE_TOPIC:
+    if topic == constants.DIPLOMA_LOADER_TOPIC:
         birthday = data["birthday"].split('.')
         diplomas = []
         current_date = int(datetime.datetime.now().strftime('%Y'))
