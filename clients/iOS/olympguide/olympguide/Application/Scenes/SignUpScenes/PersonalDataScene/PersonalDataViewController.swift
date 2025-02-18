@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class PersonalDataViewController: UIViewController {
+final class PersonalDataViewController: UIViewController, ValidationErrorDisplayable {
     
     // MARK: - Свойства
     private var userEmail: String = ""
@@ -16,36 +16,41 @@ final class PersonalDataViewController: UIViewController {
     private var toggleButtonTopConstraint: NSLayoutConstraint?
     private var birthdayTopConstraint: NSLayoutConstraint?
     
-    // MARK: UI Элементы
-    let lastNameTextField: CustomInputDataField = CustomInputDataField(with: "Фамилия")
-    let nameTextField: CustomInputDataField = CustomInputDataField(with: "Имя")
+    private var interactor: PersonalDataInteractor?
     
-    var secondNameTextField: CustomInputDataField = CustomInputDataField(with: "Отчество")
+    // MARK: UI Элементы
+    let lastNameTextField: HighlightableField = CustomInputDataField(with: "Фамилия")
+    let nameTextField: HighlightableField = CustomInputDataField(with: "Имя")
+    
+    var secondNameTextField: HighlightableField = CustomInputDataField(with: "Отчество")
     
     let toggleSecondNameButton: HasSecondNameButton = HasSecondNameButton(frame: .zero)
     
-    let birthdayPicker: CustomDatePicker = CustomDatePicker(with: "День рождения")
+    let birthdayPicker: HighlightableField = CustomDatePicker(with: "День рождения")
     
-    let regionTextField: RegionTextField = RegionTextField(
+    let regionTextField: (HighlightableField & RegionDelegateOwner) = RegionTextField(
         with: "Регион",
         endPoint: "/meta/regions"
     )
     
-    let passwordTextField: CustomPasswordField = CustomPasswordField(with: "Придумайте пароль")
+    let passwordTextField: HighlightableField = CustomPasswordField(with: "Придумайте пароль")
+    
+    private let nextButton: UIButton = UIButton(type: .system)
     
     // MARK: Свойства данных
     var lastName: String = ""
-    var name: String = ""
+    var firstName: String = ""
     var secondName: String = ""
     var birthday: String = ""
-    var region: String = ""
+    var region: Int?
     var password: String = ""
     
     // MARK: - Инициализация
     
-    init(email: String) {
+    init(email: String, interactor: PersonalDataInteractor?) {
         super.init(nibName: nil, bundle: nil)
         self.userEmail = email
+        self.interactor = interactor
     }
     
     required init?(coder: NSCoder) {
@@ -68,6 +73,7 @@ final class PersonalDataViewController: UIViewController {
         lastNameTextField.delegate = self
         nameTextField.delegate = self
         secondNameTextField.delegate = self
+        birthdayPicker.delegate = self
         passwordTextField.delegate = self
         
         nameTextField.tag = 1
@@ -122,6 +128,8 @@ final class PersonalDataViewController: UIViewController {
         configureRegionTextField()
         // 7. Пароль
         configurePasswordTextField()
+        
+        configureNextButton()
     }
     
     private func configureLastNameTextField() {
@@ -175,6 +183,8 @@ final class PersonalDataViewController: UIViewController {
         birthdayTopConstraint?.isActive = true
         
         birthdayPicker.pinLeft(to: view.leadingAnchor, 20)
+        
+        
     }
     
     private func configureRegionTextField() {
@@ -191,6 +201,23 @@ final class PersonalDataViewController: UIViewController {
         
         passwordTextField.pinTop(to: regionTextField.bottomAnchor, 24)
         passwordTextField.pinLeft(to: view.leadingAnchor, 20)
+    }
+    
+    private func configureNextButton() {
+        nextButton.titleLabel?.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        nextButton.layer.cornerRadius = 13
+        nextButton.titleLabel?.tintColor = .black
+        nextButton.backgroundColor = UIColor(hex: "#E0E8FE")
+        nextButton.setTitle("Продолжить", for: .normal)
+        
+        view.addSubview(nextButton)
+        
+        nextButton.setHeight(48)
+        nextButton.pinLeft(to: view.leadingAnchor, 20)
+        nextButton.pinRight(to: view.trailingAnchor, 20)
+        nextButton.pinBottom(to: view.bottomAnchor, 43)
+        
+        nextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
     }
     
     
@@ -286,6 +313,21 @@ final class PersonalDataViewController: UIViewController {
     @objc private func keyboardWillHide(_ notification: Notification) {
         self.view.frame.origin.y = 0
     }
+    
+    // MARK: - Actions
+    @objc
+    private func didTapNextButton() {
+        let request = PersonalData.SignUp.Request(
+            email: userEmail,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            secondName: hasSecondName ? secondName : nil,
+            birthday: birthday,
+            regionId: region
+        )
+        interactor?.signUp(request: request)
+    }
 }
 
 
@@ -294,15 +336,13 @@ extension PersonalDataViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
         switch searchBar.tag {
         case 1:
-            name = text
+            firstName = text
         case 2:
             secondName = text
         case 3:
             lastName = text
         case 4:
             birthday = text
-        case 5:
-            region = text
         case 6:
             password = text
         default:
@@ -312,7 +352,7 @@ extension PersonalDataViewController: CustomTextFieldDelegate {
 }
 
 extension PersonalDataViewController: RegionTextFieldDelegate {
-    func regionTextFieldDidSelect(region: String) {
+    func regionTextFieldDidSelect(region: Int) {
         self.region = region
     }
     
@@ -325,5 +365,18 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
     
     func dissmissKeyboard() {
         view.endEditing(true)
+    }
+}
+
+extension PersonalDataViewController : PersonalDataDisplayLogic {
+    func displaySignUp(viewModel: PersonalData.SignUp.ViewModel) {
+        if let errorMesseges = viewModel.errorMessage {
+            showAlert(with: errorMesseges.joined(separator: "\n"))
+            return
+        }
+    }
+    
+    func displayError(message: String) {
+        
     }
 }
