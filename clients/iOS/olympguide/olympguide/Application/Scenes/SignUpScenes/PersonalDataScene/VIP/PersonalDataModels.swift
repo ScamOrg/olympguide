@@ -23,7 +23,7 @@ enum PersonalData {
         }
         
         struct ViewModel {
-            let errorMessage: String?
+            let errorMessage: [String]?
         }
     }
 }
