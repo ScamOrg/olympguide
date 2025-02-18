@@ -88,7 +88,7 @@ fileprivate enum Constants {
 
 
 protocol OptionsViewControllerDelegate: AnyObject {
-    func didSelectOption(_ options: [Int], _ optionsNames: [String])
+    func didSelectOption(_ options: Set<Int>, _ optionsNames: [Options.FetchOptions.ViewModel.OptionViewModel])
     func didCancle()
 }
 
@@ -493,7 +493,7 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     private func handleButtonTap(at indexPath: IndexPath) {
         if currentSelectedIndices.contains(indexPath.row) {
             currentSelectedIndices.remove(indexPath.row)
-            tableView.reloadRows(at: [indexPath], with: .automatic)
+            tableView.reloadData()
             if let originIndex = currentToAll[indexPath.row] {
                 selectedIndices.remove(originIndex)
                 selectedScrollView.removeButtons(with: originIndex)
@@ -506,17 +506,17 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
             selectedIndices.insert(originIndex)
             selectedScrollView.addButtonToStackView(with: options[originIndex].name, tag: originIndex)
         }
-        tableView.reloadRows(at: [indexPath], with: .automatic)
+        tableView.reloadData()
         
         if !isMultipleChoice {
             for number in selectedIndices {
                 if allToCurrent[number] != indexPath.row {
                     if let currentIndex = allToCurrent[number] {
                         currentSelectedIndices.remove(currentIndex)
-                        tableView.reloadRows(at: [IndexPath(row: currentIndex, section: 0)], with: .automatic)
                     }
                     selectedScrollView.removeButtons(with: number)
                     selectedIndices.remove(number)
+                    tableView.reloadData()
                     break
                 }
             }
@@ -552,11 +552,11 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     func saveButtonTouchUp(_ sender: UIButton) {
         buttonTouchUp(sender)
         initialSelectedIndices = selectedIndices
-        var names: [String] = []
+        var names: [Options.FetchOptions.ViewModel.OptionViewModel] = []
         for index in selectedIndices {
-            names.append(options[index].name)
+            names.append(options[index])
         }
-        delegate?.didSelectOption(Array(selectedIndices), names)
+        delegate?.didSelectOption(selectedIndices, names)
         animateDismiss {
             self.dismiss(animated: false)
         }
