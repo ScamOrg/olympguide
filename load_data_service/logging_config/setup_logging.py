@@ -15,3 +15,5 @@ def setup_logging():
     )
 
     logging.getLogger().handlers[0].setFormatter(ColoredFormatter())
+
+    logging.getLogger("pdfminer").setLevel(logging.WARNING)
