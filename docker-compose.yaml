@@ -67,20 +67,20 @@ services:
     depends_on:
       - redis
 
-    load_diploma_servise:
-        build:
-          context: ./load_diploma_servise
-          dockerfile: Dockerfile
-        container_name: load_diploma_servise
-        restart: always
-        environment:
-          - REDIS_HOST=redis
-          - REDIS_PORT=${REDIS_PORT}
-          - REDIS_PASSWORD=${REDIS_PASSWORD}
-          - SMTP_USERNAME=${SMTP_USERNAME}
-          - SMTP_PASSWORD=${SMTP_PASSWORD}
-        depends_on:
-          - redis
+  load_diploma_servise:
+    build:
+      context: ./load_diploma_servise
+      dockerfile: Dockerfile
+    container_name: load_diploma_servise
+    restart: always
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    depends_on:
+      - redis
 
   api:
     build:
