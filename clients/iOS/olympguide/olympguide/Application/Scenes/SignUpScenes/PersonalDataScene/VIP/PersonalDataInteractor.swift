@@ -45,8 +45,13 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             if request.regionId == nil {
                 validationErrors.append(.invalidRegion)
             }
+            let response = PersonalData.SignUp.Response(
+                success: false,
+                error: AppError.validation(validationErrors) as NSError
+            )
             
-            presenter?.presentError(with: AppError.validation(validationErrors) as NSError)
+            self.presenter?.presentSignUp(response: response)
+            
             return
         }
         
@@ -55,7 +60,11 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
         guard request.secondName == nil || !secondName.isEmpty else {
             var validationErrors: [ValidationError] = []
             validationErrors.append(.invalidSecondName)
-            presenter?.presentError(with: AppError.validation(validationErrors) as NSError)
+            let response = PersonalData.SignUp.Response(
+                success: false,
+                error: AppError.validation(validationErrors) as NSError
+            )
+            self.presenter?.presentSignUp(response: response)
             return
         }
         
@@ -80,13 +89,18 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
                 
                 self.presenter?.presentSignUp(response: response)
             case .failure(let networkError):
-                self.presenter?.presentError(with: networkError as NSError)
+            let response = PersonalData.SignUp.Response(
+                    success: false,
+                    error: networkError
+                )
+                self.presenter?.presentSignUp(response: response)
             }
         }
     }
     
     func isPasswordValid(with password: String?) -> Bool {
-        let passwordRegex = #"^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$"#
+        let passwordRegex = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z0-9\-_]{8,}$"#
+        
         guard
             let password = password?.trimmingCharacters(in: .whitespacesAndNewlines),
             !password.isEmpty,
