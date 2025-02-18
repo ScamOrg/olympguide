@@ -73,7 +73,6 @@ class CustomTextField: UIView {
         configureTextField()
         configureDeleteButton()
         addCloseButtonOnKeyboard()
-        addTapGesture()
     }
     
     private func setupView() {
@@ -120,11 +119,6 @@ class CustomTextField: UIView {
                                           action: #selector(closeInputView))
         toolbar.items = [flexSpace, closeButton]
         textField.inputAccessoryView = toolbar
-    }
-    
-    private func addTapGesture() {
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchBar))
-//        addGestureRecognizer(tapGesture)
     }
     
     // MARK: - Layout
