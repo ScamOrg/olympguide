@@ -84,5 +84,8 @@ test-output/
 # Documentation
 *.docset
 
-#python
+# python
 *.pyc
+
+# load_service
+*.pdf
