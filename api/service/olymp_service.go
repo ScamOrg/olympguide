@@ -10,6 +10,7 @@ import (
 type IOlympService interface {
 	GetOlymps(params *dto.OlympQueryParams) ([]dto.OlympiadShortResponse, error)
 	GetLikedOlymps(userID uint) ([]dto.OlympiadShortResponse, error)
+	GetOlymp(olympiadID string, userID any) (*dto.OlympiadResponse, error)
 	LikeOlymp(olympiadID string, userID uint) (bool, error)
 	DislikeOlymp(olympiadID string, userID uint) (bool, error)
 }
