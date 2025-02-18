@@ -23,6 +23,7 @@ type Field struct {
 type University struct {
 	UniversityID uint `gorm:"primaryKey"`
 	Name         string
+	ShortName    string
 	Logo         string
 	Email        string
 	Site         string
@@ -43,6 +44,7 @@ type Program struct {
 	UniversityID     uint
 	FacultyID        uint
 	FieldID          uint
+	Popularity       int
 	University       University `gorm:"foreignKey:UniversityID;references:UniversityID"`
 	Faculty          Faculty    `gorm:"foreignKey:FacultyID;references:FacultyID"`
 	Field            Field      `gorm:"foreignKey:FieldID;references:FieldID"`

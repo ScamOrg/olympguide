@@ -53,6 +53,7 @@ func (rt *Router) setupRoutes() {
 	rt.setupMetaRoutes()
 	rt.setupFacultyRoutes()
 	rt.setupProgramRoutes()
+	rt.setupBenefitRoutes()
 	rt.setupServiceDiplomaRoutes()
 }
 
@@ -96,6 +97,12 @@ func (rt *Router) setupFieldRoutes() {
 
 func (rt *Router) setupOlympRoutes() {
 	rt.engine.GET("/olympiads", rt.handlers.Olymp.GetOlympiads)
+	olympiad := rt.engine.Group("/olympiad")
+	olympiadWithID := olympiad.Group("/:id")
+	{
+		olympiadWithID.GET("/", rt.handlers.Olymp.GetOlympiad)
+		olympiadWithID.GET("/benefits", rt.handlers.Benefit.GetBenefitsByOlympiad)
+	}
 }
 
 func (rt *Router) setupUserRoutes() {
@@ -156,12 +163,18 @@ func (rt *Router) setupFacultyRoutes() {
 func (rt *Router) setupProgramRoutes() {
 	program := rt.engine.Group("/program")
 	program.POST("/", rt.handlers.Program.NewProgram)
+	programWithID := program.Group("/:id")
 	{
-		programWithID := program.Group("/:id")
-		{
-			programWithID.GET("/", rt.handlers.Program.GetProgram)
-		}
+		programWithID.GET("/", rt.handlers.Program.GetProgram)
+		programWithID.GET("/benefits", rt.handlers.Benefit.GetBenefitsByProgram)
 	}
+}
+
+func (rt *Router) setupBenefitRoutes() {
+	benefit := rt.engine.Group("/benefit")
+	benefit.Use(rt.mw.RolesMiddleware(role.DataLoaderService, role.Admin, role.Founder))
+	benefit.POST("/", rt.handlers.Benefit.NewBenefit)
+	benefit.DELETE("/:id", rt.handlers.Benefit.DeleteBenefit)
 }
 
 func (rt *Router) setupServiceDiplomaRoutes() {

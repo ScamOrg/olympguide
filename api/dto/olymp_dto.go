@@ -22,3 +22,10 @@ type OlympiadResponse struct {
 	Description string `json:"description"`
 	Link        string `json:"link"`
 }
+
+type OlympiadBenefitInfo struct {
+	OlympiadID uint   `json:"olympiad_id"`
+	Name       string `json:"name"`
+	Level      int16  `json:"level"`
+	Profile    string `json:"profile"`
+}

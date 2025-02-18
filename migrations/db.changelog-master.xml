@@ -19,5 +19,16 @@
     <changeSet id="4" author="titarenko">
         <sqlFile path="changelog/changes/007-diploma_new_table.sql"/>
     </changeSet>
-
+    <changeSet id="5" author="titarenko">
+        <sqlFile path="changelog/changes/008-change_benefit_tables.sql"/>
+    </changeSet>
+    <changeSet id="6" author="titarenko">
+        <sqlFile path="changelog/changes/009-add_univer_shortname.sql"/>
+        <sqlFile path="changelog/changes/010-add_popularity_program.sql"/>
+    </changeSet>
+    <changeSet id="7" author="titarenko">
+        <sqlFile path="changelog/changes/011-add_unique_benefit_constraint.sql"/>
+        <sqlFile path="changelog/changes/012-add_benefit_indexes_and_del_liked_fields.sql"/>
+    </changeSet>
+    
 </databaseChangeLog>

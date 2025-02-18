@@ -35,13 +35,6 @@ func (d *DiplomaService) NewDiplomaByUser(request *dto.DiplomaUserRequest, userI
 }
 
 func (d *DiplomaService) NewDiploma(request *dto.DiplomaRequest) error {
-	if !d.userRepo.Exists(request.UserID) {
-		return errs.UserNotExist
-	}
-	if !d.olympRepo.Exists(request.OlympiadID) {
-		return errs.OlympNotExist
-	}
-
 	return d.diplomaRepo.NewDiploma(newDiplomaModel(request))
 }
 

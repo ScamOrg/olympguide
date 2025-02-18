@@ -2,6 +2,7 @@ package dto
 
 type UniversityRequest struct {
 	Name        string `json:"name" binding:"required"`
+	ShortName   string `json:"short_name" binding:"required"`
 	Logo        string `json:"logo"`
 	Email       string `json:"email"`
 	Site        string `json:"site"`
@@ -12,6 +13,7 @@ type UniversityRequest struct {
 type UniversityShortResponse struct {
 	UniversityID uint   `json:"university_id"`
 	Name         string `json:"name"`
+	ShortName    string `json:"short_name"`
 	Logo         string `json:"logo"`
 	Region       string `json:"region"`
 	Like         bool   `json:"like"`

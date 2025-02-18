@@ -47,6 +47,19 @@ func (o *OlympHandler) GetLikedOlympiads(c *gin.Context) {
 	c.JSON(http.StatusOK, olymps)
 }
 
+func (o *OlympHandler) GetOlympiad(c *gin.Context) {
+	olympiadID := c.Param("id")
+	userID, _ := c.Get(constants.ContextUserID)
+
+	olympiad, err := o.olympService.GetOlymp(olympiadID, userID)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, olympiad)
+}
+
 func (o *OlympHandler) LikeOlymp(c *gin.Context) {
 	olympID := c.Param("id")
 	userID, _ := c.MustGet(constants.ContextUserID).(uint)

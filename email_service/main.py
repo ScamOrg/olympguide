@@ -4,7 +4,12 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 
-redis_client = redis.StrictRedis(host=constants.REDIS_HOST, port=constants.REDIS_PORT, decode_responses=True)
+redis_client = redis.StrictRedis(
+    host=constants.REDIS_HOST,
+    port=constants.REDIS_PORT,
+    password=constants.REDIS_PASSWORD,
+    decode_responses=True
+)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

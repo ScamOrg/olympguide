@@ -30,8 +30,8 @@ func (r *PgOlympRepo) GetOlymps(params *dto.OlympQueryParams) ([]model.Olympiad,
 	query := r.db.Debug().
 		Joins("LEFT JOIN olympguide.liked_olympiads lo ON lo.olympiad_id = olympguide.olympiad.olympiad_id AND lo.user_id = ?", params.UserID).
 		Select("olympguide.olympiad.*, CASE WHEN lo.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like")
-	query = applyFilters(query, params.Levels, params.Profiles, params.Search)
-	query = applySorting(query, params.Sort, params.Order)
+	query = applyOlympFilters(query, params.Levels, params.Profiles, params.Search)
+	query = applyOlympSorting(query, params.Sort, params.Order)
 
 	if err := query.Find(&olympiads).Error; err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (r *PgOlympRepo) Exists(olympiadID uint) bool {
 	return count > 0
 }
 
-func applyFilters(query *gorm.DB, levels, profiles []string, search string) *gorm.DB {
+func applyOlympFilters(query *gorm.DB, levels, profiles []string, search string) *gorm.DB {
 	if len(levels) > 0 {
 		query = query.Where("level IN (?)", levels)
 	}
@@ -119,7 +119,7 @@ func applyFilters(query *gorm.DB, levels, profiles []string, search string) *gor
 	return query
 }
 
-func applySorting(query *gorm.DB, sort, order string) *gorm.DB {
+func applyOlympSorting(query *gorm.DB, sort, order string) *gorm.DB {
 	allowedSortFields := map[string]bool{
 		"level":   true,
 		"profile": true,

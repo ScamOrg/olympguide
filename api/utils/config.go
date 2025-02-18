@@ -7,14 +7,15 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     int
-	DBUser     string
-	DBPassword string
-	DBName     string
-	RedisHost  string
-	RedisPort  int
-	ServerPort int
+	DBHost        string
+	DBPort        int
+	DBUser        string
+	DBPassword    string
+	DBName        string
+	RedisHost     string
+	RedisPort     int
+	RedisPassword string
+	ServerPort    int
 }
 
 func LoadConfig() (*Config, error) {
@@ -38,15 +39,15 @@ func LoadConfig() (*Config, error) {
 	}
 
 	cfg := &Config{
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     dbPort,
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		RedisHost:  os.Getenv("REDIS_HOST"),
-		RedisPort:  redisPort,
-		ServerPort: serverPort,
+		DBHost:        os.Getenv("DB_HOST"),
+		DBPort:        dbPort,
+		DBUser:        os.Getenv("DB_USER"),
+		DBPassword:    os.Getenv("DB_PASSWORD"),
+		DBName:        os.Getenv("DB_NAME"),
+		RedisHost:     os.Getenv("REDIS_HOST"),
+		RedisPort:     redisPort,
+		RedisPassword: os.Getenv("REDIS_PASSWORD"),
+		ServerPort:    serverPort,
 	}
-
 	return cfg, nil
 }

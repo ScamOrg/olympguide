@@ -2,11 +2,7 @@ package repository
 
 import (
 	"api/model"
-	"api/utils/errs"
-	"errors"
-	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
-	"log"
 )
 
 type IUniverRepo interface {
@@ -56,7 +52,7 @@ func (u *PgUniverRepo) GetUnivers(search string, regionIDs []string, userID any)
 		Joins("LEFT JOIN olympguide.liked_universities lu ON lu.university_id = olympguide.university.university_id AND lu.user_id = ?", userID).
 		Select("olympguide.university.*, CASE WHEN lu.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like")
 	if search != "" {
-		query = query.Where("name ILIKE ?", "%"+search+"%")
+		query = query.Where("name ILIKE ? OR short_name ILIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 	if len(regionIDs) > 0 {
 		query = query.Where("region_id IN (?)", regionIDs)
@@ -85,13 +81,6 @@ func (u *PgUniverRepo) GetLikedUnivers(userID uint) ([]model.University, error) 
 func (u *PgUniverRepo) NewUniver(univer *model.University) (uint, error) {
 	err := u.db.Create(&univer).Error
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			log.Println("Code:", pgErr.Code)
-			if pgErr.Code == "23505" {
-				return 0, errs.UniverAlreadyExists
-			}
-		}
 		return 0, err
 	}
 	return univer.UniversityID, nil

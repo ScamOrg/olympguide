@@ -10,4 +10,5 @@ type Handlers struct {
 	Faculty *FacultyHandler
 	Program *ProgramHandler
 	Diploma *DiplomaHandler
+	Benefit *BenefitHandler
 }

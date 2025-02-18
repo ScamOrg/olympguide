@@ -4,12 +4,9 @@ import (
 	"api/dto"
 	"api/model"
 	"api/utils/constants"
-	"api/utils/errs"
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/go-redis/redis/v8"
-	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -34,12 +31,6 @@ func NewDiplomaRepo(db *gorm.DB, redis *redis.Client) *DiplomaRepo {
 func (d *DiplomaRepo) NewDiploma(diploma *model.Diploma) error {
 	err := d.db.Create(&diploma).Error
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			if pgErr.Code == "23505" {
-				return errs.DiplomaAlreadyExists
-			}
-		}
 		return err
 	}
 	return nil

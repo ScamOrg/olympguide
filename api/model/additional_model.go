@@ -35,6 +35,21 @@ type Diploma struct {
 	Olympiad   Olympiad `gorm:"foreignKey:OlympiadID;references:OlympiadID"`
 }
 
+type Benefit struct {
+	BenefitID            uint `gorm:"primaryKey"`
+	ProgramID            uint
+	OlympiadID           uint
+	MinClass             uint
+	MinDiplomaLevel      uint
+	BVI                  bool                   `gorm:"column:is_bvi"`
+	FullScoreSubjects    []Subject              `gorm:"many2many:olympguide.fullscore_subjects;foreignKey:BenefitID;joinForeignKey:BenefitID;References:SubjectID;joinReferences:SubjectID"`
+	ConfirmationSubjects []Subject              `gorm:"many2many:olympguide.confirmation_subjects;foreignKey:BenefitID;joinForeignKey:BenefitID;References:SubjectID;joinReferences:SubjectID"`
+	ConfSubjRel          []ConfirmationSubjects `gorm:"foreignKey:BenefitID;references:BenefitID"`
+	Olympiad             Olympiad               `gorm:"foreignKey:OlympiadID;references:OlympiadID"`
+	Program              Program                `gorm:"foreignKey:ProgramID;references:ProgramID"`
+}
+
+func (Benefit) TableName() string    { return "olympguide.benefit" }
 func (Region) TableName() string     { return "olympguide.region" }
 func (GroupField) TableName() string { return "olympguide.group_of_fields" }
 func (Faculty) TableName() string    { return "olympguide.faculty" }

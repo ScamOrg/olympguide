@@ -47,6 +47,7 @@ def get_fields() -> dict[str: int]:
         for item in field['field']:
             fields[item['code']] = item['field_id']
 
+
     return fields
 
 def get_olympiads() -> dict[str: int]:

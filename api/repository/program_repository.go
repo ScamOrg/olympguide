@@ -2,17 +2,13 @@ package repository
 
 import (
 	"api/model"
-	"api/utils/errs"
-	"errors"
-	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
 type IProgramRepo interface {
 	GetProgramsByFacultyID(facultyID string, userID any) ([]model.Program, error)
 	GetLikedPrograms(userID uint) ([]model.Program, error)
-	NewProgram(program *model.Program,
-		optSubjects []uint, reqSubjects []uint) (uint, error)
+	NewProgram(program *model.Program) (uint, error)
 	UpdateProgram(program *model.Program) error
 	DeleteProgram(program *model.Program) error
 	GetProgram(programID string, userID any) (*model.Program, error)
@@ -21,6 +17,7 @@ type IProgramRepo interface {
 	GetSubjects() ([]model.Subject, error)
 	GetUniverProgramsWithFaculty(univerID string, userID any) ([]model.Program, error)
 	GetUniverProgramsWithGroup(univerID string, userID any) ([]model.Program, error)
+	ChangeProgramPopularity(program *model.Program, value int)
 }
 
 type PgProgramRepo struct {
@@ -102,46 +99,12 @@ func (p *PgProgramRepo) GetLikedPrograms(userID uint) ([]model.Program, error) {
 	return programs, nil
 }
 
-func (p *PgProgramRepo) NewProgram(program *model.Program,
-	optSubjects []uint, reqSubjects []uint) (uint, error) {
-	err := p.db.Transaction(func(tx *gorm.DB) error {
-		err := tx.Create(program).Error
-		if err != nil {
-			var pgErr *pgconn.PgError
-			if errors.As(err, &pgErr) {
-				if pgErr.Code == "23505" {
-					return errs.ProgramAlreadyExists
-				}
-			}
-			return err
-		}
-		if len(reqSubjects) > 0 {
-			requiredSubjects := make([]model.ProgramRequiredSubjects, len(reqSubjects))
-			for i, subjectID := range reqSubjects {
-				requiredSubjects[i] = model.ProgramRequiredSubjects{
-					ProgramID: program.ProgramID,
-					SubjectID: subjectID,
-				}
-			}
-			if err := tx.Table("olympguide.program_required_subjects").Create(&requiredSubjects).Error; err != nil {
-				return err
-			}
-		}
-		if len(optSubjects) > 0 {
-			optionalSubjects := make([]model.ProgramOptionalSubjects, len(optSubjects))
-			for i, subjectID := range optSubjects {
-				optionalSubjects[i] = model.ProgramOptionalSubjects{
-					ProgramID: program.ProgramID,
-					SubjectID: subjectID,
-				}
-			}
-			if err := tx.Table("olympguide.program_optional_subjects").Create(&optionalSubjects).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	return program.ProgramID, err
+func (p *PgProgramRepo) NewProgram(program *model.Program) (uint, error) {
+	err := p.db.Create(program).Error
+	if err != nil {
+		return 0, err
+	}
+	return program.ProgramID, nil
 }
 
 func (p *PgProgramRepo) UpdateProgram(program *model.Program) error {
@@ -176,4 +139,9 @@ func (p *PgProgramRepo) GetSubjects() ([]model.Subject, error) {
 		return nil, err
 	}
 	return subjects, nil
+}
+
+func (p *PgProgramRepo) ChangeProgramPopularity(program *model.Program, value int) {
+	program.Popularity += value
+	p.db.Save(program)
 }
