@@ -28,9 +28,14 @@ func (b *BenefitService) DeleteBenefit(benefitId string) error {
 	return b.benefitRepo.DeleteBenefit(benefitId)
 }
 
+func (b *BenefitService) GetBenefitsByProgramID(programID string) {
+
+}
+
 func newBenefitModel(request *dto.BenefitRequest) *model.Benefit {
 	benefit := model.Benefit{
 		ProgramID:       request.ProgramID,
+		OlympiadID:      request.OlympiadID,
 		MinClass:        request.MinClass,
 		MinDiplomaLevel: request.MinDiplomaLevel,
 		BVI:             request.BVI,

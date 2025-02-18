@@ -129,6 +129,7 @@ func (u *UniverService) DislikeUniver(universityID string, userID uint) (bool, e
 func newUniverModel(request *dto.UniversityRequest) *model.University {
 	return &model.University{
 		Name:        request.Name,
+		ShortName:   request.ShortName,
 		Logo:        request.Logo,
 		Site:        request.Site,
 		Email:       request.Email,
@@ -145,6 +146,7 @@ func newUniverResponse(univer *model.University) *dto.UniversityResponse {
 		UniversityShortResponse: dto.UniversityShortResponse{
 			UniversityID: univer.UniversityID,
 			Name:         univer.Name,
+			ShortName:    univer.ShortName,
 			Logo:         univer.Logo,
 			Region:       univer.Region.Name,
 			Like:         univer.Like,
@@ -158,6 +160,7 @@ func newUniversShortResponse(univers []model.University) []dto.UniversityShortRe
 		response = append(response, dto.UniversityShortResponse{
 			UniversityID: univer.UniversityID,
 			Name:         univer.Name,
+			ShortName:    univer.ShortName,
 			Logo:         univer.Logo,
 			Region:       univer.Region.Name,
 			Like:         univer.Like,

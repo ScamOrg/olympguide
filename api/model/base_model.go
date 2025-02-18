@@ -23,6 +23,7 @@ type Field struct {
 type University struct {
 	UniversityID uint `gorm:"primaryKey"`
 	Name         string
+	ShortName    string
 	Logo         string
 	Email        string
 	Site         string

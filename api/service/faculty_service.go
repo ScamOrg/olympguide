@@ -4,7 +4,6 @@ import (
 	"api/dto"
 	"api/model"
 	"api/repository"
-	"api/utils/errs"
 )
 
 type IFacultyService interface {
@@ -25,10 +24,6 @@ func NewFacultyService(facultyRepo repository.IFacultyRepo, univerRepo repositor
 
 func (u *FacultyService) NewFaculty(request *dto.FacultyNewRequest) (uint, error) {
 	facultyModel := newFacultyModel(request)
-	exists := u.univerRepo.UniverExists(facultyModel.UniversityID)
-	if !exists {
-		return 0, errs.UniversityNotExist
-	}
 	return u.facultyRepo.NewFaculty(facultyModel)
 }
 

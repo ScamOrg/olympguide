@@ -22,5 +22,8 @@
     <changeSet id="5" author="titarenko">
         <sqlFile path="changelog/changes/008-change_benefit_tables.sql"/>
     </changeSet>
+    <changeSet id="6" author="titarenko">
+        <sqlFile path="changelog/changes/009-add_univer_shortname.sql"/>
+    </changeSet>
 
 </databaseChangeLog>

@@ -30,3 +30,10 @@ type ProgramRequest struct {
 	OptionalSubjects []uint `json:"optional_subjects"`
 	RequiredSubjects []uint `json:"required_subjects"`
 }
+
+type ProgramBenefitInfo struct {
+	ProgramID       uint   `json:"program_id"`
+	Name            string `json:"name"`
+	Field           string `json:"field"`
+	UniverShortName string `json:"university"`
+}

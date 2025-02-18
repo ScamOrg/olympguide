@@ -41,8 +41,11 @@ var (
 )
 
 var (
-	UniversityNotExist = AppError{400, "UniversityNotExist", "University not exist", nil}
-	FacultyErr         = AppError{400, "FacultyNotExistsOrBelongsToAnotherUniver", "Faculty not found or does not belong to the university", nil}
+	FacultyNotInUniversity = AppError{
+		Code:    400,
+		Type:    "FacultyNotInUniversity",
+		Message: "The specified faculty does not exist or does not belong to the given university",
+	}
 )
 
 var (

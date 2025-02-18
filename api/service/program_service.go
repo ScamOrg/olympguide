@@ -56,7 +56,7 @@ func (p *ProgramService) NewProgram(request *dto.ProgramRequest) (uint, error) {
 	program := newProgramModel(request)
 
 	if !p.facultyRepo.ExistsInUniversity(program.FacultyID, program.UniversityID) {
-		return 0, errs.FacultyErr
+		return 0, errs.FacultyNotInUniversity
 	}
 
 	return p.programRepo.NewProgram(program)
