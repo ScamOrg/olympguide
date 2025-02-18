@@ -7,6 +7,7 @@ import (
 
 type IBenefitRepo interface {
 	NewBenefit(benefit *model.Benefit) error
+	DeleteBenefit(benefitID string) error
 }
 
 type PgBenefitRepo struct {
@@ -18,5 +19,9 @@ func NewPgBenefitRepo(db *gorm.DB) *PgBenefitRepo {
 }
 
 func (b *PgBenefitRepo) NewBenefit(benefit *model.Benefit) error {
-	return nil
+	return b.db.Create(&benefit).Error
+}
+
+func (b *PgBenefitRepo) DeleteBenefit(benefitID string) error {
+	return b.db.Delete(&model.Benefit{}, benefitID).Error
 }

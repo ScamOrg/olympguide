@@ -23,7 +23,7 @@ func (b *BenefitHandler) NewBenefit(c *gin.Context) {
 		return
 	}
 
-	err := b.benefitService.NewBenefit(request)
+	err := b.benefitService.NewBenefit(&request)
 
 	if err != nil {
 		errs.HandleError(c, err)
@@ -31,4 +31,16 @@ func (b *BenefitHandler) NewBenefit(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
+}
+
+func (b *BenefitHandler) DeleteBenefit(c *gin.Context) {
+	benefitID := c.Param("id")
+
+	err := b.benefitService.DeleteBenefit(benefitID)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
