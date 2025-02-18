@@ -52,7 +52,7 @@ func (u *PgUniverRepo) GetUnivers(search string, regionIDs []string, userID any)
 		Joins("LEFT JOIN olympguide.liked_universities lu ON lu.university_id = olympguide.university.university_id AND lu.user_id = ?", userID).
 		Select("olympguide.university.*, CASE WHEN lu.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like")
 	if search != "" {
-		query = query.Where("name ILIKE ?", "%"+search+"%")
+		query = query.Where("name ILIKE ? OR short_name ILIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 	if len(regionIDs) > 0 {
 		query = query.Where("region_id IN (?)", regionIDs)

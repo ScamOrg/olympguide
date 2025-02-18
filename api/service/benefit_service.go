@@ -28,8 +28,8 @@ func (b *BenefitService) DeleteBenefit(benefitId string) error {
 	return b.benefitRepo.DeleteBenefit(benefitId)
 }
 
-func (b *BenefitService) GetBenefitsByProgramID(programID string) {
-
+func (b *BenefitService) GetBenefitsByProgramID(programID string) []model.Benefit {
+	model, err := b.benefitRepo.(programID)
 }
 
 func newBenefitModel(request *dto.BenefitRequest) *model.Benefit {

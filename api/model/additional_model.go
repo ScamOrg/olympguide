@@ -45,6 +45,8 @@ type Benefit struct {
 	FullScoreSubjects    []Subject              `gorm:"many2many:olympguide.fullscore_subjects;foreignKey:BenefitID;joinForeignKey:BenefitID;References:SubjectID;joinReferences:SubjectID"`
 	ConfirmationSubjects []Subject              `gorm:"many2many:olympguide.confirmation_subjects;foreignKey:BenefitID;joinForeignKey:BenefitID;References:SubjectID;joinReferences:SubjectID"`
 	ConfSubjRel          []ConfirmationSubjects `gorm:"foreignKey:BenefitID;references:BenefitID"`
+	Olympiad             Olympiad               `gorm:"foreignKey:OlympiadID;references:OlympiadID"`
+	Program              Program                `gorm:"foreignKey:ProgramID;references:ProgramID"`
 }
 
 func (Benefit) TableName() string    { return "olympguide.benefit" }

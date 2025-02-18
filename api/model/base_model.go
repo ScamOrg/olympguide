@@ -44,6 +44,7 @@ type Program struct {
 	UniversityID     uint
 	FacultyID        uint
 	FieldID          uint
+	Popularity       int
 	University       University `gorm:"foreignKey:UniversityID;references:UniversityID"`
 	Faculty          Faculty    `gorm:"foreignKey:FacultyID;references:FacultyID"`
 	Field            Field      `gorm:"foreignKey:FieldID;references:FieldID"`

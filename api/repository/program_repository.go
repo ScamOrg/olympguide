@@ -17,6 +17,7 @@ type IProgramRepo interface {
 	GetSubjects() ([]model.Subject, error)
 	GetUniverProgramsWithFaculty(univerID string, userID any) ([]model.Program, error)
 	GetUniverProgramsWithGroup(univerID string, userID any) ([]model.Program, error)
+	ChangeProgramPopularity(program *model.Program, value int)
 }
 
 type PgProgramRepo struct {
@@ -138,4 +139,9 @@ func (p *PgProgramRepo) GetSubjects() ([]model.Subject, error) {
 		return nil, err
 	}
 	return subjects, nil
+}
+
+func (p *PgProgramRepo) ChangeProgramPopularity(program *model.Program, value int) {
+	program.Popularity += value
+	p.db.Save(program)
 }

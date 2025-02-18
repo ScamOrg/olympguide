@@ -15,8 +15,10 @@ const (
 	LikeUniverPopularDecr = -10
 	// LikeOlympPopularIncr LikeProgramUniverPopularIncr = 1
 	// LikeProgramUniverPopularDecr = -1
-	LikeOlympPopularIncr = 5
-	LikeOlympPopularDecr = -5
+	LikeOlympPopularIncr   = 5
+	LikeOlympPopularDecr   = -5
+	LikeProgramPopularIncr = 5
+	LikeProgramPopularDecr = -5
 )
 
 const (

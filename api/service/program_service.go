@@ -4,6 +4,7 @@ import (
 	"api/dto"
 	"api/model"
 	"api/repository"
+	"api/utils/constants"
 	"api/utils/errs"
 )
 
@@ -76,6 +77,7 @@ func (p *ProgramService) LikeProgram(programID string, userID uint) (bool, error
 	if err != nil {
 		return false, err
 	}
+	p.programRepo.ChangeProgramPopularity(program, constants.LikeProgramPopularIncr)
 	return true, nil
 }
 
@@ -93,7 +95,7 @@ func (p *ProgramService) DislikeProgram(programID string, userID uint) (bool, er
 	if err != nil {
 		return false, err
 	}
-
+	p.programRepo.ChangeProgramPopularity(program, constants.LikeProgramPopularDecr)
 	return true, nil
 }
 

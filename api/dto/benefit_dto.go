@@ -37,3 +37,23 @@ type ProgramBenefitTree struct {
 	Program  ProgramBenefitInfo `json:"program"`
 	Benefits []BenefitInfo      `json:"benefits"`
 }
+
+type BenefitByProgramQueryParams struct {
+	Levels   []string `form:"level"`
+	Profiles []string `form:"profile"`
+	BenefitBaseQueryParams
+}
+
+type BenefitByOlympiasQueryParams struct {
+	Fields []string `form:"field"`
+	BenefitBaseQueryParams
+}
+
+type BenefitBaseQueryParams struct {
+	BVI             []bool `form:"is_bvi"`
+	MinDiplomaLevel []uint `form:"min_diploma_level"`
+	MinClass        []uint `form:"min_class"`
+	Search          string `form:"search"`
+	Sort            string `form:"sort"`
+	Order           string `form:"order"`
+}

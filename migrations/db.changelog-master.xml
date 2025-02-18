@@ -24,6 +24,7 @@
     </changeSet>
     <changeSet id="6" author="titarenko">
         <sqlFile path="changelog/changes/009-add_univer_shortname.sql"/>
+        <sqlFile path="changelog/changes/010-add_popularity_program.sql"/>
     </changeSet>
 
 </databaseChangeLog>
