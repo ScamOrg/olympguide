@@ -44,7 +44,7 @@ type BenefitByProgramQueryParams struct {
 	BenefitBaseQueryParams
 }
 
-type BenefitByOlympiasQueryParams struct {
+type BenefitByOlympiadQueryParams struct {
 	Fields []string `form:"field"`
 	BenefitBaseQueryParams
 }

@@ -97,6 +97,12 @@ func (rt *Router) setupFieldRoutes() {
 
 func (rt *Router) setupOlympRoutes() {
 	rt.engine.GET("/olympiads", rt.handlers.Olymp.GetOlympiads)
+	olympiad := rt.engine.Group("/olympiad")
+	olympiadWithID := olympiad.Group("/:id")
+	{
+		olympiadWithID.GET("/", rt.handlers.Benefit.GetOlympiad)
+		olympiadWithID.GET("/benefits", rt.handlers.Benefit.GetBenefitsByOlympiad)
+	}
 }
 
 func (rt *Router) setupUserRoutes() {
@@ -160,6 +166,7 @@ func (rt *Router) setupProgramRoutes() {
 	programWithID := program.Group("/:id")
 	{
 		programWithID.GET("/", rt.handlers.Program.GetProgram)
+		programWithID.GET("/benefits", rt.handlers.Benefit.GetBenefitsByProgram)
 	}
 }
 

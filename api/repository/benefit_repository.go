@@ -10,7 +10,7 @@ type IBenefitRepo interface {
 	NewBenefit(benefit *model.Benefit) error
 	DeleteBenefit(benefitID string) error
 	GetBenefitsByProgram(programID string, params *dto.BenefitByProgramQueryParams) ([]model.Benefit, error)
-	GetBenefitsByOlympiad(olympiadID string, params *dto.BenefitByOlympiasQueryParams) ([]model.Benefit, error)
+	GetBenefitsByOlympiad(olympiadID string, params *dto.BenefitByOlympiadQueryParams) ([]model.Benefit, error)
 }
 
 type PgBenefitRepo struct {
@@ -43,7 +43,7 @@ func (b *PgBenefitRepo) GetBenefitsByProgram(programID string, params *dto.Benef
 	return benefits, err
 }
 
-func (b *PgBenefitRepo) GetBenefitsByOlympiad(olympiadID string, params *dto.BenefitByOlympiasQueryParams) ([]model.Benefit, error) {
+func (b *PgBenefitRepo) GetBenefitsByOlympiad(olympiadID string, params *dto.BenefitByOlympiadQueryParams) ([]model.Benefit, error) {
 	var benefits []model.Benefit
 	query := b.db.Preload("FullScoreSubjects").
 		Preload("ConfirmationSubjects").

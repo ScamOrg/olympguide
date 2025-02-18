@@ -10,7 +10,7 @@ type IBenefitService interface {
 	NewBenefit(request *dto.BenefitRequest) error
 	DeleteBenefit(benefitId string) error
 	GetBenefitsByProgram(programID string, request *dto.BenefitByProgramQueryParams) ([]dto.OlympiadBenefitTree, error)
-	GetBenefitsByOlympiad(olympiadID string, request *dto.BenefitByOlympiasQueryParams) ([]dto.ProgramBenefitTree, error)
+	GetBenefitsByOlympiad(olympiadID string, request *dto.BenefitByOlympiadQueryParams) ([]dto.ProgramBenefitTree, error)
 }
 
 type BenefitService struct {
@@ -38,7 +38,7 @@ func (b *BenefitService) GetBenefitsByProgram(programID string, request *dto.Ben
 	return newOlympiadBenefitTrees(benefits), nil
 }
 
-func (b *BenefitService) GetBenefitsByOlympiad(olympiadID string, request *dto.BenefitByOlympiasQueryParams) ([]dto.ProgramBenefitTree, error) {
+func (b *BenefitService) GetBenefitsByOlympiad(olympiadID string, request *dto.BenefitByOlympiadQueryParams) ([]dto.ProgramBenefitTree, error) {
 	benefits, err := b.benefitRepo.GetBenefitsByOlympiad(olympiadID, request)
 	if err != nil {
 		return nil, err

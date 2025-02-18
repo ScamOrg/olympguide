@@ -44,3 +44,37 @@ func (b *BenefitHandler) DeleteBenefit(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
+
+func (b *BenefitHandler) GetBenefitsByProgram(c *gin.Context) {
+	var queryParams dto.BenefitByProgramQueryParams
+	if err := c.ShouldBindQuery(&queryParams); err != nil {
+		errs.HandleError(c, errs.InvalidRequest)
+		return
+	}
+	programID := c.Param("id")
+
+	response, err := b.benefitService.GetBenefitsByProgram(programID, &queryParams)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (b *BenefitHandler) GetBenefitsByOlympiad(c *gin.Context) {
+	var queryParams dto.BenefitByOlympiadQueryParams
+	if err := c.ShouldBindQuery(&queryParams); err != nil {
+		errs.HandleError(c, errs.InvalidRequest)
+		return
+	}
+	programID := c.Param("id")
+
+	response, err := b.benefitService.GetBenefitsByOlympiad(programID, &queryParams)
+	if err != nil {
+		errs.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
