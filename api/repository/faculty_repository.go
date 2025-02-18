@@ -2,9 +2,6 @@ package repository
 
 import (
 	"api/model"
-	"api/utils/errs"
-	"errors"
-	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -43,12 +40,6 @@ func (u *PgFacultyRepo) GetFacultyByID(facultyID string) (*model.Faculty, error)
 func (u *PgFacultyRepo) NewFaculty(faculty *model.Faculty) (uint, error) {
 	err := u.db.Create(&faculty).Error
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			if pgErr.Code == "23505" {
-				return 0, errs.FacultyAlreadyExists
-			}
-		}
 		return 0, err
 	}
 	return faculty.FacultyID, nil

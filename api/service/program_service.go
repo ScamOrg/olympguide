@@ -55,19 +55,11 @@ func (p *ProgramService) GetLikedPrograms(userID uint) ([]dto.ProgramResponse, e
 func (p *ProgramService) NewProgram(request *dto.ProgramRequest) (uint, error) {
 	program := newProgramModel(request)
 
-	if !p.univerRepo.Exists(program.UniversityID) {
-		return 0, errs.UniversityNotExist
-	}
-
 	if !p.facultyRepo.ExistsInUniversity(program.FacultyID, program.UniversityID) {
 		return 0, errs.FacultyErr
 	}
 
-	if !p.fieldRepo.Exists(program.FieldID) {
-		return 0, errs.FieldNotExist
-	}
-
-	return p.programRepo.NewProgram(program, request.OptionalSubjects, request.RequiredSubjects)
+	return p.programRepo.NewProgram(program)
 }
 
 func (p *ProgramService) LikeProgram(programID string, userID uint) (bool, error) {
@@ -179,16 +171,31 @@ func newProgramResponse(program *model.Program) *dto.ProgramResponse {
 }
 
 func newProgramModel(request *dto.ProgramRequest) *model.Program {
-	return &model.Program{
-		Name:         request.Name,
-		BudgetPlaces: request.BudgetPlaces,
-		PaidPlaces:   request.PaidPlaces,
-		Cost:         request.Cost,
-		Link:         request.Link,
-		UniversityID: request.UniversityID,
-		FieldID:      request.FieldID,
-		FacultyID:    request.FacultyID,
+	program := model.Program{
+		Name:             request.Name,
+		BudgetPlaces:     request.BudgetPlaces,
+		PaidPlaces:       request.PaidPlaces,
+		Cost:             request.Cost,
+		Link:             request.Link,
+		UniversityID:     request.UniversityID,
+		FieldID:          request.FieldID,
+		FacultyID:        request.FacultyID,
+		OptionalSubjects: make([]model.Subject, len(request.OptionalSubjects)),
+		RequiredSubjects: make([]model.Subject, len(request.RequiredSubjects)),
 	}
+
+	for i := range request.OptionalSubjects {
+		program.OptionalSubjects[i] = model.Subject{
+			SubjectID: request.OptionalSubjects[i],
+		}
+	}
+
+	for i := range request.RequiredSubjects {
+		program.RequiredSubjects[i] = model.Subject{
+			SubjectID: request.RequiredSubjects[i],
+		}
+	}
+	return &program
 }
 
 func newFacultyProgramTree(programs []model.Program) []dto.FacultyProgramTree {

@@ -19,5 +19,8 @@
     <changeSet id="4" author="titarenko">
         <sqlFile path="changelog/changes/007-diploma_new_table.sql"/>
     </changeSet>
+    <changeSet id="5" author="titarenko">
+        <sqlFile path="changelog/changes/008-change_benefit_tables.sql"/>
+    </changeSet>
 
 </databaseChangeLog>

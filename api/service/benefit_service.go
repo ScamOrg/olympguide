@@ -29,26 +29,29 @@ func (b *BenefitService) DeleteBenefit(benefitId string) error {
 }
 
 func newBenefitModel(request *dto.BenefitRequest) *model.Benefit {
-	modelBenefit := model.Benefit{
-		ProgramID:   request.ProgramID,
-		MinClass:    request.MinClass,
-		MinLevel:    request.MinLevel,
-		BVI:         request.BVI,
-		ConfSubjRel: make([]model.ConfirmationSubjects, len(request.ConfirmSubjects)),
+	benefit := model.Benefit{
+		ProgramID:       request.ProgramID,
+		MinClass:        request.MinClass,
+		MinDiplomaLevel: request.MinDiplomaLevel,
+		BVI:             request.BVI,
+		ConfSubjRel:     make([]model.ConfirmationSubjects, len(request.ConfirmSubjects)),
 	}
+
 	for i := range request.ConfirmSubjects {
-		modelBenefit.ConfSubjRel[i] = model.ConfirmationSubjects{
+		benefit.ConfSubjRel[i] = model.ConfirmationSubjects{
 			SubjectID: request.ConfirmSubjects[i].SubjectID,
 			Score:     request.ConfirmSubjects[i].Score,
 		}
 	}
+
 	if !request.BVI {
-		modelBenefit.FullScoreSubjects = make([]model.Subject, len(request.FullScoreSubjects))
+		benefit.FullScoreSubjects = make([]model.Subject, len(request.FullScoreSubjects))
 		for i := range request.FullScoreSubjects {
-			modelBenefit.FullScoreSubjects[i] = model.Subject{
-				SubjectID: request.FullScoreSubjects[i].SubjectID,
+			benefit.FullScoreSubjects[i] = model.Subject{
+				SubjectID: request.FullScoreSubjects[i],
 			}
 		}
 	}
-	return &modelBenefit
+
+	return &benefit
 }

@@ -6,11 +6,19 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"log"
+	"strconv"
 )
 
 func ConnectSessionStore(cfg *Config) sessions.Store {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
-	store, err := redis.NewStore(constants.MaxSessionConn, "tcp", redisAddress, "", []byte("og_secret"))
+	store, err := redis.NewStoreWithDB(
+		constants.MaxSessionConn,
+		"tcp",
+		redisAddress,
+		cfg.RedisPassword,
+		strconv.Itoa(constants.RedisDBNum),
+		[]byte("og_secret"),
+	)
 	if err != nil {
 		log.Fatalf("Could not connect to store: %v", err)
 	}

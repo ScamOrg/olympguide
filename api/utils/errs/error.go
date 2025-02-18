@@ -3,6 +3,7 @@ package errs
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 	"log"
 )
@@ -25,9 +26,6 @@ var (
 	PreviousCodeNotExpired = AppError{400, "PreviousCodeNotExpired", "Please wait until the previous code expires", nil}
 )
 var (
-	DiplomaAlreadyExists = AppError{409, "DiplomaAlreadyExists", "Diploma with this class, olympiad, user already exists", nil}
-	UniverAlreadyExists  = AppError{409, "UniverAlreadyExists", "Univer with this name already exists", nil}
-	FacultyAlreadyExists = AppError{409, "FacultyAlreadyExists", "Faculty with this name, university already exists", nil}
 	ProgramAlreadyExists = AppError{409, "ProgramAlreadyExists", "Program with this name, university already exists", nil}
 )
 var (
@@ -50,6 +48,11 @@ var (
 	FieldNotExist      = AppError{400, "FieldNotExist", "Field not exist", nil}
 	UserNotExist       = AppError{400, "UserNotExist", "User not exist", nil}
 	OlympNotExist      = AppError{400, "OlympNotExist", "Olymp not exist", nil}
+)
+
+var (
+	ForeignKeyViolation = AppError{400, "ForeignKeyViolation", "Foreign key violation", nil}
+	UniqueViolation     = AppError{409, "UniqueViolation", "Unique constraint violation", nil}
 )
 
 func (e AppError) WithAdditional(data map[string]interface{}) AppError {
@@ -94,6 +97,15 @@ func handleUnknownError(c *gin.Context, err error) {
 		if errors.Is(err, knownErr) {
 			resultError = &appErr
 			break
+		}
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		switch pgErr.Code {
+		case "23505":
+			resultError = &UniqueViolation
+		case "23503":
+			resultError = &ForeignKeyViolation
 		}
 	}
 	if resultError == nil {

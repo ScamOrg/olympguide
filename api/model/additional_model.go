@@ -38,9 +38,10 @@ type Diploma struct {
 type Benefit struct {
 	BenefitID            uint `gorm:"primaryKey"`
 	ProgramID            uint
+	OlympiadID           uint
 	MinClass             uint
-	MinLevel             uint
-	BVI                  bool
+	MinDiplomaLevel      uint
+	BVI                  bool                   `gorm:"column:is_bvi"`
 	FullScoreSubjects    []Subject              `gorm:"many2many:olympguide.fullscore_subjects;foreignKey:BenefitID;joinForeignKey:BenefitID;References:SubjectID;joinReferences:SubjectID"`
 	ConfirmationSubjects []Subject              `gorm:"many2many:olympguide.confirmation_subjects;foreignKey:BenefitID;joinForeignKey:BenefitID;References:SubjectID;joinReferences:SubjectID"`
 	ConfSubjRel          []ConfirmationSubjects `gorm:"foreignKey:BenefitID;references:BenefitID"`
