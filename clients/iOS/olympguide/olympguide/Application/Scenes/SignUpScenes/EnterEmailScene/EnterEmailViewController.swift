@@ -170,7 +170,7 @@ extension EnterEmailViewController: EnterEmailDisplayLogic {
         if let errorMessage = viewModel.errorMessage {
             let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default))
-            emailTextField.makeRed()
+            emailTextField.highlightError()
             present(alert, animated: true)
         } else {
             router?.routeToVerifyCode()

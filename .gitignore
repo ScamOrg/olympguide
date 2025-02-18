@@ -86,9 +86,12 @@ test-output/
 
 # python
 *.pyc
+*.pyc
 
 # load_service
 *.pdf
 *.csv
 *.json
+__pycache__/
+
 /.venv/
