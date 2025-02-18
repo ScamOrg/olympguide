@@ -19,7 +19,6 @@ protocol PersonalDataBusinessLogic {
 // MARK: - Presentation Logic
 protocol PersonalDataPresentationLogic {
     func presentSignUp(response: PersonalData.SignUp.Response)
-    func presentError(with error: Error)
 }
 
 // MARK: - Display Logic
@@ -36,4 +35,13 @@ protocol PersonalDataRoutingLogic {
 // MARK: - Data Passing
 protocol PersonalDataDataPassing {
     var dataStore: EnterEmailDataStore? { get }
+}
+
+protocol ValidationErrorDisplayable: AnyObject {
+    var lastNameTextField: HighlightableField { get }
+    var nameTextField: HighlightableField { get }
+    var secondNameTextField: HighlightableField { get }
+    var birthdayPicker: HighlightableField { get }
+    var regionTextField: (HighlightableField & RegionDelegateOwner) { get }
+    var passwordTextField: HighlightableField { get }
 }
