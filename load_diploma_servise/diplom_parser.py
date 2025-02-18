@@ -155,4 +155,3 @@ def process_redis_diploma_loader():
 
 if __name__ == "__main__":
     process_redis_diploma_loader()
-    name = 'Владислав'
