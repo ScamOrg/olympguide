@@ -38,6 +38,7 @@ def get_fields() -> dict[str: int]:
     if response.status_code != 200:
         logger.error('Cannot get fields')
         return dict()
+
     response.encoding = 'utf-8'
 
     fields = {}
@@ -47,3 +48,18 @@ def get_fields() -> dict[str: int]:
             fields[item['code']] = item['field_id']
 
     return fields
+
+def get_olympiads() -> dict[str: int]:
+    response = requests.get(f"{API_URL}:{API_PORT}/olympiads")
+    if response.status_code != 200:
+        logger.error('Cannot get olympiads')
+        return dict()
+
+    response.encoding = 'utf-8'
+
+    olympiads = {}
+
+    for olympiad in response.json():
+        olympiads[olympiad['name'].lower()] = olympiad['olympiad_id']
+
+    return olympiads
