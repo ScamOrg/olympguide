@@ -91,3 +91,4 @@ test-output/
 *.pdf
 *.csv
 *.json
+/.venv/

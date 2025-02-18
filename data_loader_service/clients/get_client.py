@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-API_URL = os.getenv("API_URL")
+API_URL = os.getenv("API_HOST")
 API_PORT = os.getenv("API_PORT")
 def get_regions():
    pass

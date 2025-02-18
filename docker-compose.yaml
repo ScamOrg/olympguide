@@ -77,6 +77,12 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - BEARER_TOKEN=${BEARER_DATA_LOADER_TOKEN}
+      - API_HOST=go_api
+      - API_PORT=${API_PORT}
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     depends_on:
       - redis
 

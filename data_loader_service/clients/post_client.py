@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = os.getenv("API_URL")
+API_URL = os.getenv("API_HOST")
 API_PORT = os.getenv("API_PORT")
 BEARER_TOKEN = os.getenv("BEARER_TOKEN")
 

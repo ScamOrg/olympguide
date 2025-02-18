@@ -1,15 +1,17 @@
-import constants
-import redis
+import datetime
 import logging
 import re
+
+import redis
 import hashlib
-import requests
 import demjson3
-import datetime
+
 from logging_config.setup_logging import setup_logging
+from retry_requests import fetch_with_retries
+from Diploma import Diploma
 import clients.get_client
 import clients.post_client
-from Diploma import Diploma
+import constants
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -70,7 +72,7 @@ def get_diplomas(last_name, first_name, middle_name, day, month, year, base_year
         f"compiled-storage-{base_year}/by-person-released/{hash_val}/codes.js"
     )
 
-    resp = requests.get(url)
+    resp = fetch_with_retries(url)
     if resp.status_code == 404:
         return []
     elif resp.status_code != 200:
@@ -115,6 +117,8 @@ def process_diplomas(diplomas: list[str], user_id: int):
                     diploma_class=diploma[1]
                 )
             )
+            logger.info(f'Diploma (olympiad_id: {olympiad_id}, '
+                        f'level: {level}, diploma_class:{diploma[1]}) created for user_id: {user_id}')
 
         else:
             logger.warning(f'Not found olympiad {diploma}')
