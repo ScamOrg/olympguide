@@ -89,6 +89,7 @@ func newDiplomasResponse(diplomas []model.Diploma) []dto.DiplomaResponse {
 			Olympiad: dto.OlympDiplomaInfo{
 				Name:    diplomas[i].Olympiad.Name,
 				Profile: diplomas[i].Olympiad.Profile,
+				Level:   diplomas[i].Olympiad.Level,
 			},
 		}
 	}
