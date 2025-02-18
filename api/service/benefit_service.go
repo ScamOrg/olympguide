@@ -8,6 +8,7 @@ import (
 
 type IBenefitService interface {
 	NewBenefit(request *dto.BenefitRequest) error
+	DeleteBenefit(benefitId string) error
 }
 
 type BenefitService struct {
