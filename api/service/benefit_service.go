@@ -9,6 +9,8 @@ import (
 type IBenefitService interface {
 	NewBenefit(request *dto.BenefitRequest) error
 	DeleteBenefit(benefitId string) error
+	GetBenefitsByProgram(programID string, request *dto.BenefitByProgramQueryParams) ([]dto.OlympiadBenefitTree, error)
+	GetBenefitsByOlympiad(olympiadID string, request *dto.BenefitByOlympiasQueryParams) ([]dto.ProgramBenefitTree, error)
 }
 
 type BenefitService struct {
