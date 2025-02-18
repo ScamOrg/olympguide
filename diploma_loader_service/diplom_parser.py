@@ -117,6 +117,8 @@ def process_diplomas(diplomas: list[str], user_id: int):
                     diploma_class=diploma[1]
                 )
             )
+            logger.info(f'Diploma (olympiad_id: {olympiad_id}, '
+                        f'level: {level}, diploma_class:{diploma[1]}) created for user_id: {user_id}')
 
         else:
             logger.warning(f'Not found olympiad {diploma}')
