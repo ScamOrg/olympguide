@@ -38,6 +38,14 @@ func (o *OlympService) GetLikedOlymps(userID uint) ([]dto.OlympiadShortResponse,
 	return newOlympsShortResponse(olymps), nil
 }
 
+func (o *OlympService) GetOlymp(olympiadID string, userID any) (*dto.OlympiadResponse, error) {
+	olymp, err := o.olympRepo.GetOlymp(olympiadID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return newOlympResponse(olymp), nil
+}
+
 func (o *OlympService) LikeOlymp(olympiadID string, userID uint) (bool, error) {
 	olymp, err := o.olympRepo.GetOlymp(olympiadID, userID)
 	if err != nil {
@@ -86,4 +94,18 @@ func newOlympsShortResponse(olymps []model.Olympiad) []dto.OlympiadShortResponse
 		})
 	}
 	return response
+}
+
+func newOlympResponse(olymp *model.Olympiad) *dto.OlympiadResponse {
+	return &dto.OlympiadResponse{
+		OlympiadShortResponse: dto.OlympiadShortResponse{
+			OlympiadID: olymp.OlympiadID,
+			Name:       olymp.Name,
+			Level:      olymp.Level,
+			Profile:    olymp.Profile,
+			Like:       olymp.Like,
+		},
+		Description: olymp.Description,
+		Link:        olymp.Link,
+	}
 }

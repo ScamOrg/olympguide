@@ -100,7 +100,7 @@ func (rt *Router) setupOlympRoutes() {
 	olympiad := rt.engine.Group("/olympiad")
 	olympiadWithID := olympiad.Group("/:id")
 	{
-		olympiadWithID.GET("/", rt.handlers.Benefit.GetOlympiad)
+		olympiadWithID.GET("/", rt.handlers.Olymp.GetOlympiad)
 		olympiadWithID.GET("/benefits", rt.handlers.Benefit.GetBenefitsByOlympiad)
 	}
 }
