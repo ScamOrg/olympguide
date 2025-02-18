@@ -89,3 +89,4 @@ test-output/
 
 # load_service
 *.pdf
+*.csv
