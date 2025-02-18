@@ -13,6 +13,7 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
+
 def create_university(name, email, site, region_id):
     url = f"{API_URL}:{API_PORT}/universities"
     payload = {
@@ -24,6 +25,7 @@ def create_university(name, email, site, region_id):
     response = requests.post(url, json=payload, headers=HEADERS)
     return response.json() if response.status_code == 201 else {"error": response.text}
 
+
 def upload_faculties(university_id, faculties):
     url = f"{API_URL}:{API_PORT}/faculty"
     for faculty in faculties:
@@ -34,6 +36,7 @@ def upload_faculties(university_id, faculties):
         response = requests.post(url, json=payload, headers=HEADERS)
         if response.status_code != 201:
             print(response.text)
+
 
 def upload_programs(university_id, programs):
     url = f"{API_URL}:{API_PORT}/program"
@@ -53,6 +56,7 @@ def upload_programs(university_id, programs):
         response = requests.post(url, json=payload, headers=HEADERS)
         if response.status_code != 201:
             print(response.text)
+
 
 def upload_benefits(university_id, privileges):
     url = f"{API_URL}:{API_PORT}/universities/{university_id}/privileges"
