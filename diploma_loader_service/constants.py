@@ -5,6 +5,8 @@ load_dotenv()
 
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = int(os.getenv("REDIS_PORT"))
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
+
 DIPLOMA_LOADER_TOPIC = "user.diplomas.upload"
 REDIS_TOPICS = [DIPLOMA_LOADER_TOPIC]
 
