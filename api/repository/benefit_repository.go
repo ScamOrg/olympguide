@@ -9,6 +9,8 @@ import (
 type IBenefitRepo interface {
 	NewBenefit(benefit *model.Benefit) error
 	DeleteBenefit(benefitID string) error
+	GetBenefitsByProgram(programID string, params *dto.BenefitByProgramQueryParams) ([]model.Benefit, error)
+	GetBenefitsByOlympiad(olympiadID string, params *dto.BenefitByOlympiasQueryParams) ([]model.Benefit, error)
 }
 
 type PgBenefitRepo struct {

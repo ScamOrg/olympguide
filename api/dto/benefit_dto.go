@@ -16,8 +16,8 @@ type ConfirmSubjectReq struct {
 }
 
 type ConfirmSubjectResp struct {
-	Subject string `json:"subject"`
-	Score   uint   `json:"score"`
+	Name  string `json:"subject"`
+	Score uint   `json:"score"`
 }
 
 type BenefitInfo struct {
