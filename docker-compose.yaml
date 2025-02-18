@@ -67,18 +67,22 @@ services:
     depends_on:
       - redis
 
-  load_diploma_servise:
+  diploma_loader_service:
     build:
-      context: ./load_diploma_servise
+      context: diploma_loader_service
       dockerfile: Dockerfile
-    container_name: load_diploma_servise
+    container_name: diploma_loader_service
     restart: always
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - SMTP_USERNAME=${SMTP_USERNAME}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - BEARER_TOKEN=${BEARER_DATA_LOADER_TOKEN}
+      - API_HOST=go_api
+      - API_PORT=${API_PORT}
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     depends_on:
       - redis
 

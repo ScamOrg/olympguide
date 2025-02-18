@@ -93,3 +93,5 @@ test-output/
 *.csv
 *.json
 __pycache__/
+
+/.venv/

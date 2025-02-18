@@ -2,7 +2,7 @@ import constants
 import requests
 
 def get_olympiads() -> dict[str: int]:
-    response = requests.get(f"{constants.API_URL}:{constants.API_PORT}/olympiads")
+    response = requests.get(f'http://{constants.API_HOST}:{constants.API_PORT}/olympiads')
     if response.status_code != 200:
         logger.error('Cannot get olympiads')
         return dict()

@@ -14,6 +14,7 @@ type DiplomaUserRequest struct {
 type OlympDiplomaInfo struct {
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
+	Level   int16  `json:"level"`
 }
 
 type DiplomaResponse struct {
