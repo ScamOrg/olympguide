@@ -135,7 +135,7 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
     @objc private func loginButtonTapped() {
         print("Войти нажато")
 //        let searchVC = VerificateEmailViewController(email: "pankravvlad1@gmail.com")
-        let searchVC = PersonalDataViewController(email: "pankravvlad1@gmail.com")
+        let searchVC = PersonalDataAssembly.build(email: "test1@gmail.com")
         navigationController?.pushViewController(searchVC, animated: true)
     }
 }
