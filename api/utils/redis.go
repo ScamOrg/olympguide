@@ -10,7 +10,6 @@ import (
 
 func ConnectRedis(cfg *Config) *redis.Client {
 	redisAddress := fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort)
-	log.Printf(cfg.RedisPassword)
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisAddress,
 		Password: cfg.RedisPassword,

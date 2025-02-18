@@ -31,7 +31,9 @@ func (b *PgBenefitRepo) DeleteBenefit(benefitID string) error {
 
 func (b *PgBenefitRepo) GetBenefitsByProgram(programID string, params *dto.BenefitByProgramQueryParams) ([]model.Benefit, error) {
 	var benefits []model.Benefit
-	query := b.db.Preload("FullScoreSubjects").
+	query := b.db.
+		Joins("JOIN olympguide.olympiad AS olymp ON olymp.olympiad_id = benefit.olympiad_id").
+		Preload("FullScoreSubjects").
 		Preload("ConfirmationSubjects").
 		Preload("ConfSubjRel").
 		Preload("Olympiad").
@@ -45,13 +47,15 @@ func (b *PgBenefitRepo) GetBenefitsByProgram(programID string, params *dto.Benef
 
 func (b *PgBenefitRepo) GetBenefitsByOlympiad(olympiadID string, params *dto.BenefitByOlympiadQueryParams) ([]model.Benefit, error) {
 	var benefits []model.Benefit
-	query := b.db.Preload("FullScoreSubjects").
+	query := b.db.Debug().
+		Joins("JOIN olympguide.educational_program AS pr ON pr.program_id = benefit.program_id").
+		Preload("FullScoreSubjects").
 		Preload("ConfirmationSubjects").
 		Preload("ConfSubjRel").
 		Preload("Program").
 		Preload("Program.Field").
 		Preload("Program.University").
-		Where("Olympiad_id = ?", olympiadID)
+		Where("olympiad_id = ?", olympiadID)
 	applyBenefitByOlympiadSorting(query, params.Sort, params.Order)
 	applyBenefitBaseFilters(query, &params.BenefitBaseQueryParams)
 	applyBenefitsByOlympiadFilters(query, params.Fields, params.Search)
@@ -61,8 +65,8 @@ func (b *PgBenefitRepo) GetBenefitsByOlympiad(olympiadID string, params *dto.Ben
 
 func applyBenefitByProgramSorting(query *gorm.DB, sort, order string) *gorm.DB {
 	allowedSortFields := map[string]string{
-		"level":   "Olympiad.Level",
-		"profile": "Olympiad.Profile",
+		"level":   "olymp.level",
+		"profile": "olymp.profile",
 	}
 
 	var resultOrder string
@@ -72,16 +76,16 @@ func applyBenefitByProgramSorting(query *gorm.DB, sort, order string) *gorm.DB {
 		}
 		resultOrder = value + " " + order
 	} else {
-		resultOrder = "Olympiad.Popularity DESC"
+		resultOrder = "olymp.popularity DESC"
 	}
-	resultOrder += ", Olympiad.Olympiad_id ASC, is_bvi DESC, min_diploma_level ASC"
+	resultOrder += ", olymp.olympiad_id ASC, is_bvi DESC, min_diploma_level ASC"
 	return query.Order(resultOrder)
 }
 
 func applyBenefitByOlympiadSorting(query *gorm.DB, sort, order string) *gorm.DB {
 	allowedSortFields := map[string]string{
-		"field":      "Program.Field.Code",
-		"university": "Program.University.Popularity",
+		"field":      "pr.field.code",
+		"university": "pr.university.popularity",
 	}
 	var resultOrder string
 	if value, exist := allowedSortFields[sort]; exist {
@@ -90,9 +94,9 @@ func applyBenefitByOlympiadSorting(query *gorm.DB, sort, order string) *gorm.DB 
 		}
 		resultOrder = value + " " + order
 	} else {
-		resultOrder = "Olympiad.Program.Popularity DESC"
+		resultOrder = "pr.popularity DESC"
 	}
-	resultOrder += ", Program.Program_id ASC, is_bvi DESC, min_diploma_level ASC"
+	resultOrder += ", pr.program_id ASC, is_bvi DESC, min_diploma_level ASC"
 	return query.Order(resultOrder)
 }
 
@@ -111,24 +115,24 @@ func applyBenefitBaseFilters(query *gorm.DB, params *dto.BenefitBaseQueryParams)
 
 func applyBenefitByProgramFilters(query *gorm.DB, levels, profiles []string, search string) *gorm.DB {
 	if len(levels) > 0 {
-		query = query.Where("Olympiad.Level IN (?)", levels)
+		query = query.Where("olymp.level IN (?)", levels)
 	}
 	if len(profiles) > 0 {
-		query = query.Where("Olympiad.Profile IN (?)", profiles)
+		query = query.Where("olymp.profile IN (?)", profiles)
 	}
 	if search != "" {
-		query = query.Where("Olympiad.Name ILIKE ?", "%"+search+"%")
+		query = query.Where("olymp.name ILIKE ?", "%"+search+"%")
 	}
 	return query
 }
 
 func applyBenefitsByOlympiadFilters(query *gorm.DB, fields []string, search string) *gorm.DB {
 	if len(fields) > 0 {
-		query = query.Where("Program.Field.Code IN (?)", fields)
+		query = query.Where("pr.field.code IN (?)", fields)
 	}
 	if search != "" {
-		query = query.Where("Program.Name ILIKE ? "+
-			"OR Program.University.Name", "%"+search+"%", "%"+search+"%")
+		query = query.Where("pr.name ILIKE ? "+
+			"OR pr.university.name", "%"+search+"%", "%"+search+"%")
 	}
 	return query
 }

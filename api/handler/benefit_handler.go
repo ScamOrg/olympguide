@@ -68,9 +68,9 @@ func (b *BenefitHandler) GetBenefitsByOlympiad(c *gin.Context) {
 		errs.HandleError(c, errs.InvalidRequest)
 		return
 	}
-	programID := c.Param("id")
+	olympiadID := c.Param("id")
 
-	response, err := b.benefitService.GetBenefitsByOlympiad(programID, &queryParams)
+	response, err := b.benefitService.GetBenefitsByOlympiad(olympiadID, &queryParams)
 	if err != nil {
 		errs.HandleError(c, err)
 		return

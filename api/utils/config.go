@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 )
@@ -50,6 +49,5 @@ func LoadConfig() (*Config, error) {
 		RedisPassword: os.Getenv("REDIS_PASSWORD"),
 		ServerPort:    serverPort,
 	}
-	log.Print(cfg)
 	return cfg, nil
 }
