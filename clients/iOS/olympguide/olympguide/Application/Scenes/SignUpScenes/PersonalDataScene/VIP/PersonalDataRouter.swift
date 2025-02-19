@@ -10,7 +10,7 @@ import UIKit
 final class PersonalDataRouter : PersonalDataRoutingLogic {
     weak var viewController: UIViewController?
     
-    func roteToRoot(email: String, password: String) {
+    func routeToRoot(email: String, password: String) {
         AuthManager.shared.login(email: email, password: password) {[weak self] result in
             let previousViewController = self?.viewController?.navigationController?.viewControllers.dropLast().last
             DispatchQueue.main.asyncAfter(deadline: .now()) {
