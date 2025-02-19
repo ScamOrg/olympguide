@@ -8,78 +8,83 @@
 import Foundation
 import Combine
 
+import Foundation
+import Combine
+
 class AuthManager {
-    static let shared = AuthManager()
-    private let baseURL: String
-    
+    static let shared = AuthManager(networkService: NetworkService())
+
+    private let networkService: NetworkServiceProtocol
     @Published private(set) var isAuthenticated: Bool = false
+    
+    private let baseURL: String
     private var cancellables = Set<AnyCancellable>()
     
-    private init() {
+    init(networkService: NetworkServiceProtocol) {
         guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String else {
             fatalError("BASE_URL is not set in Info.plist!")
         }
         self.baseURL = baseURLString
-        checkSession()
+        self.networkService = networkService
     }
     
-    func login(username: String, password: String, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "\(baseURL)/auth/login") else {
-            completion(false)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let requestBody: [String: String] = [
-            "name": username,
+    func login(
+        email: String,
+        password: String,
+        completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
+    ) {
+        let body: [String: Any] = [
+            "email": email,
             "password": password
         ]
         
-        URLSession.shared.dataTaskPublisher(for: request)
-            .map { ($0.response as? HTTPURLResponse)?.statusCode == 200 }
-            .replaceError(with: false)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] success in
-                if success {
+        networkService.request(
+            endpoint: "/auth/login",
+            method: .post,
+            queryItems: nil,
+            body: body,
+            completion: { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
+                switch result {
+                case .success(let response):
                     self?.isAuthenticated = true
+                    completion(.success(response))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
-                completion(success)
             }
-            .store(in: &cancellables)
+        )
     }
     
     func checkSession() {
-        let url = URL(string: "\(baseURL)/check-session")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        URLSession.shared.dataTaskPublisher(for: request)
-            .map { ($0.response as? HTTPURLResponse)?.statusCode == 200 }
-            .replaceError(with: false)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isValidSession in
-                self?.isAuthenticated = isValidSession
+        networkService.request(
+            endpoint: "/auth/check-session",
+            method: .get,
+            queryItems: nil,
+            body: nil
+        ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success:
+                self?.isAuthenticated = true
+            case .failure:
+                self?.isAuthenticated = false
             }
-            .store(in: &cancellables)
+        }
     }
     
-    func logout() {
-        let url = URL(string: "\(baseURL)/auth/logout")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        URLSession.shared.dataTaskPublisher(for: request)
-            .map { ($0.response as? HTTPURLResponse)?.statusCode == 200 }
-            .replaceError(with: false)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] success in
-                if success {
-                    self?.isAuthenticated = false
-                }
+    func logout(completion: ((Result<BaseServerResponse, NetworkError>) -> Void)? = nil) {
+        networkService.request(
+            endpoint: "/auth/logout",
+            method: .post,
+            queryItems: nil,
+            body: nil
+        ) { [weak self] (result: Result<BaseServerResponse, NetworkError>) in
+            switch result {
+            case .success(let response):
+                self?.isAuthenticated = false
+                completion?(.success(response))
+            case .failure(let error):
+                completion?(.failure(error))
             }
-            .store(in: &cancellables)
+        }
     }
 }
