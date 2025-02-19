@@ -15,6 +15,26 @@ enum NetworkError: LocalizedError {
     case previousCodeNotExpired(time: Int)
     case unknown(message: String?)
     case internalServerError(message: String?)
+    init?(serverType: String, time: Int? = nil, message: String? = nil) {
+        switch serverType {
+        case "PreviousCodeNotExpired":
+            if let time = time {
+                self = .previousCodeNotExpired(time: time)
+            } else {
+                self = .unknown(message: "PreviousCodeNotExpired without time")
+            }
+        case "InternalServerError":
+            self = .internalServerError(message: message)
+        case "UniqueViolation":
+            self = .uniqueViolation(message: message)
+        case "UserNotFound":
+            self = .userNotFound(message: message)
+        case "InvalidPassword":
+            self = .invalidPassword(message: message)
+        default:
+            self = .serverError(message: message)
+        }
+    }
     
     var errorDescription: String? {
         switch self {
