@@ -23,7 +23,6 @@ final class EnterEmailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Регистрация"
-        configure()
         configureUI()
         let backItem = UIBarButtonItem(title: "Регистрация", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
@@ -37,23 +36,6 @@ final class EnterEmailViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeFromKeyboardNotifications()
-    }
-    
-    private func configure() {
-        let viewController = self
-        let interactor = EnterEmailInteractor()
-        let presenter = EnterEmailPresenter()
-        let router = EnterEmailRouter()
-        
-        viewController.interactor = interactor
-        viewController.router = router
-        
-        interactor.presenter = presenter
-        
-        presenter.viewController = viewController
-        
-        router.viewController = viewController
-        router.dataStore = interactor
     }
     
     // MARK: - Private UI Setup
