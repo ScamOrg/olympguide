@@ -8,7 +8,6 @@
 import UIKit
 
 final class EnterEmailRouter: EnterEmailRoutingLogic, EnterEmailDataPassing {
-    
     weak var viewController: UIViewController?
     var dataStore: EnterEmailDataStore?
 
