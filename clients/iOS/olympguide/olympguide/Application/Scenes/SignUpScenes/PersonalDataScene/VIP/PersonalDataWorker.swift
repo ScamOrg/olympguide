@@ -24,7 +24,7 @@ final class PersonalDataWorker {
         regionId: Int,
         completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
     ) {
-        let endpoint = "/auth/sign_up"
+        let endpoint = "/auth/sign-up"
         
         let body: [String: Any] = [
             "email": email,
