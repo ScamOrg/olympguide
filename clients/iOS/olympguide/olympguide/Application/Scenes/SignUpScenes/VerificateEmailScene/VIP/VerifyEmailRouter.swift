@@ -8,7 +8,6 @@
 import UIKit
 
 final class VerifyEmailRouter: VerifyEmailRoutingLogic, VerifyEmailDataPassing {
-    
     weak var viewController: UIViewController?
     var dataStore: VerifyEmailDataStore?
     

@@ -25,7 +25,7 @@ final class EnterEmailWorker: EnterEmailWorkerLogic {
         email: String,
         completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void
     ) {
-        let endpoint = "/auth/send_code"
+        let endpoint = "/auth/send-code"
         let body: [String: Any] = ["email": email]
         
         networkService.request(

@@ -61,7 +61,10 @@ final class NetworkService: NetworkServiceProtocol {
             }
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) {
+            data,
+            response,
+            error in
             DispatchQueue.main.async {
                 if let error = error {
                     completion(.failure(.unknown(message: error.localizedDescription)))
@@ -82,11 +85,20 @@ final class NetworkService: NetworkServiceProtocol {
                     let decodedData = try JSONDecoder().decode(T.self, from: data)
                     if !(200...299).contains(httpResponse.statusCode) {
                         if let errorData = decodedData as? BaseServerResponse {
-                            if errorData.type == "PreviousCodeNotExpired", let time = errorData.time {
+                            if errorData.type == "PreviousCodeNotExpired",
+                               let time = errorData.time {
                                 completion(.failure(.previousCodeNotExpired(time: time)))
                                 return
                             }
-                            completion(.failure(.serverError(message: errorData.message)))
+                            if let networkError = NetworkError(
+                                serverType: errorData.type ?? "",
+                                time: errorData.time,
+                                message: errorData.message
+                            ) {
+                                completion(.failure(networkError))
+                            } else {
+                                completion(.failure(.unknown(message: "Unrecognized error: \(String(describing: errorData.type))")))
+                            }
                             return
                         }
                     }

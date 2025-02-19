@@ -11,7 +11,11 @@ class PersonalDataAssembly {
         let presenter = PersonalDataPresenter()
         let interactor = PersonalDataInteractor()
         interactor.presenter = presenter
-        let view = PersonalDataViewController(email: email, interactor: interactor)
+        let view = PersonalDataViewController(email: email)
+        view.interactor = interactor
+        let router = PersonalDataRouter()
+        router.viewController = view
+        view.router = router
         presenter.view = view
         return view
     }

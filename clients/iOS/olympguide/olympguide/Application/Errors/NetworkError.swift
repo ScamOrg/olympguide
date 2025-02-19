@@ -15,6 +15,30 @@ enum NetworkError: LocalizedError {
     case previousCodeNotExpired(time: Int)
     case unknown(message: String?)
     case internalServerError(message: String?)
+    case uniqueViolation(message: String?)
+    case userNotFound(message: String?)
+    case invalidPassword(message: String?)
+    
+    init?(serverType: String, time: Int? = nil, message: String? = nil) {
+        switch serverType {
+        case "PreviousCodeNotExpired":
+            if let time = time {
+                self = .previousCodeNotExpired(time: time)
+            } else {
+                self = .unknown(message: "PreviousCodeNotExpired without time")
+            }
+        case "InternalServerError":
+            self = .internalServerError(message: message)
+        case "UniqueViolation":
+            self = .uniqueViolation(message: message)
+        case "UserNotFound":
+            self = .userNotFound(message: message)
+        case "InvalidPassword":
+            self = .invalidPassword(message: message)
+        default:
+            self = .serverError(message: message)
+        }
+    }
     
     var errorDescription: String? {
         switch self {
@@ -33,6 +57,12 @@ enum NetworkError: LocalizedError {
             return message
         case .internalServerError(message: let message):
             return message
+        case .uniqueViolation(message: _):
+            return "Пользователь с такой почтой уже существует"
+        case .userNotFound(message: _):
+            return "Пользователь с такой почтой не найден"
+        case .invalidPassword(message: _):
+            return "Неверный пароль"
         }
     }
 }

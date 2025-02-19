@@ -1,31 +1,36 @@
 //
-//  EnterEmailViewController.swift
+//  SignInViewController.swift
 //  olympguide
 //
-//  Created by Tom Tim on 19.01.2025.
+//  Created by Tom Tim on 19.02.2025.
 //
 
 import UIKit
 
-final class EnterEmailViewController: UIViewController {
+final class SignInViewController: UIViewController, SignInValidationErrorDisplayable {
     
     // MARK: - VIP
-    var interactor: EnterEmailBusinessLogic?
-    var router: (EnterEmailRoutingLogic & EnterEmailDataPassing)?
+    var interactor: SignInBusinessLogic?
+    var router: SignInRoutingLogic?
     
     // MARK: - UI
-    private let emailTextField: CustomInputDataField = CustomInputDataField(with: "email")
+    let emailTextField: HighlightableField = CustomInputDataField(with: "email")
+    let passwordTextField: HighlightableField = CustomPasswordField(with: "password")
+    
     private let nextButton: UIButton = UIButton(type: .system)
     private var nextButtonBottomConstraint: NSLayoutConstraint!
-    private var currentEmail: String = ""
+    private var email: String = ""
+    private var password: String = ""
     
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Регистрация"
+        title = "Вход"
+        
+        emailTextField.tag = 1
+        passwordTextField.tag = 2
+        
         configureUI()
-        let backItem = UIBarButtonItem(title: "Регистрация", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,6 +47,7 @@ final class EnterEmailViewController: UIViewController {
     private func configureUI() {
         view.backgroundColor = .white
         configureEmailTextField()
+        configurePasswordTextField()
         configureNextButton()
     }
     
@@ -50,8 +56,17 @@ final class EnterEmailViewController: UIViewController {
         
         emailTextField.pinTop(to: view.safeAreaLayoutGuide.topAnchor, 16)
         emailTextField.pinLeft(to: view.leadingAnchor, 20)
-        emailTextField.setTextFieldType(.emailAddress, .emailAddress)
+        emailTextField.setTextFieldType(.emailAddress, .username)
         emailTextField.delegate = self
+    }
+    
+    private func configurePasswordTextField() {
+        view.addSubview(passwordTextField)
+        
+        passwordTextField.pinTop(to: emailTextField.bottomAnchor, 24)
+        passwordTextField.pinLeft(to: view.leadingAnchor, 20)
+        passwordTextField.setTextFieldType(.default, .password)
+        passwordTextField.delegate = self
     }
     
     private func configureNextButton() {
@@ -59,7 +74,7 @@ final class EnterEmailViewController: UIViewController {
         nextButton.layer.cornerRadius = 13
         nextButton.titleLabel?.tintColor = .black
         nextButton.backgroundColor = UIColor(hex: "#E0E8FE")
-        nextButton.setTitle("Продолжить", for: .normal)
+        nextButton.setTitle("Войти", for: .normal)
         
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nextButton)
@@ -79,19 +94,26 @@ final class EnterEmailViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func didTapNextButton() {
-        let request = EnterEmailModels.SendCode.Request(email: currentEmail)
-        interactor?.sendCode(request: request)
+        let request = SignInModels.SignIn.Request(email: email, password: password)
+        interactor?.signIn(request)
     }
 }
 
-extension EnterEmailViewController: CustomTextFieldDelegate {
+extension SignInViewController: CustomTextFieldDelegate {
     func action(_ searchBar: CustomTextField, textDidChange text: String) {
-        currentEmail = text
+        switch searchBar.tag {
+        case 1:
+            email = text
+        case 2:
+            password = text
+        default:
+            break
+        }
     }
 }
 
 // MARK: - Keyboard handling
-extension EnterEmailViewController {
+extension SignInViewController {
     private func subscribeToKeyboardNotifications() {
         NotificationCenter.default.addObserver(
             self,
@@ -146,16 +168,17 @@ extension EnterEmailViewController {
     }
 }
 
-// MARK: - EnterEmailDisplayLogic
-extension EnterEmailViewController: EnterEmailDisplayLogic {
-    func displaySendCodeResult(viewModel: EnterEmailModels.SendCode.ViewModel) {
-        if let errorMessage = viewModel.errorMessage {
-            let alert = UIAlertController(title: "Ошибка", message: errorMessage, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            emailTextField.highlightError()
-            present(alert, animated: true)
+
+extension SignInViewController : SignInDisplayLogic {
+    func displaySignInResult(_ viewModel: SignInModels.SignIn.ViewModel) {
+        if viewModel.success {
+            router?.routeToRoot()
         } else {
-            router?.routeToVerifyCode()
+            if let errorMesseges = viewModel.errorMessages, errorMesseges.count > 0 {
+                showAlert(with: errorMesseges.joined(separator: "\n"))
+                return
+            }
         }
     }
 }
+

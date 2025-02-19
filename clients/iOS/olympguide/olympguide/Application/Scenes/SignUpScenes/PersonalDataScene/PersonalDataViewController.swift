@@ -16,7 +16,8 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     private var toggleButtonTopConstraint: NSLayoutConstraint?
     private var birthdayTopConstraint: NSLayoutConstraint?
     
-    private var interactor: PersonalDataInteractor?
+    var interactor: PersonalDataInteractor?
+    var router: PersonalDataRouter?
     
     // MARK: UI Элементы
     let lastNameTextField: HighlightableField = CustomInputDataField(with: "Фамилия")
@@ -47,10 +48,9 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     
     // MARK: - Инициализация
     
-    init(email: String, interactor: PersonalDataInteractor?) {
+    init(email: String) {
         super.init(nibName: nil, bundle: nil)
         self.userEmail = email
-        self.interactor = interactor
     }
     
     required init?(coder: NSCoder) {
@@ -130,6 +130,12 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         configurePasswordTextField()
         
         configureNextButton()
+        
+        let hiddenUsernameField = UITextField(frame: .zero)
+        hiddenUsernameField.text = userEmail
+        hiddenUsernameField.textContentType = .username
+        hiddenUsernameField.isHidden = true
+        view.addSubview(hiddenUsernameField)
     }
     
     private func configureLastNameTextField() {
@@ -156,7 +162,7 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
     private func configureToggleSecondNameButton() {
         view.addSubview(toggleSecondNameButton)
         toggleSecondNameButton.text = "Нет отчества"
-
+        
         toggleSecondNameButton.translatesAutoresizingMaskIntoConstraints = false
         
         if hasSecondName {
@@ -201,6 +207,8 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         
         passwordTextField.pinTop(to: regionTextField.bottomAnchor, 24)
         passwordTextField.pinLeft(to: view.leadingAnchor, 20)
+        
+        passwordTextField.setTextFieldType(.default, .newPassword)
     }
     
     private func configureNextButton() {
@@ -374,9 +382,6 @@ extension PersonalDataViewController : PersonalDataDisplayLogic {
             showAlert(with: errorMesseges.joined(separator: "\n"))
             return
         }
-    }
-    
-    func displayError(message: String) {
-        
+        router?.routeToRoot(email: userEmail, password: password)
     }
 }
