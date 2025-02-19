@@ -81,7 +81,7 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             guard let self = self else { return }
             
             switch result {
-            case .success(_):
+            case .success:
                 let response = PersonalData.SignUp.Response(
                     success: true,
                     error: nil
@@ -91,7 +91,7 @@ final class PersonalDataInteractor : PersonalDataBusinessLogic {
             case .failure(let networkError):
             let response = PersonalData.SignUp.Response(
                     success: false,
-                    error: networkError
+                    error: AppError.network(networkError) as NSError
                 )
                 self.presenter?.presentSignUp(response: response)
             }
