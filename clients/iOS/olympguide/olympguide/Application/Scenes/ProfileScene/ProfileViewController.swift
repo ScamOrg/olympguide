@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -38,9 +39,11 @@ fileprivate enum Constants {
     }
 }
 
-class ProfileViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class ProfileViewController: UIViewController {
+    var router: ProfileRoutingLogic?
     
     private let tableView = UITableView(frame: .zero, style: .plain)
+    private var authCancellable: AnyCancellable?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +53,12 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
+        
+        authCancellable = AuthManager.shared.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
     }
     
     private func configureNavigationBar() {
@@ -76,66 +85,100 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
         tableView.tableHeaderView = headerContainer
     }
     
-    // MARK: - UITableViewDataSource
+    // MARK: - Actions
+    @objc private func registerButtonTapped() {
+        router?.routeToSignUp()
+    }
+    
+    @objc private func loginButtonTapped() {
+        router?.routeToSignIn()
+    }
+    
+    @objc private func logoutButtonTapped() {
+        AuthManager.shared.logout()
+    }
+}
+
+// MARK: - UITableViewDataSource
+extension ProfileViewController : UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 8 // 2 кнопки + 6 пунктов меню
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row == 0 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: ProfileButtonTableViewCell.reuseIdentifier, for: indexPath) as! ProfileButtonTableViewCell
-            cell.configure(title: "Зарегистрироваться", borderColor: UIColor(hex: "#FF2D55")!, textColor: .black)
-            cell.actionButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
-            return cell
-        } else if indexPath.row == 1 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: ProfileButtonTableViewCell.reuseIdentifier, for: indexPath) as! ProfileButtonTableViewCell
-            cell.configure(title: "Войти", borderColor: UIColor(hex: "#32ADE6")!, textColor: .black)
-            cell.actionButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-            return cell
+        if AuthManager.shared.isAuthenticated {
+            return 9
         } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: ProfileTableViewCell.reuseIdentifier, for: indexPath) as! ProfileTableViewCell
-            switch indexPath.row {
-            case 2:
-                cell.configure(title: "Регион", detail: "Москва")
-            case 3:
-                cell.configure(title: "Избранные ВУЗы")
-            case 4:
-                cell.configure(title: "Избранные направления")
-            case 5:
-                cell.configure(title: "Избранные олимпиады")
-            case 6:
-                cell.configure(title: "Настройка уведомлений")
-            case 7:
-                cell.configure(title: "О нас")
-                cell.hideSeparator(true)
-            default:
-                break
-            }
-            return cell
+            return 5
         }
     }
     
-    // MARK: - UITableViewDelegate
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if !AuthManager.shared.isAuthenticated {
+            if indexPath.row == 0 {
+                let cell = ProfileButtonTableViewCell()
+                cell.configure(title: "Зарегистрироваться", borderColor: UIColor(hex: "#FF2D55")!, textColor: .black)
+                cell.actionButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
+                return cell
+            } else if indexPath.row == 1 {
+                let cell = ProfileButtonTableViewCell()
+                cell.configure(title: "Войти", borderColor: UIColor(hex: "#32ADE6")!, textColor: .black)
+                cell.actionButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+                return cell
+            } else {
+                let cell = ProfileTableViewCell()
+                switch indexPath.row {
+                case 2:
+                    cell.configure(title: "Регион", detail: "Москва")
+                case 3:
+                    cell.configure(title: "Тема приложения")
+                case 4:
+                    cell.configure(title: "О нас")
+                    cell.hideSeparator(true)
+                default:
+                    break
+                }
+                return cell
+            }
+        } else {
+            if indexPath.row <= 7 {
+                let cell = ProfileTableViewCell()
+                switch indexPath.row {
+                case 0:
+                    cell.configure(title: "Регион", detail: "Москва")
+                case 1:
+                    cell.configure(title: "Личные данные")
+                case 2:
+                    cell.configure(title: "Мои дипломы")
+                case 3:
+                    cell.configure(title: "Избранные ВУЗы")
+                case 4:
+                    cell.configure(title: "Избранные олимпиады")
+                case 5:
+                    cell.configure(title: "Настройка уведомлений")
+                case 6:
+                    cell.configure(title: "Тема приложения")
+                case 7:
+                    cell.configure(title: "О нас")
+                    cell.hideSeparator(true)
+                default:
+                    break
+                }
+                return cell
+            }
+            else {
+                let cell = ProfileButtonTableViewCell()
+                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55")!, textColor: .red)
+                cell.actionButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
+                return cell
+            }
+        }
+    }
+}
+
+// MARK: - UITableViewDelegate
+extension ProfileViewController : UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-    // MARK: - Actions
-    @objc private func registerButtonTapped() {
-        let enterEmailVC = EnterEmailViewController()
-        enterEmailVC.hidesBottomBarWhenPushed = true
-        
-        navigationController?.pushViewController(enterEmailVC, animated: true)
-    }
-    
-    @objc private func loginButtonTapped() {
-        print("Войти нажато")
-//        let searchVC = VerificateEmailViewController(email: "pankravvlad1@gmail.com")
-        let searchVC = PersonalDataAssembly.build(email: "test1@gmail.com")
-        navigationController?.pushViewController(searchVC, animated: true)
     }
 }
