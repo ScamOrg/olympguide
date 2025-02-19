@@ -38,11 +38,9 @@ fileprivate enum Constants {
 
 // MARK: - Custom Button
 class HasSecondNameButton: UIButton {
-    
     // MARK: - Subviews
-    
     private let cellTitleLabel: UILabel = UILabel()
-    
+
     private let iconImageView: UIImageView = UIImageView()
     
     
