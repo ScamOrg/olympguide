@@ -30,7 +30,7 @@ final class VerifyEmailWorker: VerifyEmailWorkerLogic {
     func verifyCode(code: String,
                     email: String,
                     completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void) {
-        let endpoint = "/auth/verify_code"
+        let endpoint = "/auth/verify-code"
         let body: [String: Any] = [
             "code": code,
             "email": email
@@ -52,7 +52,7 @@ final class VerifyEmailWorker: VerifyEmailWorkerLogic {
     }
     
     func resendCode(email: String, completion: @escaping (Result<BaseServerResponse, NetworkError>) -> Void) {
-        let endpoint = "/auth/send_code"
+        let endpoint = "/auth/send-code"
         let body: [String: Any] = ["email": email]
         
         networkService.request(
