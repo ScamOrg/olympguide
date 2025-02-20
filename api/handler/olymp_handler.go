@@ -21,7 +21,7 @@ func NewOlympHandler(olympService service.IOlympService) *OlympHandler {
 //
 // @Summary Получить список олимпиад
 // @Description Возвращает список олимпиад с фильтрацией по уровню, профилю и поисковому запросу. Также поддерживается сортировка.
-// @Tags olympiads
+// @Tags Олимпиады
 // @Accept json
 // @Produce json
 // @Param level query []string false "Фильтр по уровням (можно передавать несколько значений)" collectionFormat(multi)

@@ -33,7 +33,7 @@ func (h *FieldHandler) GetField(c *gin.Context) {
 //
 // @Summary Получение списка групп направлений подготовки
 // @Description Возвращает список групп направлений и их направлений с возможностью фильтрации по уровню образования и поиску.
-// @Tags Groups
+// @Tags Группы с направлениями
 // @Accept json
 // @Produce json
 // @Param degree query []string false "Уровень образования"
