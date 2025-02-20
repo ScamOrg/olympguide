@@ -366,9 +366,7 @@ extension PersonalDataViewController: RegionTextFieldDelegate {
     
     func regionTextFieldWillSelect(with optionsVC: OptionsViewController) {
         optionsVC.modalPresentationStyle = .overFullScreen
-        present(optionsVC, animated: false) {
-            optionsVC.animateShow()
-        }
+        present(optionsVC, animated: false)
     }
     
     func dissmissKeyboard() {
