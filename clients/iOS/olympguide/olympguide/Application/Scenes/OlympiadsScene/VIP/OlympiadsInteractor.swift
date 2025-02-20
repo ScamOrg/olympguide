@@ -10,12 +10,12 @@ final class OlympiadsInteractor: OlympiadsBusinessLogic, OlympiadsDataStore {
     var presenter: OlympiadsPresentationLogic?
     var worker: OlympiadsWorker = OlympiadsWorker()
     var olympiads: [OlympiadModel] = []
-
+    var params: Dictionary<String, Set<String>> = [:]
+    
     func loadOlympiads(_ request: Olympiads.Load.Request) {
+        params = request.params
         worker.fetchOlympiads(
-            levels: request.levels,
-            sort: request.sortOption?.rawValue,
-            search: request.searchQuery
+            with: params
         ) { [weak self] result in
             switch result {
             case .success(let olympiads):
