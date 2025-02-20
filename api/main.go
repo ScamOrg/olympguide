@@ -1,3 +1,13 @@
+// @title OlympGuide API
+// @version 1.0
+// @description Это API для продажи олимпгайда за 30 лямов
+// @contact.name Support Team
+// @contact.email olympguide@mail.ru
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+// @host localhost:8080
+// @BasePath /api/v1
+
 package main
 
 import (

@@ -1,0 +1,113 @@
+basePath: /api/v1
+definitions:
+  dto.OlympiadShortResponse:
+    properties:
+      level:
+        description: Уровень олимпиады
+        example: 1
+        type: integer
+      like:
+        description: Лайкнута ли олимпиада пользователем
+        example: true
+        type: boolean
+      name:
+        description: Название олимпиады
+        example: Олимпиада по математике
+        type: string
+      olympiad_id:
+        description: ID олимпиады
+        example: 123
+        type: integer
+      profile:
+        description: Профиль олимпиады
+        example: math
+        type: string
+    type: object
+  errs.AppError:
+    description: Структура ошибки, возвращаемая API в случае неудачного запроса.
+    properties:
+      code:
+        description: HTTP-код ошибки
+        example: 400
+        type: integer
+      details:
+        additionalProperties: true
+        description: Дополнительные сведения об ошибке (если есть)
+        type: object
+      message:
+        description: Сообщение об ошибке
+        example: Invalid request data
+        type: string
+      type:
+        description: Тип ошибки
+        example: InvalidRequest
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: olympguide@mail.ru
+    name: Support Team
+  description: Это API для продажи олимпгайда за 30 лямов
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: OlympGuide API
+  version: "1.0"
+paths:
+  /olympiads:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список олимпиад с фильтрацией по уровню, профилю и поисковому
+        запросу. Также поддерживается сортировка.
+      parameters:
+      - collectionFormat: multi
+        description: Фильтр по уровням (можно передавать несколько значений)
+        in: query
+        items:
+          type: string
+        name: level
+        type: array
+      - collectionFormat: multi
+        description: Фильтр по профилям (можно передавать несколько значений)
+        in: query
+        items:
+          type: string
+        name: profile
+        type: array
+      - description: Поисковый запрос по названию олимпиады
+        in: query
+        name: search
+        type: string
+      - description: Поле для сортировки (level, profile, name). По умолчанию сортируется
+          по убыванию популярности
+        in: query
+        name: sort
+        type: string
+      - description: Порядок сортировки (asc, desc). По умолчанию asc, если указан
+          `sort`
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список олимпиад
+          schema:
+            items:
+              $ref: '#/definitions/dto.OlympiadShortResponse'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получить список олимпиад
+      tags:
+      - olympiads
+swagger: "2.0"
