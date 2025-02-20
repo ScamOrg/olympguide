@@ -16,23 +16,21 @@ class OlympiadsWorker {
     }
 
     func fetchOlympiads(
-        levels: [Int]?,
-        sort: String?,
-        search: String?,
+        with params: Dictionary<String, Set<String>>,
         completion: @escaping (Result<[OlympiadModel], Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
-        if let levels = levels {
-            for level in levels {
-                queryItems.append(URLQueryItem(name: "level", value: "\(level)"))
-            }
-        }
-        if let sort = sort {
-            queryItems.append(URLQueryItem(name: "sort", value: sort))
-        }
-        if let search = search {
-            queryItems.append(URLQueryItem(name: "search", value: search))
-        }
+//        if let levels = levels {
+//            for level in levels {
+//                queryItems.append(URLQueryItem(name: "level", value: "\(level)"))
+//            }
+//        }
+//        if let sort = sort {
+//            queryItems.append(URLQueryItem(name: "sort", value: sort))
+//        }
+//        if let search = search {
+//            queryItems.append(URLQueryItem(name: "search", value: search))
+//        }
         
         networkService.request(
             endpoint: "/olympiads",
