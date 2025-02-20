@@ -119,12 +119,12 @@ info:
   title: OlympGuide API
   version: "1.0"
 paths:
-  /groups:
+  /fields:
     get:
       consumes:
       - application/json
-      description: Возвращает список групп направлений и их направлений с возможностью
-        фильтрации по уровню образования и поиску.
+      description: Возвращает список групп и их направлений с возможностью фильтрации
+        по уровню образования и поиску.
       parameters:
       - collectionFormat: csv
         description: Уровень образования
@@ -154,9 +154,9 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/errs.AppError'
-      summary: Получение списка групп направлений подготовки
+      summary: Получение всех направлений подготовки
       tags:
-      - Groups
+      - Группы с направлениями
   /olympiads:
     get:
       consumes:
@@ -209,9 +209,9 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/errs.AppError'
-      summary: Получить список олимпиад
+      summary: Получение список олимпиад
       tags:
-      - olympiads
+      - Олимпиады
   /universities:
     get:
       consumes:

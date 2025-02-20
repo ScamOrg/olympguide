@@ -22,9 +22,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/groups": {
+        "/fields": {
             "get": {
-                "description": "Возвращает список групп направлений и их направлений с возможностью фильтрации по уровню образования и поиску.",
+                "description": "Возвращает список групп и их направлений с возможностью фильтрации по уровню образования и поиску.",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,9 +32,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Groups"
+                    "Группы с направлениями"
                 ],
-                "summary": "Получение списка групп направлений подготовки",
+                "summary": "Получение всех направлений подготовки",
                 "parameters": [
                     {
                         "type": "array",
@@ -88,9 +88,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "olympiads"
+                    "Олимпиады"
                 ],
-                "summary": "Получить список олимпиад",
+                "summary": "Получение список олимпиад",
                 "parameters": [
                     {
                         "type": "array",

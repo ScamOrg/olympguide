@@ -19,7 +19,7 @@ func NewOlympHandler(olympService service.IOlympService) *OlympHandler {
 
 // GetOlympiads возвращает список олимпиад с возможностью фильтрации и сортировки.
 //
-// @Summary Получить список олимпиад
+// @Summary Получение список олимпиад
 // @Description Возвращает список олимпиад с фильтрацией по уровню, профилю и поисковому запросу. Также поддерживается сортировка.
 // @Tags Олимпиады
 // @Accept json
