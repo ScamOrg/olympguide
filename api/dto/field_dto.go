@@ -15,7 +15,7 @@ type FieldShortInfo struct {
 // @Description Группа направлений подготовки с их параметрами.
 type GroupResponse struct {
 	Name   string           `json:"name" example:"Математические науки"` // Название группы
-	Code   string           `json:"code" example:"01"`                   // Код группы
+	Code   string           `json:"code" example:"01.00.00"`             // Код группы
 	Fields []FieldShortInfo `json:"fields"`                              // Список направлений в группе
 }
 

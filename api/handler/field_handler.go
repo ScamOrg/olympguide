@@ -36,8 +36,8 @@ func (h *FieldHandler) GetField(c *gin.Context) {
 // @Tags Groups
 // @Accept json
 // @Produce json
-// @Param degree query []string false "Уровень образования" example(Бакалавриат, Магистратура)
-// @Param search query string false "Поиск по названию или коду (например, 'Математика' или '01.03.04')" example(Математика)
+// @Param degree query []string false "Уровень образования"
+// @Param search query string false "Поиск по названию или коду (например, 'Математика' или '01.03.04')"
 // @Success 200 {array} dto.GroupResponse "Список групп и их направлений"
 // @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
 // @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"

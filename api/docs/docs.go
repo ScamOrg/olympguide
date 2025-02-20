@@ -42,14 +42,12 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "example": "Бакалавриат, Магистратура",
                         "description": "Уровень образования",
                         "name": "degree",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "example": "Математика",
                         "description": "Поиск по названию или коду (например, 'Математика' или '01.03.04')",
                         "name": "search",
                         "in": "query"
@@ -184,14 +182,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "example": true,
                         "description": "Фильтр: только университеты из региона пользователя",
                         "name": "from_my_region",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "example": "\"МГУ\"",
                         "description": "Поиск по названию или сокращенному названию",
                         "name": "search",
                         "in": "query"
@@ -257,7 +253,7 @@ const docTemplate = `{
                 "code": {
                     "description": "Код группы",
                     "type": "string",
-                    "example": "01"
+                    "example": "01.00.00"
                 },
                 "fields": {
                     "description": "Список направлений в группе",

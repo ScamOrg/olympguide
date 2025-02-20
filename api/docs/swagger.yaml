@@ -25,7 +25,7 @@ definitions:
     properties:
       code:
         description: Код группы
-        example: "01"
+        example: 01.00.00
         type: string
       fields:
         description: Список направлений в группе
@@ -128,14 +128,12 @@ paths:
       parameters:
       - collectionFormat: csv
         description: Уровень образования
-        example: Бакалавриат, Магистратура
         in: query
         items:
           type: string
         name: degree
         type: array
       - description: Поиск по названию или коду (например, 'Математика' или '01.03.04')
-        example: Математика
         in: query
         name: search
         type: string
@@ -229,12 +227,10 @@ paths:
         name: region_id
         type: array
       - description: 'Фильтр: только университеты из региона пользователя'
-        example: true
         in: query
         name: from_my_region
         type: boolean
       - description: Поиск по названию или сокращенному названию
-        example: '"МГУ"'
         in: query
         name: search
         type: string

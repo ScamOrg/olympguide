@@ -38,8 +38,8 @@ func (u *UniverHandler) GetUniver(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param region_id query []string false "Фильтр по ID регионов" collectionFormat(multi)
-// @Param from_my_region query bool false "Фильтр: только университеты из региона пользователя" example(true)
-// @Param search query string false "Поиск по названию или сокращенному названию" example("МГУ")
+// @Param from_my_region query boolean false "Фильтр: только университеты из региона пользователя"
+// @Param search query string false "Поиск по названию или сокращенному названию"
 // @Success 200 {array} dto.UniversityShortResponse "Список университетов"
 // @Failure 400 {object} errs.AppError "Некорректный запрос"
 // @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
