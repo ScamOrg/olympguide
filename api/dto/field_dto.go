@@ -1,15 +1,22 @@
 package dto
 
+// FieldShortInfo содержит краткую информацию о направлении подготовки.
+//
+// @Description Краткая информация о направлении подготовки.
 type FieldShortInfo struct {
-	FieldID uint   `json:"field_id"`
-	Name    string `json:"name"`
-	Code    string `json:"code"`
-	Degree  string `json:"degree"`
+	FieldID uint   `json:"field_id" example:"1"`         // ID направления подготовки
+	Name    string `json:"name" example:"Математика"`    // Название направления
+	Code    string `json:"code" example:"01.03.01"`      // Код направления
+	Degree  string `json:"degree" example:"Бакалавриат"` // Уровень образования
 }
+
+// GroupResponse представляет ответ с группами направлений.
+//
+// @Description Группа направлений подготовки с их параметрами.
 type GroupResponse struct {
-	Name   string           `json:"name"`
-	Code   string           `json:"code"`
-	Fields []FieldShortInfo `json:"field"`
+	Name   string           `json:"name" example:"Математические науки"` // Название группы
+	Code   string           `json:"code" example:"01"`                   // Код группы
+	Fields []FieldShortInfo `json:"fields"`                              // Список направлений в группе
 }
 
 type GroupShortInfo struct {
@@ -25,9 +32,12 @@ type FieldResponse struct {
 	Group   GroupShortInfo `json:"group"`
 }
 
+// GroupQueryParams содержит параметры запроса для фильтрации групп.
+//
+// @Description Параметры запроса для поиска и фильтрации групп направлений подготовки.
 type GroupQueryParams struct {
-	Degrees []string `form:"degree"`
-	Search  string   `form:"search"`
+	Degrees []string `form:"degree" example:"Бакалавриат"` // Уровень образования
+	Search  string   `form:"search" example:"Математика"`  // Поиск по названию или коду
 }
 
 type GroupProgramTree struct {

@@ -18,6 +18,8 @@ type AppError struct {
 	Details map[string]interface{} `json:"details,omitempty"`                      // Дополнительные сведения об ошибке (если есть)
 }
 
+// @Schema (example={"code": 400, "type": "InvalidRequest", "message": "Invalid request data", "details": {"ttl": 3}})
+
 var (
 	InternalServerError = AppError{500, "InternalServerError", "Internal server error", nil}
 	Unauthorized        = AppError{401, "Unauthorized", "Unauthorized", nil}

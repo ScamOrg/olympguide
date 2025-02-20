@@ -52,8 +52,8 @@ func (rt *Router) setupRoutes() {
 	rt.engine.Use(rt.mw.SessionMiddleware())
 	rt.engine.Use(rt.mw.ValidateID())
 
-	rt.api.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	rt.api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	rt.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	rt.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	rt.setupAuthRoutes()
 	rt.setupUniverRoutes()

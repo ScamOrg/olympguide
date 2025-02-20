@@ -22,6 +22,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/groups": {
+            "get": {
+                "description": "Возвращает список групп направлений и их направлений с возможностью фильтрации по уровню образования и поиску.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Получение списка групп направлений подготовки",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "example": "Бакалавриат, Магистратура",
+                        "description": "Уровень образования",
+                        "name": "degree",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Математика",
+                        "description": "Поиск по названию или коду (например, 'Математика' или '01.03.04')",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список групп и их направлений",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.GroupResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные параметры запроса",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/olympiads": {
             "get": {
                 "description": "Возвращает список олимпиад с фильтрацией по уровню, профилю и поисковому запросу. Также поддерживается сортировка.",
@@ -99,9 +157,122 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/universities": {
+            "get": {
+                "description": "Возвращает список университетов с учетом фильтров поиска и сортировкой по убыванию популярности.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Университеты"
+                ],
+                "summary": "Получение списка университетов",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Фильтр по ID регионов",
+                        "name": "region_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Фильтр: только университеты из региона пользователя",
+                        "name": "from_my_region",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"МГУ\"",
+                        "description": "Поиск по названию или сокращенному названию",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список университетов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UniversityShortResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dto.FieldShortInfo": {
+            "description": "Краткая информация о направлении подготовки.",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Код направления",
+                    "type": "string",
+                    "example": "01.03.01"
+                },
+                "degree": {
+                    "description": "Уровень образования",
+                    "type": "string",
+                    "example": "Бакалавриат"
+                },
+                "field_id": {
+                    "description": "ID направления подготовки",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "description": "Название направления",
+                    "type": "string",
+                    "example": "Математика"
+                }
+            }
+        },
+        "dto.GroupResponse": {
+            "description": "Группа направлений подготовки с их параметрами.",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Код группы",
+                    "type": "string",
+                    "example": "01"
+                },
+                "fields": {
+                    "description": "Список направлений в группе",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.FieldShortInfo"
+                    }
+                },
+                "name": {
+                    "description": "Название группы",
+                    "type": "string",
+                    "example": "Математические науки"
+                }
+            }
+        },
         "dto.OlympiadShortResponse": {
             "type": "object",
             "properties": {
@@ -118,7 +289,7 @@ const docTemplate = `{
                 "name": {
                     "description": "Название олимпиады",
                     "type": "string",
-                    "example": "Олимпиада по математике"
+                    "example": "Олимпиада Росатом по математике"
                 },
                 "olympiad_id": {
                     "description": "ID олимпиады",
@@ -128,7 +299,43 @@ const docTemplate = `{
                 "profile": {
                     "description": "Профиль олимпиады",
                     "type": "string",
-                    "example": "math"
+                    "example": "физика"
+                }
+            }
+        },
+        "dto.UniversityShortResponse": {
+            "description": "Ответ API с краткими сведениями об университете.",
+            "type": "object",
+            "properties": {
+                "like": {
+                    "description": "Лайкнут ли университет пользователем",
+                    "type": "boolean",
+                    "example": true
+                },
+                "logo": {
+                    "description": "URL логотипа",
+                    "type": "string",
+                    "example": "https://example.com/logo.png"
+                },
+                "name": {
+                    "description": "Полное название",
+                    "type": "string",
+                    "example": "Московский государственный университет"
+                },
+                "region": {
+                    "description": "Название региона",
+                    "type": "string",
+                    "example": "Москва"
+                },
+                "short_name": {
+                    "description": "Краткое название",
+                    "type": "string",
+                    "example": "МГУ"
+                },
+                "university_id": {
+                    "description": "ID университета",
+                    "type": "integer",
+                    "example": 123
                 }
             }
         },
