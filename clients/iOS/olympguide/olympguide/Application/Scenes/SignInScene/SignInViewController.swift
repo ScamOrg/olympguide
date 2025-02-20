@@ -15,7 +15,7 @@ final class SignInViewController: UIViewController, SignInValidationErrorDisplay
     
     // MARK: - UI
     let emailTextField: HighlightableField = CustomInputDataField(with: "email")
-    let passwordTextField: HighlightableField = CustomPasswordField(with: "password")
+    let passwordTextField: HighlightableField = CustomPasswordField(with: "пароль")
     
     private let nextButton: UIButton = UIButton(type: .system)
     private var nextButtonBottomConstraint: NSLayoutConstraint!
