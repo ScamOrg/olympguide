@@ -258,20 +258,8 @@ extension FieldsViewController: FilterSortViewDelegate {
     }
     
     func filterSortView(_ view: FilterSortView,
-                        didTapFilterWithTitle title: String) {
-        switch title {
-        case "Формат обучения":
-            let items = ["Бакалавриат", "Специалитет"]
-            let sheetVC = OptionsViewController(items: items,
-                                                title: title,
-                                                isMultipleChoice: true)
-            sheetVC.modalPresentationStyle = .overFullScreen
-            present(sheetVC, animated: false) {
-                sheetVC.animateShow()
-            }
-        default:
-            break
-        }
+                        didTapFilterWith title: String) {
+       
     }
 }
 
