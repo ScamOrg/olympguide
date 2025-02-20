@@ -106,7 +106,7 @@ func (r *PgOlympRepo) Exists(olympiadID uint) bool {
 	return count > 0
 }
 
-func applyOlympFilters(query *gorm.DB, levels, profiles []string, search string) *gorm.DB {
+func applyOlympFilters(query *gorm.DB, levels []uint, profiles []string, search string) *gorm.DB {
 	if len(levels) > 0 {
 		query = query.Where("level IN (?)", levels)
 	}

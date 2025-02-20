@@ -8,12 +8,17 @@ import (
 	"log"
 )
 
+// AppError представляет стандартную структуру ошибки API.
+//
+// @Description Структура ошибки, возвращаемая API в случае неудачного запроса.
 type AppError struct {
-	Code    int
-	Type    string
-	Message string
-	Details map[string]interface{}
+	Code    int                    `json:"code" example:"400"`                     // HTTP-код ошибки
+	Type    string                 `json:"type" example:"InvalidRequest"`          // Тип ошибки
+	Message string                 `json:"message" example:"Invalid request data"` // Сообщение об ошибке
+	Details map[string]interface{} `json:"details,omitempty"`                      // Дополнительные сведения об ошибке (если есть)
 }
+
+// @Schema (example={"code": 400, "type": "InvalidRequest", "message": "Invalid request data", "details": {"ttl": 3}})
 
 var (
 	InternalServerError = AppError{500, "InternalServerError", "Internal server error", nil}

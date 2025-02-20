@@ -30,6 +30,20 @@ func (u *UniverHandler) GetUniver(c *gin.Context) {
 	c.JSON(http.StatusOK, university)
 }
 
+// GetUnivers обрабатывает запрос на получение списка университетов.
+//
+// @Summary Получение списка университетов
+// @Description Возвращает список университетов с учетом фильтров поиска и сортировкой по убыванию популярности.
+// @Tags Университеты
+// @Accept json
+// @Produce json
+// @Param region_id query []string false "Фильтр по ID регионов" collectionFormat(multi)
+// @Param from_my_region query boolean false "Фильтр: только университеты из региона пользователя"
+// @Param search query string false "Поиск по названию или сокращенному названию"
+// @Success 200 {array} dto.UniversityShortResponse "Список университетов"
+// @Failure 400 {object} errs.AppError "Некорректный запрос"
+// @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
+// @Router /universities [get]
 func (u *UniverHandler) GetUnivers(c *gin.Context) {
 	var queryParams dto.UniversityQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {

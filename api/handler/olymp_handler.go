@@ -17,6 +17,22 @@ func NewOlympHandler(olympService service.IOlympService) *OlympHandler {
 	return &OlympHandler{olympService: olympService}
 }
 
+// GetOlympiads возвращает список олимпиад с возможностью фильтрации и сортировки.
+//
+// @Summary Получение список олимпиад
+// @Description Возвращает список олимпиад с фильтрацией по уровню, профилю и поисковому запросу. Также поддерживается сортировка.
+// @Tags Олимпиады
+// @Accept json
+// @Produce json
+// @Param level query []string false "Фильтр по уровням (можно передавать несколько значений)" collectionFormat(multi)
+// @Param profile query []string false "Фильтр по профилям (можно передавать несколько значений)" collectionFormat(multi)
+// @Param search query string false "Поисковый запрос по названию олимпиады"
+// @Param sort query string false "Поле для сортировки (level, profile, name). По умолчанию сортируется по убыванию популярности"
+// @Param order query string false "Порядок сортировки (asc, desc). По умолчанию asc, если указан `sort`"
+// @Success 200 {array} dto.OlympiadShortResponse "Список олимпиад"
+// @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
+// @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
+// @Router /olympiads [get]
 func (o *OlympHandler) GetOlympiads(c *gin.Context) {
 	var queryParams dto.OlympQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {

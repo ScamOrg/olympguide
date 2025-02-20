@@ -1,6 +1,7 @@
 package router
 
 import (
+	_ "api/docs"
 	"api/handler"
 	"api/middleware"
 	"api/utils/role"
@@ -8,28 +9,36 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 )
 
 type Router struct {
 	engine   *gin.Engine
+	api      *gin.RouterGroup
 	handlers *handler.Handlers
 	mw       *middleware.Mw
 	store    sessions.Store
 }
 
 func NewRouter(handlers *handler.Handlers, mw *middleware.Mw, store sessions.Store) *Router {
-	return &Router{
-		engine:   gin.Default(),
+	engine := gin.Default()
+	apiGroup := engine.Group("/api/v1")
+
+	router := &Router{
+		engine:   engine,
+		api:      apiGroup,
 		handlers: handlers,
 		mw:       mw,
 		store:    store,
 	}
+
+	router.setupRoutes()
+	return router
 }
 
 func (rt *Router) Run(port int) {
-	rt.setupRoutes()
-
 	serverAddress := fmt.Sprintf(":%d", port)
 	log.Printf("Server listening on %s", serverAddress)
 	if err := rt.engine.Run(serverAddress); err != nil {
@@ -44,6 +53,7 @@ func (rt *Router) setupRoutes() {
 	rt.engine.Use(rt.mw.ValidateID())
 
 	rt.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	rt.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	rt.setupAuthRoutes()
 	rt.setupUniverRoutes()
@@ -58,7 +68,7 @@ func (rt *Router) setupRoutes() {
 }
 
 func (rt *Router) setupAuthRoutes() {
-	authGroup := rt.engine.Group("/auth")
+	authGroup := rt.api.Group("/auth")
 	authGroup.POST("/send-code", rt.handlers.Auth.SendCode)
 	authGroup.POST("/verify-code", rt.handlers.Auth.VerifyCode)
 	authGroup.POST("/sign-up", rt.handlers.Auth.SignUp)
@@ -68,8 +78,8 @@ func (rt *Router) setupAuthRoutes() {
 }
 
 func (rt *Router) setupUniverRoutes() {
-	rt.engine.GET("/universities", rt.handlers.Univer.GetUnivers)
-	university := rt.engine.Group("/university")
+	rt.api.GET("/universities", rt.handlers.Univer.GetUnivers)
+	university := rt.api.Group("/university")
 	{
 		university.POST("/", rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService), rt.handlers.Univer.NewUniver)
 
@@ -91,13 +101,13 @@ func (rt *Router) setupUniverRoutes() {
 }
 
 func (rt *Router) setupFieldRoutes() {
-	rt.engine.GET("/fields", rt.handlers.Field.GetGroups)
-	rt.engine.GET("/field/:id", rt.handlers.Field.GetField)
+	rt.api.GET("/fields", rt.handlers.Field.GetGroups)
+	rt.api.GET("/field/:id", rt.handlers.Field.GetField)
 }
 
 func (rt *Router) setupOlympRoutes() {
-	rt.engine.GET("/olympiads", rt.handlers.Olymp.GetOlympiads)
-	olympiad := rt.engine.Group("/olympiad")
+	rt.api.GET("/olympiads", rt.handlers.Olymp.GetOlympiads)
+	olympiad := rt.api.Group("/olympiad")
 	olympiadWithID := olympiad.Group("/:id")
 	{
 		olympiadWithID.GET("/", rt.handlers.Olymp.GetOlympiad)
@@ -106,7 +116,7 @@ func (rt *Router) setupOlympRoutes() {
 }
 
 func (rt *Router) setupUserRoutes() {
-	user := rt.engine.Group("/user", rt.mw.UserMiddleware())
+	user := rt.api.Group("/user", rt.mw.UserMiddleware())
 	{
 		user.GET("/data", rt.handlers.User.GetUserData)
 		diplomas := user.Group("/diplomas")
@@ -138,7 +148,7 @@ func (rt *Router) setupUserRoutes() {
 }
 
 func (rt *Router) setupMetaRoutes() {
-	meta := rt.engine.Group("/meta")
+	meta := rt.api.Group("/meta")
 	meta.GET("/regions", rt.handlers.Meta.GetRegions)
 	meta.GET("/university-regions", rt.handlers.Meta.GetUniversityRegions)
 	meta.GET("/olympiad-profiles", rt.handlers.Meta.GetOlympiadProfiles)
@@ -146,7 +156,7 @@ func (rt *Router) setupMetaRoutes() {
 }
 
 func (rt *Router) setupFacultyRoutes() {
-	faculty := rt.engine.Group("/faculty")
+	faculty := rt.api.Group("/faculty")
 	faculty.Use(rt.mw.RolesMiddleware(role.Founder, role.Admin, role.DataLoaderService))
 	{
 		faculty.POST("/", rt.handlers.Faculty.NewFaculty)
@@ -161,7 +171,7 @@ func (rt *Router) setupFacultyRoutes() {
 }
 
 func (rt *Router) setupProgramRoutes() {
-	program := rt.engine.Group("/program")
+	program := rt.api.Group("/program")
 	program.POST("/", rt.handlers.Program.NewProgram)
 	programWithID := program.Group("/:id")
 	{
@@ -171,12 +181,12 @@ func (rt *Router) setupProgramRoutes() {
 }
 
 func (rt *Router) setupBenefitRoutes() {
-	benefit := rt.engine.Group("/benefit")
+	benefit := rt.api.Group("/benefit")
 	benefit.Use(rt.mw.RolesMiddleware(role.DataLoaderService, role.Admin, role.Founder))
 	benefit.POST("/", rt.handlers.Benefit.NewBenefit)
 	benefit.DELETE("/:id", rt.handlers.Benefit.DeleteBenefit)
 }
 
 func (rt *Router) setupServiceDiplomaRoutes() {
-	rt.engine.POST("/service/diploma", rt.mw.RolesMiddleware(role.DataLoaderService), rt.handlers.Diploma.NewDiplomaByService)
+	rt.api.POST("/service/diploma", rt.mw.RolesMiddleware(role.DataLoaderService), rt.handlers.Diploma.NewDiplomaByService)
 }

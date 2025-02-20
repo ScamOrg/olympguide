@@ -1,0 +1,257 @@
+basePath: /api/v1
+definitions:
+  dto.FieldShortInfo:
+    description: Краткая информация о направлении подготовки.
+    properties:
+      code:
+        description: Код направления
+        example: 01.03.01
+        type: string
+      degree:
+        description: Уровень образования
+        example: Бакалавриат
+        type: string
+      field_id:
+        description: ID направления подготовки
+        example: 1
+        type: integer
+      name:
+        description: Название направления
+        example: Математика
+        type: string
+    type: object
+  dto.GroupResponse:
+    description: Группа направлений подготовки с их параметрами.
+    properties:
+      code:
+        description: Код группы
+        example: 01.00.00
+        type: string
+      fields:
+        description: Список направлений в группе
+        items:
+          $ref: '#/definitions/dto.FieldShortInfo'
+        type: array
+      name:
+        description: Название группы
+        example: Математические науки
+        type: string
+    type: object
+  dto.OlympiadShortResponse:
+    properties:
+      level:
+        description: Уровень олимпиады
+        example: 1
+        type: integer
+      like:
+        description: Лайкнута ли олимпиада пользователем
+        example: true
+        type: boolean
+      name:
+        description: Название олимпиады
+        example: Олимпиада Росатом по математике
+        type: string
+      olympiad_id:
+        description: ID олимпиады
+        example: 123
+        type: integer
+      profile:
+        description: Профиль олимпиады
+        example: физика
+        type: string
+    type: object
+  dto.UniversityShortResponse:
+    description: Ответ API с краткими сведениями об университете.
+    properties:
+      like:
+        description: Лайкнут ли университет пользователем
+        example: true
+        type: boolean
+      logo:
+        description: URL логотипа
+        example: https://example.com/logo.png
+        type: string
+      name:
+        description: Полное название
+        example: Московский государственный университет
+        type: string
+      region:
+        description: Название региона
+        example: Москва
+        type: string
+      short_name:
+        description: Краткое название
+        example: МГУ
+        type: string
+      university_id:
+        description: ID университета
+        example: 123
+        type: integer
+    type: object
+  errs.AppError:
+    description: Структура ошибки, возвращаемая API в случае неудачного запроса.
+    properties:
+      code:
+        description: HTTP-код ошибки
+        example: 400
+        type: integer
+      details:
+        additionalProperties: true
+        description: Дополнительные сведения об ошибке (если есть)
+        type: object
+      message:
+        description: Сообщение об ошибке
+        example: Invalid request data
+        type: string
+      type:
+        description: Тип ошибки
+        example: InvalidRequest
+        type: string
+    type: object
+info:
+  contact:
+    email: olympguide@mail.ru
+    name: Support Team
+  description: Это API для продажи олимпгайда за 30 лямов
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: OlympGuide API
+  version: "1.0"
+paths:
+  /fields:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список групп и их направлений с возможностью фильтрации
+        по уровню образования и поиску.
+      parameters:
+      - collectionFormat: csv
+        description: Уровень образования
+        in: query
+        items:
+          type: string
+        name: degree
+        type: array
+      - description: Поиск по названию или коду (например, 'Математика' или '01.03.04')
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список групп и их направлений
+          schema:
+            items:
+              $ref: '#/definitions/dto.GroupResponse'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получение всех направлений подготовки
+      tags:
+      - Группы с направлениями
+  /olympiads:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список олимпиад с фильтрацией по уровню, профилю и поисковому
+        запросу. Также поддерживается сортировка.
+      parameters:
+      - collectionFormat: multi
+        description: Фильтр по уровням (можно передавать несколько значений)
+        in: query
+        items:
+          type: string
+        name: level
+        type: array
+      - collectionFormat: multi
+        description: Фильтр по профилям (можно передавать несколько значений)
+        in: query
+        items:
+          type: string
+        name: profile
+        type: array
+      - description: Поисковый запрос по названию олимпиады
+        in: query
+        name: search
+        type: string
+      - description: Поле для сортировки (level, profile, name). По умолчанию сортируется
+          по убыванию популярности
+        in: query
+        name: sort
+        type: string
+      - description: Порядок сортировки (asc, desc). По умолчанию asc, если указан
+          `sort`
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список олимпиад
+          schema:
+            items:
+              $ref: '#/definitions/dto.OlympiadShortResponse'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получение список олимпиад
+      tags:
+      - Олимпиады
+  /universities:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список университетов с учетом фильтров поиска и сортировкой
+        по убыванию популярности.
+      parameters:
+      - collectionFormat: multi
+        description: Фильтр по ID регионов
+        in: query
+        items:
+          type: string
+        name: region_id
+        type: array
+      - description: 'Фильтр: только университеты из региона пользователя'
+        in: query
+        name: from_my_region
+        type: boolean
+      - description: Поиск по названию или сокращенному названию
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список университетов
+          schema:
+            items:
+              $ref: '#/definitions/dto.UniversityShortResponse'
+            type: array
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получение списка университетов
+      tags:
+      - Университеты
+swagger: "2.0"

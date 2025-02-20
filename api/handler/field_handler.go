@@ -29,6 +29,19 @@ func (h *FieldHandler) GetField(c *gin.Context) {
 	c.JSON(http.StatusOK, field)
 }
 
+// GetGroups обрабатывает запрос на получение списка групп направлений и их направлений.
+//
+// @Summary Получение всех направлений подготовки
+// @Description Возвращает список групп и их направлений с возможностью фильтрации по уровню образования и поиску.
+// @Tags Группы с направлениями
+// @Accept json
+// @Produce json
+// @Param degree query []string false "Уровень образования"
+// @Param search query string false "Поиск по названию или коду (например, 'Математика' или '01.03.04')"
+// @Success 200 {array} dto.GroupResponse "Список групп и их направлений"
+// @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
+// @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
+// @Router /fields [get]
 func (h *FieldHandler) GetGroups(c *gin.Context) {
 	var queryParams dto.GroupQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {
