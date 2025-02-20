@@ -45,15 +45,25 @@ protocol ScrolledButtonProtocol {
     var isSelectedItem: Bool { get set }
 }
 
+
+protocol FilterSortButtonDelegate: AnyObject {
+    func filterSortButtonDidSelect(_ button: FilterButton, with view: OptionsViewController)
+}
+
 class FilterButton: UIButton, ScrolledButtonProtocol {
     
     // MARK: - Variables
     private var titleLabelCustom: UILabel = UILabel()
     let arrowImageView: UIImageView = UIImageView()
+    weak var delegate: FilterSortButtonDelegate?
     
     var filterTitle: String {
         return titleLabelCustom.text ?? ""
     }
+    var selectedIndecies: Set<Int> = []
+    private var endPoint: String = ""
+    private var count: Int = 0
+    private var isMultipleChoice: Bool = false
     
     private var _isSelectedItem = false
     var isSelectedItem: Bool {
@@ -65,18 +75,35 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
             } else {
                 configureDefault()
             }
-            // При смене состояния обновляем размеры кнопки, если они зависят от intrinsicContentSize
             self.invalidateIntrinsicContentSize()
         }
     }
     
     // MARK: - Lifecycle
-    init(title: String) {
+    init(
+        title: String
+    ) {
         super.init(frame: .zero)
         self.titleLabelCustom.text = title
         isUserInteractionEnabled = true
         configureUI()
     }
+    
+    init(
+        title: String,
+        endpoint: String,
+        count: Int,
+        isMultipleChoice: Bool = false
+    ) {
+        self.isMultipleChoice = isMultipleChoice
+        self.count = count
+        self.endPoint = endpoint
+        super.init(frame: .zero)
+        self.titleLabelCustom.text = title
+        isUserInteractionEnabled = true
+        configureUI()
+    }
+
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
@@ -149,6 +176,7 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         // Используем Regular шрифт в состоянии по умолчанию
         titleLabelCustom.font = Constants.Fonts.defaultTitleFont
         titleLabelCustom.textColor = Constants.Colors.defaultTitleTextColor
+        addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     private func configureSelected() {
@@ -159,4 +187,25 @@ class FilterButton: UIButton, ScrolledButtonProtocol {
         titleLabelCustom.font = Constants.Fonts.selectedTitleFont
         titleLabelCustom.textColor = Constants.Colors.selectedTitleTextColor
     }
+    
+    @objc func buttonTapped() {
+        let optionVC = OptionsViewController(
+            title: filterTitle,
+            isMultipleChoice: isMultipleChoice,
+            selectedIndices: selectedIndecies,
+            count: count,
+            endPoint: endPoint
+        )
+        optionVC.delegate = self
+    }
 }
+
+extension FilterButton : OptionsViewControllerDelegate {
+    func didSelectOption(_ optionsIndicies: Set<Int>, _ optionsNames: [Options.FetchOptions.ViewModel.OptionViewModel]) {
+        selectedIndecies = optionsIndicies
+//        delegate
+    }
+    
+    func didCancle() { }
+}
+
