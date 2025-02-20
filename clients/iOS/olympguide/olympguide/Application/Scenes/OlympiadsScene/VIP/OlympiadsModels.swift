@@ -11,10 +11,7 @@ enum Olympiads {
     // MARK: - Use Cases
     enum Load {
         struct Request {
-            let sortOption: SortOption?
-            let searchQuery: String?
-            let levels: [Int]?
-            let profiles: [String]?
+            let params: Dictionary<String, Set<String>>
         }
         
         struct Response {
