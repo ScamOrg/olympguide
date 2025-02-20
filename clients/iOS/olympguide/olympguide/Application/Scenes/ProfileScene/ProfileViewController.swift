@@ -168,7 +168,7 @@ extension ProfileViewController : UITableViewDataSource {
             }
             else {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55")!, textColor: .red)
+                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55")!, textColor: .black)
                 cell.actionButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
                 return cell
             }
