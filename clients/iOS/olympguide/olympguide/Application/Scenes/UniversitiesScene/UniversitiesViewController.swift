@@ -200,30 +200,9 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
 extension UniversitiesViewController: FilterSortViewDelegate {
     
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-        let items = ["По возрастанию", "По убыванию"]
-        let sheetVC = OptionsViewController(items: items,
-                                            title: "Сортировка",
-                                            isMultipleChoice: false)
-        sheetVC.modalPresentationStyle = .overFullScreen
-        present(sheetVC, animated: false) {
-            sheetVC.animateShow()
-        }
     }
     
-    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
-        switch title {
-        case "Регион":
-            let items = ["Москва", "Санкт-Петербург", "Долгопрудный"]
-            let sheetVC = OptionsViewController(items: items,
-                                                title: "Регион",
-                                                isMultipleChoice: true)
-            sheetVC.modalPresentationStyle = .overFullScreen
-            present(sheetVC, animated: false) {
-                sheetVC.animateShow()
-            }
-        default:
-            break
-        }
+    func filterSortView(_ view: FilterSortView, didTapFilterWith title: String) {
     }
 }
 
