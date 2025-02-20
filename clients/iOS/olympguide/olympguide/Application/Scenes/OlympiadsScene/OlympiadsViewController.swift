@@ -67,7 +67,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
         configureTableView()
         
         interactor?.loadOlympiads(
-            Olympiads.Load.Request(sortOption: nil, searchQuery: nil, levels: nil, profiles: nil)
+            Olympiads.Load.Request(params: Dictionary<String, Set<String>>())
         )
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
@@ -158,7 +158,9 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.interactor?.loadOlympiads(
-                Olympiads.Load.Request(sortOption: nil, searchQuery: nil, levels: nil, profiles: nil)
+                Olympiads.Load.Request(
+                    params: Dictionary<String, Set<String>>()
+                )
             )
             self.refreshControl.endRefreshing()
         }
@@ -200,38 +202,10 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
 extension OlympiadsViewController: FilterSortViewDelegate {
     
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
-        let items = ["По возрастанию", "По убыванию"]
-        let sheetVC = OptionsViewController(items: items,
-                                            title: "Сортировка",
-                                            isMultipleChoice: false)
-        sheetVC.modalPresentationStyle = .overFullScreen
-        present(sheetVC, animated: false) {
-            sheetVC.animateShow()
-        }
+       
     }
     
-    func filterSortView(_ view: FilterSortView, didTapFilterWithTitle title: String) {
-        switch title {
-        case "Профиль":
-            let items = ["Математика", "Информатика"]
-            let sheetVC = OptionsViewController(items: items,
-                                                title: "Профиль",
-                                                isMultipleChoice: true)
-            sheetVC.modalPresentationStyle = .overFullScreen
-            present(sheetVC, animated: false) {
-                sheetVC.animateShow()
-            }
-        case "Уровень":
-            let items = ["I уровень", "II уровень", "III уровень"]
-            let sheetVC = OptionsViewController(items: items,
-                                                title: "Уровень",
-                                                isMultipleChoice: true)
-            sheetVC.modalPresentationStyle = .overFullScreen
-            present(sheetVC, animated: false) {
-                sheetVC.animateShow()
-            }
-        default:
-            break
-        }
+    func filterSortView(_ view: FilterSortView, didTapFilterWith title: String) {
+      
     }
 }
