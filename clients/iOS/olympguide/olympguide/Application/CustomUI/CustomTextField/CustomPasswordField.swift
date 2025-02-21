@@ -34,7 +34,8 @@ class CustomPasswordField: CustomTextField, HighlightableField {
         configureVisiblePasswordField()
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
         super.init(coder: coder)
         setSecureTextEntry(true)
         setActionButtonImage(UIImage(systemName: "eye"))

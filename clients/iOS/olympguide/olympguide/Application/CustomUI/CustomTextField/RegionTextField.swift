@@ -30,7 +30,8 @@ final class RegionTextField: CustomTextField, HighlightableField, RegionDelegate
         isUserInteractionEnabled(false)
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
     

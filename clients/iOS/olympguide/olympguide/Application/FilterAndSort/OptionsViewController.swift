@@ -95,7 +95,6 @@ protocol OptionsViewControllerDelegate: AnyObject {
 final class OptionsViewController: UIViewController {
     
     // MARK: - Properties
-    
     weak var delegate: OptionsViewControllerDelegate?
     var interactor: (OptionsDataStore & OptionsBusinessLogic)?
     
@@ -136,13 +135,6 @@ final class OptionsViewController: UIViewController {
     
     // MARK: - Initializers
     init(items: [String], title: String, isMultipleChoice: Bool) {
-//        for (index, value) in items.enumerated() {
-//            let option = OptionModel(
-//                title: value,
-//                currentIndex: index
-//            )
-////            self.items.append(option)
-//        }
         self.titleLabel.text = title
         self.isMultipleChoice = isMultipleChoice
         super.init(nibName: nil, bundle: nil)
@@ -156,17 +148,6 @@ final class OptionsViewController: UIViewController {
         count: Int,
         endPoint: String
     ) {
-        
-//        for value in items {
-//            let option = OptionModel(
-//                title: value.name,
-//                realIndex: value.id,
-//                currentIndex: value.id
-//            )
-//            self.items.append(option)
-//        }
-        
-//        self.items.sort { $0.realIndex < $1.realIndex }
         self.count = count
         self.endPoint = endPoint
         self.titleLabel.text = title
@@ -183,6 +164,7 @@ final class OptionsViewController: UIViewController {
         setup()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -193,7 +175,7 @@ final class OptionsViewController: UIViewController {
         super.viewDidLoad()
         self.modalPresentationStyle = .overFullScreen
         configureGesture()
-        configureUI()
+//        configureUI()
         
         interactor?.loadOptions(request: Options.FetchOptions.Request(endPoint: endPoint))
     }
@@ -211,14 +193,12 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Gesture Configuration
-    
     private func configureGesture() {
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
         containerView.addGestureRecognizer(panGesture)
     }
     
     // MARK: - UI Configuration
-    
     private func configureUI() {
         configureDimmingView()
         configureContainerView()
@@ -365,8 +345,8 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Animation
-    
     func animateShow() {
+        configureUI()
         UIView.animate(withDuration: Constants.Dimensions.animateDuration) {
             self.containerView.frame.origin.y = self.finalY
             self.dimmingView.backgroundColor = Constants.Colors.dimmingViewColor.withAlphaComponent(Constants.Alphas.dimmingViewFinalAlpha)
@@ -396,7 +376,6 @@ final class OptionsViewController: UIViewController {
     }
     
     // MARK: - Pan Gesture Handling
-    
     @objc
     private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
@@ -440,7 +419,6 @@ final class OptionsViewController: UIViewController {
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
-
 extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     private func calculateTableHeight() -> CGFloat {
@@ -451,7 +429,6 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         currentCount
-//        return currentSelectedIndices.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -483,13 +460,11 @@ extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     // MARK: UITableViewDelegate
-    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         handleButtonTap(at: indexPath)
     }
     
     // MARK: - Selection Handling
-    
     private func handleButtonTap(at indexPath: IndexPath) {
         if currentSelectedIndices.contains(indexPath.row) {
             currentSelectedIndices.remove(indexPath.row)
@@ -605,6 +580,7 @@ extension OptionsViewController: OptionsDisplayLogic {
         DispatchQueue.main.async {[weak self] in
             self?.tableView.reloadData()
         }
+        animateShow()
     }
     
 }

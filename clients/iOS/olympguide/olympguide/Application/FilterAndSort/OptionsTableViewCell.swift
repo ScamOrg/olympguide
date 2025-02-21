@@ -76,6 +76,7 @@ class OptionsTableViewCell: UITableViewCell {
         actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

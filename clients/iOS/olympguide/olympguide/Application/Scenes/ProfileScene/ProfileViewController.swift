@@ -51,7 +51,13 @@ class ProfileViewController: UIViewController {
         configureNavigationBar()
         configureTableView()
         
-        let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
+        let backItem = UIBarButtonItem(
+            title: Constants.Strings.backButtonTitle,
+            style: .plain,
+            target: nil,
+            action: nil
+        )
+        
         navigationItem.backBarButtonItem = backItem
         
         authCancellable = AuthManager.shared.$isAuthenticated
@@ -70,14 +76,10 @@ class ProfileViewController: UIViewController {
         view.addSubview(tableView)
         
         tableView.separatorStyle = .none
-        
         tableView.frame = view.bounds
         
         tableView.dataSource = self
         tableView.delegate = self
-        
-        tableView.register(ProfileButtonTableViewCell.self, forCellReuseIdentifier: ProfileButtonTableViewCell.reuseIdentifier)
-        tableView.register(ProfileTableViewCell.self, forCellReuseIdentifier: ProfileTableViewCell.reuseIdentifier)
         
         let headerContainer = UIView()
         headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 10)
@@ -168,7 +170,7 @@ extension ProfileViewController : UITableViewDataSource {
             }
             else {
                 let cell = ProfileButtonTableViewCell()
-                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55")!, textColor: .red)
+                cell.configure(title: "Выйти", borderColor: UIColor(hex: "#FF2D55")!, textColor: .black)
                 cell.actionButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
                 return cell
             }
