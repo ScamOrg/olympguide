@@ -25,6 +25,7 @@ protocol NetworkServiceProtocol {
 final class NetworkService: NetworkServiceProtocol {
     
     private let baseURL: String
+//    private let cache = NSCache<NSString, NSData>()
     
     init() {
         guard let baseURLString = Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String else {
@@ -47,6 +48,17 @@ final class NetworkService: NetworkServiceProtocol {
             return
         }
         
+//        let cacheKey = url.absoluteString as NSString
+//        if method == .get, let cachedData = cache.object(forKey: cacheKey) {
+//            do {
+//                let decodedData = try JSONDecoder().decode(T.self, from: cachedData as Data)
+//                completion(.success(decodedData))
+//            } catch {
+//                completion(.failure(.decodingError))
+//            }
+//            return
+//        }
+        
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -61,10 +73,7 @@ final class NetworkService: NetworkServiceProtocol {
             }
         }
         
-        URLSession.shared.dataTask(with: request) {
-            data,
-            response,
-            error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
                     completion(.failure(.unknown(message: error.localizedDescription)))
@@ -80,6 +89,10 @@ final class NetworkService: NetworkServiceProtocol {
                     completion(.failure(.noData))
                     return
                 }
+                
+//                if method == .get, (200...299).contains(httpResponse.statusCode) {
+//                    self.cache.setObject(data as NSData, forKey: cacheKey)
+//                }
                 
                 do {
                     let decodedData = try JSONDecoder().decode(T.self, from: data)
