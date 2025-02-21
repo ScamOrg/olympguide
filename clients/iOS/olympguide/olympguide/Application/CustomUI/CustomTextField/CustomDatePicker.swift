@@ -19,7 +19,8 @@ final class CustomDatePicker: CustomTextField, HighlightableField {
         configureDatePicker()
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
         super.init(coder: coder)
         setTextFieldInputView(datePicker)
         configureDatePicker()

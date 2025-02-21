@@ -67,6 +67,7 @@ final class FilterSortView: UIView {
         setupUI()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupUI()

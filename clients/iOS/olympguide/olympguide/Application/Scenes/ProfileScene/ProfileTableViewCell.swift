@@ -20,7 +20,6 @@ class ProfileTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        // Настраиваем сабвью
         label.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
         
         detailLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)!
@@ -36,10 +35,10 @@ class ProfileTableViewCell: UITableViewCell {
         contentView.addSubview(chevronImageView)
         contentView.addSubview(separatorLine)
         
-        // Задаём констрейны один раз
         setupConstraints()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -48,9 +47,6 @@ class ProfileTableViewCell: UITableViewCell {
     func configure(title: String, detail: String? = nil) {
         label.text = title
         detailLabel.text = detail
-        
-        // Если detail нет, можно скрыть detailLabel или настроить констрейны
-        // Но важный момент: не добавляйте subviews и не создавайте заново констрейны здесь.
     }
     
     // MARK: - Пример метода для установки констрейнов

@@ -53,13 +53,13 @@ final class PersonalDataViewController: UIViewController, ValidationErrorDisplay
         self.userEmail = email
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been реализован")
     }
     
     
     // MARK: - Жизненный цикл
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
