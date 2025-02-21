@@ -10,9 +10,12 @@ final class UniversitiesInteractor: UniversitiesBusinessLogic, UniversitiesDataS
     var presenter: UniversitiesPresentationLogic?
     var worker: UniversitiesWorker = UniversitiesWorker()
     var universities: [UniversityModel] = []
-
+    var params: Dictionary<String, Set<String>> = [:]
     func loadUniversities(_ request: Universities.Load.Request) {
-        worker.fetchUniversities(regionID: request.regionID, sort: request.sortOption?.rawValue, search: request.searchQuery) { [weak self] result in
+        params = request.params
+        worker.fetchUniversities(
+            with: params
+        ) { [weak self] result in
             switch result {
             case .success(let universities):
                 self?.universities = universities
