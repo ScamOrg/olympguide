@@ -53,5 +53,5 @@ struct GroupOfFieldsModel: Codable {
     
     let name: String
     let code: String
-    let field: [FieldModel]
+    let fields: [FieldModel]
 }

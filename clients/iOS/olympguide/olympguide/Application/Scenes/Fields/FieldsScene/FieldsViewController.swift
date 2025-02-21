@@ -212,7 +212,7 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView,
                    didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].field[indexPath.row] else {
+        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
             return
         }
         router?.routeToDetails(for: fieldModel)
