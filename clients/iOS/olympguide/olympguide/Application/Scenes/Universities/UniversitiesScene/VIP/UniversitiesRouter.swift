@@ -11,14 +11,14 @@ final class UniversitiesRouter: UniversitiesRoutingLogic {
     weak var viewController: UIViewController?
 
     func routeToDetails(for university: UniversityModel) {
-        let detailsViewController = UIViewController()  
+        let universityVC = UniversityAssembly.build(for: university)
 //        detailsViewController.university = university
-        viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
+        viewController?.navigationController?.pushViewController(universityVC, animated: true)
     }
     
     func routeToSearch() {
         let searchVC = SearchViewController(searchType: .universities)
-        searchVC.modalPresentationStyle = .overFullScreen
+//        searchVC.modalPresentationStyle = .overFullScreen
         viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
