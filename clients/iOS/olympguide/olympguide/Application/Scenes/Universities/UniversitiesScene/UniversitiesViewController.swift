@@ -71,7 +71,7 @@ class UniversitiesViewController: UIViewController, MainVC {
         configureTableView()
         
         interactor?.loadUniversities(
-            Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
+            Universities.Load.Request(params: Dictionary<String, Set<String>>())
         )
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
@@ -160,7 +160,7 @@ class UniversitiesViewController: UIViewController, MainVC {
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.interactor?.loadUniversities(
-                Universities.Load.Request(regionID: nil, sortOption: nil, searchQuery: nil)
+                Universities.Load.Request(params: Dictionary<String, Set<String>>())
             )
             self.refreshControl.endRefreshing()
         }
