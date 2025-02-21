@@ -11,9 +11,7 @@ enum Universities {
     // MARK: - Use Cases
     enum Load {
         struct Request {
-            let regionID: Int?
-            let sortOption: SortOption?
-            let searchQuery: String?
+            let params: Dictionary<String, Set<String>>
         }
         
         struct Response {
@@ -41,13 +39,21 @@ enum Universities {
 
 
 struct UniversityModel: Codable {
+    let email: String?
+    let site: String?
+    let description: String?
+    let phone: String?
+    
     let universityID: Int
     let name: String
+    let shortName: String
     let logo: String
     let region: String
     let like: Bool
+    
     enum CodingKeys: String, CodingKey {
         case universityID = "university_id"
-        case name, logo, region, like
+        case shortName = "short_name"
+        case name, logo, region, like, email, site, description, phone
     }
 }
