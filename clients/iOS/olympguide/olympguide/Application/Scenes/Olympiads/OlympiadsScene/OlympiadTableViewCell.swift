@@ -67,7 +67,7 @@ class OlympiadTableViewCell: UITableViewCell {
         return view
     }()
     
-    private let shimmerLayer: ShimmerView = ShimmerView()
+    private let shimmerLayer: UIShimmerView = UIShimmerView()
     
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -75,6 +75,7 @@ class OlympiadTableViewCell: UITableViewCell {
         setupUI()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
