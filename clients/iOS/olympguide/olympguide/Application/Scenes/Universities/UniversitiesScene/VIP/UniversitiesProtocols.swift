@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
-import Foundation
+import UIKit
 
 protocol UniversitiesBusinessLogic {
     func loadUniversities(_ request: Universities.Load.Request)
