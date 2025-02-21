@@ -46,7 +46,7 @@ class UniversityTableViewCell: UITableViewCell {
     // MARK: - Variables
     static let identifier = Constants.Identifier.cellIdentifier
     
-    private let logoImageView = UIImageView()
+    let logoImageView = UIImageViewWithShimmer(frame: .zero)
     private let nameLabel = UILabel()
     private let regionLabel = UILabel()
     
@@ -60,7 +60,7 @@ class UniversityTableViewCell: UITableViewCell {
         return button
     }()
     
-    private let shimmerLayer: ShimmerView = ShimmerView()
+    private let shimmerLayer: UIShimmerView = UIShimmerView()
     
     private let separatorLine: UIView = {
         let view = UIView()
@@ -74,6 +74,7 @@ class UniversityTableViewCell: UITableViewCell {
         setupUI()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -114,7 +115,6 @@ class UniversityTableViewCell: UITableViewCell {
         nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
-//        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
         
         favoriteButton.pinCenterY(to: contentView)
         favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
@@ -144,23 +144,12 @@ class UniversityTableViewCell: UITableViewCell {
         let newImageName = isFavorite ? Constants.Images.bookmarkFill : Constants.Images.bookmark
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
         
-        if let url = URL(string: viewModel.logoURL) {
-            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-                guard let self = self else { return }
-                if let data = data, error == nil, let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self.logoImageView.image = image
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.logoImageView.image = UIImage(systemName: Constants.Images.placeholder)
-                    }
-                }
-            }.resume()
-        } else {
-            logoImageView.image = UIImage(systemName: Constants.Images.placeholder)
+        logoImageView.startShimmer()
+        ImageLoader.shared.loadImage(from: viewModel.logoURL) { [weak self] image in
+            guard let self = self, let image = image else { return }
+            self.logoImageView.stopShimmer()
+            self.logoImageView.image = image
         }
-        
         shimmerLayer.isHidden = true
         shimmerLayer.stopAnimating()
         shimmerLayer.removeAllConstraints()
