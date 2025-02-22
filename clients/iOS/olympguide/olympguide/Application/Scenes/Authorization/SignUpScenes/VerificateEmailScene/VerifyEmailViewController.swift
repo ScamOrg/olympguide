@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class VerifyEmailViewController: UIViewController {
+final class VerifyEmailViewController: UIViewController, NonTabBarVC {
     var interactor: VerifyEmailBusinessLogic?
     var router: (VerifyEmailRoutingLogic & VerifyEmailDataPassing)?
     

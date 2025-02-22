@@ -16,7 +16,7 @@ fileprivate enum Constants {
     }
 }
 
-final class SearchViewController: UIViewController {
+final class SearchViewController: UIViewController, NonTabBarVC {
     
     // MARK: - VIP
     var interactor: SearchBusinessLogic?

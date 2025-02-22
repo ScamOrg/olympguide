@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class PersonalDataViewController: UIViewController, ValidationErrorDisplayable {
+final class PersonalDataViewController: UIViewController, ValidationErrorDisplayable, NonTabBarVC {
     
     // MARK: - Свойства
     private var userEmail: String = ""

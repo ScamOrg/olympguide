@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class EnterEmailViewController: UIViewController {
+final class EnterEmailViewController: UIViewController, NonTabBarVC {
     
     // MARK: - VIP
     var interactor: EnterEmailBusinessLogic?
