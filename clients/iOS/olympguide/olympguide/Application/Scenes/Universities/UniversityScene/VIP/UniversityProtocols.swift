@@ -10,6 +10,7 @@ import Foundation
 // MARK: - Business Logic
 protocol UniversityBusinessLogic {
     func loadUniversity(with request: University.Load.Request)
+    func togleFavorite(with request: University.Favorite.Request)
 }
 
 // MARK: - Data Store
@@ -21,11 +22,13 @@ protocol UniversityDataStore {
 // MARK: - Presentation Logic
 protocol UniversityPresentationLogic {
     func presentLoadUniversity(with response: University.Load.Response)
+    func presentToggleFavorite(with response: University.Favorite.Response)
 }
 
 // MARK: - Display Logic
 protocol UniversityDisplayLogic: AnyObject {
     func displayLoadResult(with viewModel: University.Load.ViewModel)
+    func displayToggleFavoriteResult(with viewModel: University.Favorite.ViewModel)
 }
 
 // MARK: - Routing Logic
