@@ -101,7 +101,9 @@ class UniversitiesViewController: UIViewController, MainVC {
         navigationItem.title = Constants.Strings.universitiesTitle
         
         if let navigationController = self.navigationController as? NavigationBarViewController {
-            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+            navigationController.searchButtonPressed = { [weak self] sender in
+                self?.router?.routeToSearch()
+            }
         }
     }
     
@@ -149,11 +151,6 @@ class UniversitiesViewController: UIViewController, MainVC {
         headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
         
         tableView.tableHeaderView = headerContainer
-    }
-    
-    @objc
-    private func didTapSearchButton() {
-        router?.routeToSearch()
     }
     
     @objc

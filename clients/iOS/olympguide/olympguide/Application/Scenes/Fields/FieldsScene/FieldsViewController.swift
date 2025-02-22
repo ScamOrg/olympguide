@@ -115,7 +115,9 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         navigationItem.title = Constants.Strings.fieldsTitle
         
         if let navigationController = self.navigationController as? NavigationBarViewController {
-            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+            navigationController.searchButtonPressed = { [weak self] _ in
+                self?.router?.routeToSearch()
+            }
         }
     }
     
@@ -170,11 +172,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
     }
     
     // MARK: - Actions
-    @objc
-    private func didTapSearchButton() {
-        router?.routeToSearch()
-    }
-    
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

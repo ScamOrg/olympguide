@@ -104,7 +104,10 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
         navigationItem.title = Constants.Strings.olympiadsTitle
         
         if let navigationController = self.navigationController as? NavigationBarViewController {
-            navigationController.setSearchButtonAction(target: self, action: #selector (didTapSearchButton))
+            navigationController.searchButtonPressed = { [weak self] sender in
+                guard sender.alpha == 1 else { return }
+                self?.router?.routeToSearch()
+            }
         }
     }
     
@@ -146,12 +149,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
         headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
         
         tableView.tableHeaderView = headerContainer
-    }
-    
-    @objc
-    private func didTapSearchButton(sender: UIButton) {
-        guard sender.alpha == 1 else { return }
-        router?.routeToSearch()
     }
     
     @objc
