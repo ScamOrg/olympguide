@@ -33,13 +33,16 @@ fileprivate enum Constants {
     }
 }
 
-final class UniversityViewController: UIViewController {
+protocol WithBookMarkButton { }
+
+final class UniversityViewController: UIViewController, WithBookMarkButton {
     var interactor: UniversityInteractor?
     var router: Router?
     
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     let universityID: Int
-    var isLike: Bool
+    let startIsFavorite: Bool
+    var isFavorite: Bool
     let nameLabel: UILabel = UILabel()
     let regionLabel: UILabel = UILabel()
     let logo: String
@@ -53,7 +56,8 @@ final class UniversityViewController: UIViewController {
         self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.universityID = university.universityID
-        self.isLike = university.like
+        self.isFavorite = university.like
+        self.startIsFavorite = university.like
         
         super.init(nibName: nil, bundle: nil)
         
@@ -86,8 +90,21 @@ final class UniversityViewController: UIViewController {
         navigationItem.backBarButtonItem = backItem
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if startIsFavorite != isFavorite {
+            let request = University.Favorite.Request(
+                universityID: universityID,
+                isFavorite: isFavorite
+            )
+            interactor?.togleFavorite(with: request)
+        }
+        
+    }
+    
     private func configureUI() {
         view.backgroundColor = .white
+        configureNavigationBar()
         configureLogoImageView()
         configureRegionLabel()
         configureNameLabel()
@@ -98,6 +115,18 @@ final class UniversityViewController: UIViewController {
         logoImageView.startShimmer()
         webSiteButton.startShimmer()
         emailButton.startShimmer()
+    }
+    
+    private func configureNavigationBar() {
+        if let navigationController = navigationController as? NavigationBarViewController {
+            let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
+            navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
+            navigationController.bookMarkButtonPressed = {[weak self] sender in
+                self?.isFavorite.toggle()
+                let newImageName = self?.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
+                sender.setImage(UIImage(systemName: newImageName), for: .normal)
+            }
+        }
     }
     
     private func configureLogoImageView() {
@@ -172,7 +201,10 @@ extension UniversityViewController : UniversityDisplayLogic {
 extension UniversityViewController : MFMailComposeViewControllerDelegate{
     @objc func openMailCompose(sender: UIButton) {
         guard MFMailComposeViewController.canSendMail() else {
-            showAlert(with: "На телефоне нет настроенного клиента для отправки электронной почты")
+            showAlert(
+                with: "На телефоне нет настроенного клиента для отправки электронной почты",
+                cancelTitle: "Ок"
+            )
             return
         }
         
