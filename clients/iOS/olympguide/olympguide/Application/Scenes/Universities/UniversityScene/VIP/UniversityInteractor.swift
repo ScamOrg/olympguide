@@ -37,4 +37,8 @@ final class UniversityInteractor: UniversityBusinessLogic, UniversityDataStore {
             }
         }
     }
+    
+    func togleFavorite(with request: University.Favorite.Request) {
+        worker.to
+    }
 }
