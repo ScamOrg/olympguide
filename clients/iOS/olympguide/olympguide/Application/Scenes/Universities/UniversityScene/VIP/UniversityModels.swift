@@ -24,4 +24,19 @@ enum University {
             let email: String
         }
     }
+    
+    enum Favorite {
+        struct Request {
+            let universityID: Int
+            let isFavorite: Bool
+        }
+        
+        struct Response {
+            let error: Error?
+        }
+        
+        struct ViewModel {
+            let errorMessage: String?
+        }
+    }
 }
