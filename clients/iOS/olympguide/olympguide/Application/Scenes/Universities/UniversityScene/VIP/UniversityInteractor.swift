@@ -38,7 +38,23 @@ final class UniversityInteractor: UniversityBusinessLogic, UniversityDataStore {
         }
     }
     
-    func togleFavorite(with request: University.Favorite.Request) {
-        worker.to
+    func toggleFavorite(with request: University.Favorite.Request) {
+        worker.toggleFavorite(
+            with: request.universityID,
+            isFavorite: request.isFavorite
+        ) { [weak self] result in
+            switch result {
+            case .success(let university):
+                let response = University.Favorite.Response(
+                    error: nil
+                )
+                self?.presenter?.presentToggleFavorite(with: response)
+            case .failure(let error):
+                let response = University.Favorite.Response(
+                    error: error
+                )
+                self?.presenter?.presentToggleFavorite(with: response)
+            }
+        }
     }
 }
