@@ -97,7 +97,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
                 universityID: universityID,
                 isFavorite: isFavorite
             )
-            interactor?.togleFavorite(with: request)
+            interactor?.toggleFavorite(with: request)
         }
         
     }
@@ -190,6 +190,12 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
 }
 
 extension UniversityViewController : UniversityDisplayLogic {
+    func displayToggleFavoriteResult(with viewModel: University.Favorite.ViewModel) {
+        DispatchQueue.main.async { [weak self] in
+            self?.showAlert(title: "Не удалось добавить ВУЗ в изранные" , with: viewModel.errorMessage)
+        }
+    }
+    
     func displayLoadResult(with viewModel: University.Load.ViewModel) {
         DispatchQueue.main.async { [weak self] in
             self?.webSiteButton.setTitle(viewModel.site, for: .normal)
