@@ -21,4 +21,11 @@ final class UniversityPresenter : UniversityPresentationLogic {
         let viewModel = University.Load.ViewModel(site: site, email: email)
         viewController?.displayLoadResult(with: viewModel)
     }
+    
+    func presentToggleFavorite(with response: University.Favorite.Response) {
+        if let error = response.error {
+            let viewModel = University.Favorite.ViewModel(errorMessage: error.localizedDescription)
+            viewController?.displayToggleFavoriteResult(with: viewModel)
+        }
+    }
 }
