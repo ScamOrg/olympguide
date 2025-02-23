@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Business Logic
 protocol UniversityBusinessLogic {
     func loadUniversity(with request: University.Load.Request)
-    func togleFavorite(with request: University.Favorite.Request)
+    func toggleFavorite(with request: University.Favorite.Request)
 }
 
 // MARK: - Data Store
