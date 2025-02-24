@@ -6,14 +6,15 @@
 //
 
 import Foundation
-protocol WorkerLogic {
+protocol ProgramsWorkerLogic {
     func fetch(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<[Model], Error>) -> Void
+        with params: [Param],
+        for universityId: Int,
+        completion: @escaping (Result<[GroupOfProgramsByFieldModel], Error>) -> Void
     )
 }
 
-class ProgramWorker : WorkerLogic {
+class ProgramsWorker : ProgramsWorkerLogic {
     
     private let networkService: NetworkServiceProtocol
     
@@ -22,20 +23,25 @@ class ProgramWorker : WorkerLogic {
     }
     
     func fetch(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<[Model], Error>) -> Void
+        with params: [Param],
+        for universityId: Int,
+        completion: @escaping (Result<[GroupOfProgramsByFieldModel], Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
         
+        params.forEach {
+            queryItems.append(URLQueryItem(name: $0.key, value: $0.value))
+        }
+        
         networkService.request(
-            endpoint: "",
+            endpoint: "/university/\(universityId)/programs/by-field",
             method: .get,
             queryItems: queryItems,
             body: nil
-        ) { (result: Result<[Model], NetworkError>) in
+        ) { (result: Result<[GroupOfProgramsByFieldModel], NetworkError>) in
             switch result {
-            case .success(let olympiads):
-                completion(.success(olympiads))
+            case .success(let groupsOfPrograms):
+                completion(.success(groupsOfPrograms))
             case .failure(let error):
                 completion(.failure(error))
             }
