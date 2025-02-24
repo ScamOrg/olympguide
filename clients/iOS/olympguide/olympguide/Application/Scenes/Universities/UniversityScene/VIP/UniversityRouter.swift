@@ -11,9 +11,11 @@ import UIKit
 
 final class UniversityRouter: UniversityRoutingLogic, UniversityDataPassing {
     var dataStore: UniversityDataStore?
+    weak var viewController: UIViewController?
     
-    func routeTo() {
-        
+    func routeToProgramsByFields(universityID: Int) {
+        let programsByFieldsVC = ProgramAssembly.build(for: universityID)
+        viewController?.navigationController?.pushViewController(programsByFieldsVC, animated: true)
     }
 }
 
