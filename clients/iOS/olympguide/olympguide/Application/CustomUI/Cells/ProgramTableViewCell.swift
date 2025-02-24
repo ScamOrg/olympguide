@@ -10,7 +10,7 @@ import UIKit
 // MARK: - CellConstants
 fileprivate enum CellConstants {
     enum Identifier {
-        static let cellIdentifier = "FieldTableViewCell"
+        static let cellIdentifier = "ProgramTableViewCell"
     }
     
     enum Images {
@@ -36,11 +36,16 @@ fileprivate enum CellConstants {
 }
 
 final class ProgramTableViewCell: UITableViewCell {
+    
+    // MARK: - Variables
+    static let identifier = CellConstants.Identifier.cellIdentifier
+    
     private let informationStack: UIStackView = UIStackView()
     private let favoriteButton: UIButton = UIButton()
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
+    private let separatorLine: UIView = UIView()
     
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle,
@@ -56,10 +61,11 @@ final class ProgramTableViewCell: UITableViewCell {
     
     private func configureUI() {
         configureInformationStack()
-        configureFavoriteButton()
+//        configureFavoriteButton()
         configureBudgetLabel()
         configurePaidLabel()
         configureCostLabel()
+        configureSeparatorLine()
     }
     
     private func configureInformationStack() {
@@ -90,32 +96,42 @@ final class ProgramTableViewCell: UITableViewCell {
     }
     
     private func configureBudgetLabel() {
-        budgtetLabel.setText(regular: "Бюджетных мест ")
+        budgtetLabel.setText(regular: "Бюджетных мест  ")
         
         contentView.addSubview(budgtetLabel)
         
         budgtetLabel.pinTop(to: informationStack.bottomAnchor, 11)
-        budgtetLabel.pinLeft(to: contentView.leadingAnchor, 20)
+        budgtetLabel.pinLeft(to: contentView.leadingAnchor, 40)
     }
     
     private func configurePaidLabel() {
-        paidLabel.setText(regular: "Платных мест ")
+        paidLabel.setText(regular: "Платных мест  ")
         
         contentView.addSubview(paidLabel)
         
         paidLabel.pinTop(to: budgtetLabel.bottomAnchor, 7)
-        paidLabel.pinLeft(to: contentView.leadingAnchor, 20)
+        paidLabel.pinLeft(to: contentView.leadingAnchor, 40)
     }
     
     private func configureCostLabel() {
-        costLabel.setText(regular: "Стоимость ")
+        costLabel.setText(regular: "Стоимость  ")
         
         contentView.addSubview(costLabel)
         
         costLabel.pinTop(to: paidLabel.bottomAnchor, 7)
-        costLabel.pinLeft(to: contentView.leadingAnchor, 20)
+        costLabel.pinLeft(to: contentView.leadingAnchor, 40)
     }
     
+    private func configureSeparatorLine() {
+        separatorLine.backgroundColor = UIColor(hex: "#D9D9D9")
+        
+        contentView.addSubview(separatorLine)
+        separatorLine.pinTop(to: costLabel.bottomAnchor, 11)
+        separatorLine.pinLeft(to: contentView.leadingAnchor, 40)
+        separatorLine.pinRight(to: contentView.trailingAnchor, 20)
+        separatorLine.setHeight(1)
+        separatorLine.pinBottom(to: contentView.bottomAnchor)
+    }
     
     func configure(with viewModel: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel) {
         informationStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -160,54 +176,5 @@ final class ProgramTableViewCell: UITableViewCell {
         budgtetLabel.setBoldText(viewModel.budgetPlaces)
         paidLabel.setBoldText(viewModel.paidPlaces)
         costLabel.setBoldText(viewModel.cost)
-    }
-}
-
-
-import UIKit
-
-final class UIInformationLabel: UILabel {
-    private var regularText: String = ""
-    private var boldText: String = ""
-    
-    func setText(regular: String = "", bold: String = "") {
-        self.regularText = regular
-        self.boldText = bold
-        updateAttributedText()
-    }
-    
-    func setBoldText(_ bold: String) {
-        self.boldText = bold
-        updateAttributedText()
-    }
-    
-    private func updateAttributedText() {
-        let fullText = regularText + boldText
-        
-        let attributedString = NSMutableAttributedString(string: fullText)
-        
-        let regularFont = UIFont(name: "MontserratAlternates-Regular", size: 14) ?? UIFont.systemFont(ofSize: 14)
-        let boldFont = UIFont(name: "MontserratAlternates-Bold", size: 14) ?? UIFont.boldSystemFont(ofSize: 14)
-        
-        attributedString.addAttribute(
-            .font,
-            value: regularFont,
-            range: NSRange(
-                location: 0,
-                length: regularText.count
-            )
-        )
-        
-        let boldRange = NSRange(
-            location: regularText.count,
-            length: boldText.count
-        )
-        attributedString.addAttribute(
-            .font,
-            value: boldFont,
-            range: boldRange
-        )
-        
-        attributedText = attributedString
     }
 }
