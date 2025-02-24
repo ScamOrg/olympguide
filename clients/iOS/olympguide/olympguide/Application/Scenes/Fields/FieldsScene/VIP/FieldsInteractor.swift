@@ -5,7 +5,7 @@
 //  Created by Tom Tim on 22.12.2024.
 //
 
-// MARK: - Fieldsnteractor
+// MARK: - FieldsInteractor
 final class FieldsInteractor: FieldsBusinessLogic, FieldsDataStore {
     var presenter: FieldsPresentationLogic?
     var worker: FieldsWorker = FieldsWorker()
