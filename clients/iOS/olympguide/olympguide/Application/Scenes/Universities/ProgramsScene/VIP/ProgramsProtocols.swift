@@ -8,7 +8,7 @@
 import Foundation
 // MARK: - Business Logic
 protocol BusinessLogic {
-    func fetchDirections(request: Models.Action.Request)
+    func fetchDirections(request: Programs.Load.Request)
 }
 
 // MARK: - Data Store
@@ -19,12 +19,12 @@ protocol DataStore {
 
 // MARK: - Presentation Logic
 protocol PresentationLogic {
-    func presentActioon(response: Models.Action.Response)
+    func presentActioon(response: Programs.Load.Response)
 }
 
 // MARK: - Display Logic
 protocol DisplayLogic: AnyObject {
-    func displayActionResult(viewModel: Models.Action.ViewModel)
+    func displayActionResult(viewModel: Programs.Load.ViewModel)
 }
 
 // MARK: - Routing Logic

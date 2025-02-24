@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-final class Router: RoutingLogic, DataPassing {
+final class ProgramRouter: RoutingLogic, DataPassing {
     var dataStore: DataStore?
     
     func routeTo() {

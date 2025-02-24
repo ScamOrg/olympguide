@@ -6,11 +6,11 @@
 //
 
 import Foundation
-final class Interactor: BusinessLogic {
+final class ProgramInteractor: BusinessLogic {
     var presenter: PresentationLogic?
-    var worker: WorkerLogic = Worker()
+    var worker: WorkerLogic = ProgramWorker()
     
-    func fetchDirections(request: Models.Action.Request) {
+    func fetchDirections(request: Programs.Load.Request) {
         
     }
 }

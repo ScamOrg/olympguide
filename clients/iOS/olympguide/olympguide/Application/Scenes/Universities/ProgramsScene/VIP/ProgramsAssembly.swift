@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class Assembly {
+final class ProgramAssembly {
     static func build() -> UIViewController {
         UIViewController()
     }

@@ -13,7 +13,7 @@ protocol WorkerLogic {
     )
 }
 
-class Worker : WorkerLogic {
+class ProgramWorker : WorkerLogic {
     
     private let networkService: NetworkServiceProtocol
     
