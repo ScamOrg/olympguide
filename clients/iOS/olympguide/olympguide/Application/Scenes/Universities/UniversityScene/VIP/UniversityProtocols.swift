@@ -33,7 +33,7 @@ protocol UniversityDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol UniversityRoutingLogic {
-    func routeTo()
+    func routeToProgramsByFields(universityID: Int)
 }
 
 // MARK: - Data Passing
