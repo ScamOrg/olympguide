@@ -47,10 +47,10 @@ func (rt *Router) Run(port int) {
 }
 
 func (rt *Router) setupRoutes() {
-	rt.engine.Use(sessions.Sessions("session", rt.store))
-	rt.engine.Use(rt.mw.PrometheusMetrics())
-	rt.engine.Use(rt.mw.SessionMiddleware())
-	rt.engine.Use(rt.mw.ValidateID())
+	rt.api.Use(sessions.Sessions("session", rt.store))
+	rt.api.Use(rt.mw.PrometheusMetrics())
+	rt.api.Use(rt.mw.SessionMiddleware())
+	rt.api.Use(rt.mw.ValidateID())
 
 	rt.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	rt.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
