@@ -8,9 +8,13 @@
 enum Programs {
     enum Load {
         struct Request {
+            let params: [Param]
+            let universityID: Int
         }
         
         struct Response {
+            let groupsOfPrograms: [GroupOfProgramsByFieldModel]?
+            let error: Error?
         }
         
         struct ViewModel {
@@ -29,7 +33,7 @@ enum Programs {
                 let code: String
                 var isExpanded: Bool = false
                 
-                let fields: [ProgramViewModel]
+                let programs: [ProgramViewModel]
             }
             
             let groupsOfPrograms: [GroupOfProgramsViewModel]
@@ -37,10 +41,35 @@ enum Programs {
     }
 }
 
-struct Model : Codable {
-    //    let olympiadID: Int
-    //    enum CodingKeys: String, CodingKey {
-    //        case olympiadID = "olympiad_id"
-    //        case name, profile, level, like
-    //    }
+struct GroupOfProgramsByFieldModel : Codable {
+    struct ProgramModel : Codable {
+        let programID: Int
+        let name: String
+        let field: String
+        let budgetPlaces: Int
+        let paidPlaces: Int
+        let cost: Int
+        let requiredSubjects: [String]
+        let optionalSubjects: [String]?
+        let like: Bool
+        
+        enum CodingKeys: String, CodingKey {
+            case programID = "program_id"
+            case budgetPlaces = "budget_places"
+            case paidPlaces = "paid_places"
+            case name, field, cost, like
+            case requiredSubjects = "required_subjects"
+            case optionalSubjects = "optional_subjects"
+        }
+    }
+    
+    let groupID: Int
+    let name: String
+    let code: String
+    let programs: [ProgramModel]
+    
+    enum CodingKeys: String, CodingKey {
+        case groupID = "group_id"
+        case name, code, programs
+    }
 }
