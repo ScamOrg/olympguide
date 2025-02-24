@@ -38,15 +38,16 @@ fileprivate enum Constants {
     }
 }
 
-class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
+class ProgramsByFieldsViewController: UIViewController, MainVC {
     
     // MARK: - VIP
-    var interactor: (FieldsDataStore & FieldsBusinessLogic)?
-    var router: FieldsRoutingLogic?
+    var interactor: (ProgramsDataStore & ProgramsBusinessLogic)?
+    var router: ProgramsRoutingLogic?
     
     // MARK: - Variables
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
+    private let universityID: Int
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
@@ -56,7 +57,17 @@ class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, Main
         return view
     }()
     
-    private var fields: [Fields.Load.ViewModel.GroupOfFieldsViewModel] = []
+    private var groupOfProgramsViewModel: [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
+    
+    init(for universityID: Int) {
+        self.universityID = universityID
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -66,9 +77,8 @@ class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, Main
         configureRefreshControl()
         configureTableView()
         
-        interactor?.loadFields(
-            Fields.Load.Request(searchQuery: nil, degree: nil)
-        )
+        let request = Programs.Load.Request(params: [], universityID: 1)
+        interactor?.loadPrograms(with: request)
         
         let backItem = UIBarButtonItem(
             title: Constants.Strings.backButtonTitle,
@@ -81,19 +91,6 @@ class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, Main
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }
-    }
-    
-    // MARK: - Methods (FieldsDisplayLogic)
-    func displayFields(viewModel: Fields.Load.ViewModel) {
-        fields = viewModel.groupsOfFields
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-            self.refreshControl.endRefreshing()
-        }
-    }
-    
-    func displayError(message: String) {
-        print("Error: \(message)")
     }
     
     private func configureNavigationBar() {
@@ -123,8 +120,8 @@ class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, Main
         tableView.frame = view.bounds
         
         tableView.register(
-            FieldTableViewCell.self,
-            forCellReuseIdentifier: FieldTableViewCell.identifier
+            ProgramTableViewCell.self,
+            forCellReuseIdentifier: ProgramTableViewCell.identifier
         )
         tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
         
@@ -160,9 +157,8 @@ class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, Main
     @objc
     private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.interactor?.loadFields(
-                Fields.Load.Request(searchQuery: nil, degree: nil)
-            )
+            let request = Programs.Load.Request(params: [], universityID: 1)
+            self.interactor?.loadPrograms(with: request)
             self.refreshControl.endRefreshing()
         }
     }
@@ -170,43 +166,51 @@ class ProgramsByFieldsViewController: UIViewController, FieldsDisplayLogic, Main
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
 extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDelegate {
-    
     func numberOfSections(in tableView: UITableView) -> Int {
-        return fields.count
+        return groupOfProgramsViewModel.count
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fields[section].isExpanded ? fields[section].fields.count : 0
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
+        return groupOfProgramsViewModel[section].isExpanded ? groupOfProgramsViewModel[section].programs.count : 0
     }
     
-    func tableView(_ tableView: UITableView,
-                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
-            withIdentifier: FieldTableViewCell.identifier,
+            withIdentifier: ProgramTableViewCell.identifier,
             for: indexPath
-        ) as! FieldTableViewCell
+        ) as! ProgramTableViewCell
         
-        let fieldViewModel = fields[indexPath.section].fields[indexPath.row]
+        let fieldViewModel = groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
         cell.configure(with: fieldViewModel)
         return cell
     }
     
-    func tableView(_ tableView: UITableView,
-                   didSelectRowAt indexPath: IndexPath) {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
-            return
-        }
-        router?.routeToDetails(for: fieldModel)
+//        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
+//            return
+//        }
+//        router?.routeToDetails(for: fieldModel)
     }
     
-    func tableView(_ tableView: UITableView,
-                   viewForHeaderInSection section: Int) -> UIView? {
-        let headerButton = FieldsTableButton(name: fields[section].name, code: fields[section].code)
+    func tableView(
+        _ tableView: UITableView,
+        viewForHeaderInSection section: Int
+    ) -> UIView? {
+        let headerButton = FieldsTableButton(name: groupOfProgramsViewModel[section].name, code: groupOfProgramsViewModel[section].code)
         headerButton.tag = section
         headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
         
-        if fields[section].isExpanded {
+        if groupOfProgramsViewModel[section].isExpanded {
             headerButton.backgroundView.backgroundColor = UIColor(hex: "#E0E8FE")
         }
         return headerButton
@@ -219,7 +223,7 @@ extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDele
         var currentOffset = tableView.contentOffset
         let headerRectBefore = tableView.rectForHeader(inSection: section)
         
-        fields[section].isExpanded.toggle()
+        groupOfProgramsViewModel[section].isExpanded.toggle()
         
         UIView.performWithoutAnimation {
             tableView.reloadSections(IndexSet(integer: section), with: .none)
@@ -235,12 +239,21 @@ extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDele
 
 // MARK: - FilterSortViewDelegate
 extension ProgramsByFieldsViewController: FilterSortViewDelegate {
-    
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
     }
     
     func filterSortView(_ view: FilterSortView,
                         didTapFilterWith title: String) {
        
+    }
+}
+
+extension ProgramsByFieldsViewController: ProgramsDisplayLogic {
+    func displayLoadProgramsResult(with viewModel: Programs.Load.ViewModel) {
+        groupOfProgramsViewModel = viewModel.groupsOfPrograms
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
+        }
     }
 }
