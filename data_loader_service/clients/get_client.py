@@ -12,8 +12,21 @@ API_PORT = os.getenv("API_PORT")
 def get_regions():
    pass
 
-def get_faculties():
-    pass
+def get_faculties(university_id):
+
+    if response.status_code != 200:
+        logger.error('Cannot get regions')
+        return dict()
+
+    response.encoding = 'utf-8'
+
+    faculties = {}
+
+    for faculty in response.json():
+        faculties[faculty['name'].lower().strip()] = faculty['faculty_id']
+
+    return faculties
+
 
 def get_universities():
     pass
