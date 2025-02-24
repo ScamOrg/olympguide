@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 def main():
     educational_programs = parse_educational_programs_with_faculties()
+    load_costs_from_first_source(programs=educational_programs)
+    load_costs_from_second_source(programs=educational_programs)
     load_subjects_places_fields(educational_programs)
 
 if __name__ == '__main__':
