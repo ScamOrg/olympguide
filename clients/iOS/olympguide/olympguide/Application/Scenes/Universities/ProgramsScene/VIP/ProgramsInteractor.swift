@@ -6,12 +6,25 @@
 //
 
 import Foundation
-final class ProgramInteractor: BusinessLogic {
-    var presenter: PresentationLogic?
-    var worker: WorkerLogic = ProgramWorker()
+final class ProgramInteractor: ProgramsBusinessLogic, ProgramsDataStore {
+    var groupsOfProgramsByFieldModel: [GroupOfProgramsByFieldModel] = []
+    var presenter: ProgramsPresentationLogic?
+    var worker: ProgramsWorkerLogic = ProgramsWorker()
     
-    func fetchDirections(request: Programs.Load.Request) {
-        
+    func loadPrograms(with request: Programs.Load.Request) {
+        worker.fetch(
+            with: request.params,
+            for: request.universityID
+        ) { [weak self] result in
+            switch result {
+            case .success(let programs):
+                let response = Programs.Load.Response(groupsOfPrograms: programs, error: nil)
+                self?.presenter?.presentLoadPrograms(with: response)
+            case .failure(let error):
+                let response = Programs.Load.Response(groupsOfPrograms: nil, error: error)
+                self?.presenter?.presentLoadPrograms(with: response)
+            }
+        }
     }
 }
 
