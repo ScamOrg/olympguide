@@ -11,7 +11,7 @@ final class OlympiadsPresenter: OlympiadsPresentationLogic {
     
     weak var viewController: OlympiadsDisplayLogic?
 
-    func presentOlympiads(response: Olympiads.Load.Response) {
+    func presentOlympiads(_ response: Olympiads.Load.Response) {
         
         let viewModels = response.olympiads.map { olympiad in
             Olympiads.Load.ViewModel.OlympiadViewModel(
@@ -22,7 +22,7 @@ final class OlympiadsPresenter: OlympiadsPresentationLogic {
         }
         
         let viewModel = Olympiads.Load.ViewModel(olympiads: viewModels)
-        viewController?.displayOlympiads(viewModel: viewModel)
+        viewController?.displayOlympiads(viewModel)
     }
 
     func presentError(message: String) {

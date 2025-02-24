@@ -75,7 +75,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
     }
     
     // MARK: - Methods
-    func displayOlympiads(viewModel: Olympiads.Load.ViewModel) {
+    func displayOlympiads(_ viewModel: Olympiads.Load.ViewModel) {
         olympiads = viewModel.olympiads
         DispatchQueue.main.async {
             self.tableView.reloadData()

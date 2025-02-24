@@ -12,12 +12,12 @@ protocol OlympiadsBusinessLogic {
 }
 
 protocol OlympiadsPresentationLogic {
-    func presentOlympiads(response: Olympiads.Load.Response)
+    func presentOlympiads(_ response: Olympiads.Load.Response)
     func presentError(message: String)
 }
 
 protocol OlympiadsDisplayLogic: AnyObject {
-    func displayOlympiads(viewModel: Olympiads.Load.ViewModel)
+    func displayOlympiads(_ viewModel: Olympiads.Load.ViewModel)
     func displayError(message: String)
 }
 

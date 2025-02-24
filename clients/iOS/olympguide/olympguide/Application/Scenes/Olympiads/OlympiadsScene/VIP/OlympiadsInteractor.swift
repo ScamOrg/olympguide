@@ -21,7 +21,7 @@ final class OlympiadsInteractor: OlympiadsBusinessLogic, OlympiadsDataStore {
             case .success(let olympiads):
                 self?.olympiads = olympiads
                 let response = Olympiads.Load.Response(olympiads: olympiads)
-                self?.presenter?.presentOlympiads(response: response)
+                self?.presenter?.presentOlympiads(response)
             case .failure(let error):
                 self?.presenter?.presentError(message: error.localizedDescription)
             }
