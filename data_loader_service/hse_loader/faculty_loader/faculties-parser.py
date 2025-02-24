@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-
+from clients.post_client import upload_faculties
 
 def parse_faculty(url: str) -> list:
     response = requests.get(url)
@@ -17,11 +17,16 @@ def parse_faculty(url: str) -> list:
         for post in post_items:
             faculties.append(post.text.strip().replace('\u00AD', ''))
 
-    return faculties
+    result = []
+    for faculty in faculties:
+        for f in faculty.split('\n'):
+
+            result.append(f.replace('\xa0', ' ').replace('\u00AD', ' '))
+    return result
 
 
 if __name__ == '__main__':
     url = "https://www.hse.ru/education/faculty/"
     # parse_faculty(url)
-    for faculty in parse_faculty(url):
-        print(faculty)
+    faculties = parse_faculty(url)
+    upload_faculties(1, faculties)
