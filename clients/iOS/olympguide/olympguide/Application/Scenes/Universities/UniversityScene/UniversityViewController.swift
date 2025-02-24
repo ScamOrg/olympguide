@@ -37,7 +37,7 @@ protocol WithBookMarkButton { }
 
 final class UniversityViewController: UIViewController, WithBookMarkButton {
     var interactor: UniversityInteractor?
-    var router: Router?
+    var router: UniversityRouter?
     
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     let universityID: Int
@@ -274,6 +274,14 @@ extension UniversityViewController : UITableViewDataSource {
 extension UniversityViewController : UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        switch indexPath.row {
+        case 0:
+            router?.routeToProgramsByFields(universityID: universityID)
+        case 1:
+            break
+        default:
+            break
+        }
     }
 }
 
@@ -305,6 +313,6 @@ struct UniversityViewControllerWrapper: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
-#Preview {
-    UniversityViewControllerWrapper()
-}
+//#Preview {
+//    UniversityViewControllerWrapper()
+//}
