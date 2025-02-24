@@ -32,4 +32,26 @@ enum Param {
         }
         return nil
     }
+    
+    var key: String {
+        switch self {
+        case .level:
+            return "level"
+        case .diplomaClass:
+            return "class"
+        case .region:
+            return "region"
+        }
+    }
+    
+    var value: String {
+        switch self {
+        case .level(let value):
+            return String(value)
+        case .diplomaClass(let value):
+            return String(value)
+        case .region(let value):
+            return String(value)
+        }
+    }
 }
