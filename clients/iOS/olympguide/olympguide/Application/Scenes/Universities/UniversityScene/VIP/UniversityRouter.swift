@@ -9,7 +9,7 @@ import Foundation
 
 import UIKit
 
-final class Router: UniversityRoutingLogic, UniversityDataPassing {
+final class UniversityRouter: UniversityRoutingLogic, UniversityDataPassing {
     var dataStore: UniversityDataStore?
     
     func routeTo() {
