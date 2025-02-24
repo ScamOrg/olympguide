@@ -8,11 +8,18 @@
 import Foundation
 import UIKit
 
-final class ProgramRouter: RoutingLogic, DataPassing {
-    var dataStore: DataStore?
+final class ProgramsRouter: ProgramsRoutingLogic, ProgramsDataPassing {
+    var dataStore: ProgramsDataStore?
+    weak var viewController: UIViewController?
     
-    func routeTo() {
+    func routeToProgram() {
         
+    }
+    
+    func routeToSearch() {
+        let searchVC = SearchViewController(searchType: .fields)
+        searchVC.modalPresentationStyle = .overFullScreen
+        viewController?.navigationController?.pushViewController(searchVC, animated: true)
     }
 }
 
