@@ -6,6 +6,7 @@ import re
 from bs4 import BeautifulSoup
 from EducationalProgram import EducationalProgram
 from clients.get_client import get_subjects, get_fields
+from clients.post_client import upload_programs
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,8 @@ def get_admission_url(program: EducationalProgram) -> str:
         program_name = "moda"
     if program.name == "Управление в креативных индустриях":
         program_name = "creative"
+    if program_name == "digital.hse.ru":
+        program_name = "digital"
     return f'https://www.hse.ru/ba/{program_name}/admission/'
 
 
@@ -178,14 +181,22 @@ def load_subjects_places_fields(programs: dict[str, EducationalProgram]) -> (dic
             
         if len(req) == len(opt) == 0:
             logger.error(f"Page {url} hasn't information about subjects")
+            continue
 
         bp, pp = extract_places(properties)
         program.budget_places = bp
         program.required_places = pp
         if bp == 0 and pp == 0:
             logger.error(f"Page {url} hasn't information about places")
+            continue
             
         fields = extract_fields(properties, exist_fields)
         program.fields = fields
         if not fields:
             logger.error(f"Page {url} hasn't information about fields")
+            continue
+        if program.cost == None:
+            continue
+
+        upload_programs(1, program)
+
