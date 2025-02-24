@@ -15,10 +15,10 @@ class EducationalProgram:
                 f"paid_places={self.paid_places}, link='{self.link}', faculties={self.faculties})")
 
     def __str__(self):
-        return (f"Программа: {self.name}\nФакультеты: {', '.join(self.faculties)}\n"
+        return (f"Программа: {self.name}\nФакультеты: {self.faculties}\n"
                 f"Бюджетные места: {self.budget_places}\nПлатные места: {self.paid_places}\n"
                 f"Ссылка: {self.link}\n"
-                f"Цена: {self.price}\n"
-                f"Направления: {', '.join(self.fields)}\n"
-                f"Обязательные предметы: {', '.join(self.required_subjects)}\n"
-                f"Предметы на выбор: {', '.join(self.optional_subjects)}")
+                f"Цена: {self.cost}\n"
+                f"Направления: {self.fields}\n"
+                f"Обязательные предметы: {self.required_subjects}\n"
+                f"Предметы на выбор: {self.optional_subjects}")
