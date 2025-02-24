@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class SignInViewController: UIViewController, SignInValidationErrorDisplayable {
+final class SignInViewController: UIViewController, SignInValidationErrorDisplayable, NonTabBarVC {
     
     // MARK: - VIP
     var interactor: SignInBusinessLogic?

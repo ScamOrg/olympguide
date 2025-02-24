@@ -45,7 +45,7 @@ final class TabBarViewController: UITabBarController {
     
     private let universitiesVC = UniversitiesViewController()
     private let olympiadsVC = OlympiadsViewController()
-    private let fieldsVC = FieldsViewController()
+    private let fieldsVC = FieldsAssembly.build()
     private let profileVC = ProfileAssembly.build()
     
     private lazy var universitiesBtn: TabButton = {

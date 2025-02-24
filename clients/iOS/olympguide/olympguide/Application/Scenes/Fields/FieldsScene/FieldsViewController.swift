@@ -61,7 +61,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setup()
         
         configureNavigationBar()
         configureRefreshControl()
@@ -95,20 +94,6 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
     
     func displayError(message: String) {
         print("Error: \(message)")
-    }
-    
-    // MARK: - Private setup
-    private func setup() {
-        let viewController = self
-        let interactor = FieldsInteractor()
-        let presenter = FieldsPresenter()
-        let router = FieldsRouter()
-        
-        viewController.interactor = interactor
-        viewController.router = router
-        interactor.presenter = presenter
-        presenter.viewController = viewController
-        router.viewController = viewController
     }
     
     private func configureNavigationBar() {

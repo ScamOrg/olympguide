@@ -276,3 +276,35 @@ extension UniversityViewController : UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
+
+import SwiftUI
+
+
+struct UniversityViewControllerWrapper: UIViewControllerRepresentable {
+    
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let sampleUniversity = UniversityModel(
+            email: nil,
+            site: nil,
+            description: nil,
+            phone: nil,
+            universityID: 1,
+            name: "Национальный исследовательский университет «Высшая школа экономики»",
+            shortName: "ВШЭ",
+            logo: "https://drive.google.com/uc?export=download&id=1UIXzJTDYv2ys_Bq5n_EPiQrRBhfujq1k",
+            region: "Москва и Московскя область",
+            like: true
+        )
+        
+        let universityVC = UniversityViewController(for: sampleUniversity)
+        
+        let navigationController = NavigationBarViewController(rootViewController: universityVC)
+        return navigationController
+    }
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+}
+
+#Preview {
+    UniversityViewControllerWrapper()
+}
