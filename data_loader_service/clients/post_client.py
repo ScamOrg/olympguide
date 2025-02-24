@@ -1,7 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
-
+from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
 load_dotenv()
 
 API_URL = os.getenv("API_HOST")
@@ -30,7 +30,7 @@ def upload_faculties(university_id, faculties):
     url = f"{API_URL}:{API_PORT}/faculty"
     for faculty in faculties:
         payload = {
-            "name": faculty.name,
+            "name": faculty,
             "university_id": university_id
         }
         response = requests.post(url, json=payload, headers=HEADERS)
@@ -38,24 +38,23 @@ def upload_faculties(university_id, faculties):
             print(response.text)
 
 
-def upload_programs(university_id, programs):
-    url = f"{API_URL}:{API_PORT}/program"
-    for program in programs:
-        payload = {
-            "name": program.name,
-            "university_id": university_id,
-            "field_id": program.field_id,
-            "faculty_id": program.faculty_id,
-            "budget_places": program.budget_places,
-            "paid_places": program.paid_places,
-            "cost": program.cost,
-            "required_subjects": [],
-            "optional_subjects": [],
-            "link": program.link
-        }
-        response = requests.post(url, json=payload, headers=HEADERS)
-        if response.status_code != 201:
-            print(response.text)
+def upload_programs(university_id, program: EducationalProgram):
+
+    payload = {
+        "name": program.name,
+        "university_id": university_id,
+        "field_id": program.fields[0],
+        "faculty_id": program.faculties[0],
+        "budget_places": program.budget_places,
+        "paid_places": program.paid_places,
+        "cost": program.cost,
+        "required_subjects": program.required_subjects,
+        "optional_subjects": program.optional_subjects,
+        "link": program.link
+    }
+    response = requests.post(url, json=payload, headers=HEADERS)
+    if response.status_code != 201:
+        print(response.text)
 
 
 def upload_benefits(university_id, privileges):
