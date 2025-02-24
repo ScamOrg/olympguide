@@ -16,8 +16,8 @@ final class ProfileRouter: ProfileRoutingLogic {
     }
     
     func routeToSignUp() {
-//        let enterEmailVC = EnterEmailAssembly.build()
-        let enterEmailVC = PersonalDataAssembly.build(email: "")
+        let enterEmailVC = EnterEmailAssembly.build()
+//        let enterEmailVC = PersonalDataAssembly.build(email: "")  
         viewController?.navigationController?.pushViewController(enterEmailVC, animated: true)
     }
 }
