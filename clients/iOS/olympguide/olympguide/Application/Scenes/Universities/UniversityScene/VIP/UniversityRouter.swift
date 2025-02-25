@@ -13,9 +13,14 @@ final class UniversityRouter: UniversityRoutingLogic, UniversityDataPassing {
     var dataStore: UniversityDataStore?
     weak var viewController: UIViewController?
     
-    func routeToProgramsByFields(universityID: Int) {
-        let programsByFieldsVC = ProgramAssembly.build(for: universityID)
+    func routeToProgramsByFields(for university: UniversityModel) {
+        let programsByFieldsVC = ProgramsByFieldsAssembly.build(for: university)
         viewController?.navigationController?.pushViewController(programsByFieldsVC, animated: true)
+    }
+    
+    func routeToProgramsByFaculties(for university: UniversityModel) {
+        let programsByFacultiesVC = ProgramsByFacultiesAssembly.build(for: university)
+        viewController?.navigationController?.pushViewController(programsByFacultiesVC, animated: true)
     }
 }
 
