@@ -35,11 +35,11 @@ fileprivate enum Constants {
 class FieldsTableButton: UIButton {
     
     // MARK: - Variables
-    private var name: String = ""
-    private var code: String = ""
-    private var isExpanded: Bool = false
+    private var name: String
+    private var code: String
+    var isExpanded: Bool
     let backgroundView: UIView = UIView()
-    let arrowImageView: UIImageView = UIImageView(image: UIImage(systemName: Constants.Images.arrowImageName))
+    let arrowImageView: UIImageView = UIImageView()
     
     private let information: UIStackView = {
         let stackView = UIStackView()
@@ -50,10 +50,12 @@ class FieldsTableButton: UIButton {
     }()
     
     // MARK: - Lifecycle
-    init(name: String, code: String) {
-        super.init(frame: .zero)
+    init(name: String, code: String, isExpanded: Bool = false) {
+        self.isExpanded = isExpanded
         self.name = name
         self.code = code
+        
+        super.init(frame: .zero)
         configureUI()
     }
     
@@ -74,6 +76,11 @@ class FieldsTableButton: UIButton {
         addSubview(backgroundView)
         addSubview(arrowImageView)
         addSubview(information)
+        
+        arrowImageView.image = isExpanded
+        ? UIImage(systemName: "chevron.up")
+        : UIImage(systemName: "chevron.down")
+        
         self.backgroundColor = .clear
         
         information.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -100,36 +107,36 @@ class FieldsTableButton: UIButton {
         
         arrowImageView.pinTop(to: self.topAnchor, 3)
         arrowImageView.pinLeft(to: self.leadingAnchor, 20)
-        
-        for char in code {
-            let label = UILabel()
-            label.text = String(char)
-            label.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
-            label.textColor = .black
-            label.textAlignment = .center
-            if char == "." {
-                label.setWidth(3)
-            } else {
-                label.setWidth(11)
+        if code.count > 0 {
+            for char in code {
+                let label = UILabel()
+                label.text = String(char)
+                label.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+                label.textColor = .black
+                label.textAlignment = .center
+                if char == "." {
+                    label.setWidth(3)
+                } else {
+                    label.setWidth(11)
+                }
+                information.addArrangedSubview(label)
             }
-            information.addArrangedSubview(label)
+            
+            let spaceLabel1 = UILabel()
+            spaceLabel1.setWidth(4)
+            let spaceLabel2 = UILabel()
+            spaceLabel2.setWidth(2)
+            information.addArrangedSubview(spaceLabel1)
+            let dashLabel = UILabel()
+            dashLabel.text = "-"
+            dashLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+            dashLabel.textColor = .black
+            dashLabel.textAlignment = .center
+            dashLabel.setWidth(11)
+            information.addArrangedSubview(dashLabel)
+            information.addArrangedSubview(spaceLabel2)
         }
-        
-        let spaceLabel1 = UILabel()
-        spaceLabel1.setWidth(4)
-        let spaceLabel2 = UILabel()
-        spaceLabel2.setWidth(2)
-        information.addArrangedSubview(spaceLabel1)
-        let dashLabel = UILabel()
-        dashLabel.text = "-"
-        dashLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
-        dashLabel.textColor = .black
-        dashLabel.textAlignment = .center
-        dashLabel.setWidth(11)
-        information.addArrangedSubview(dashLabel)
-        information.addArrangedSubview(spaceLabel2)
 
-        // Текст названия
         let nameLabel = UILabel()
         nameLabel.text = capitalizeFirstLetter(input: name)
         nameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)!
@@ -152,9 +159,9 @@ class FieldsTableButton: UIButton {
     func didTap() {
         isExpanded.toggle()
         alpha = 0.0
-        UIView.animate(withDuration: 0.1) {[weak self] in
+        UIView.animate(withDuration: 0.1, animations: {[weak self] in
             self?.alpha = 1.0
             self?.backgroundView.backgroundColor = ((self?.isExpanded) != nil) ? UIColor(hex: "#E0E8FE") : .white
-        }
+        })
     }
 }

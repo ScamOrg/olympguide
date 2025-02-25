@@ -37,7 +37,7 @@ protocol WithBookMarkButton { }
 
 final class UniversityViewController: UIViewController, WithBookMarkButton {
     var interactor: UniversityInteractor?
-    var router: Router?
+    var router: UniversityRouter?
     
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     let universityID: Int
@@ -48,6 +48,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     let logo: String
     let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
     let emailButton: UIInformationButton = UIInformationButton(type: .email)
+    let university: UniversityModel
     
     let tableView = UITableView(frame: .zero, style: .plain)
     
@@ -58,7 +59,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         self.universityID = university.universityID
         self.isFavorite = university.like
         self.startIsFavorite = university.like
-        
+        self.university = university
         super.init(nibName: nil, bundle: nil)
         
         self.nameLabel.text = university.name
@@ -274,6 +275,14 @@ extension UniversityViewController : UITableViewDataSource {
 extension UniversityViewController : UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        switch indexPath.row {
+        case 0:
+            router?.routeToProgramsByFields(for: university)
+        case 1:
+            router?.routeToProgramsByFaculties(for: university)
+        default:
+            break
+        }
     }
 }
 
@@ -305,6 +314,6 @@ struct UniversityViewControllerWrapper: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
-#Preview {
-    UniversityViewControllerWrapper()
-}
+//#Preview {
+//    UniversityViewControllerWrapper()
+//}

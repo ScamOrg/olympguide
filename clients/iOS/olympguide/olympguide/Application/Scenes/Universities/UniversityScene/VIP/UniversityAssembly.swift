@@ -12,11 +12,13 @@ final class UniversityAssembly {
         let viewController = UniversityViewController(for: university)
         let interactor = UniversityInteractor()
         let presenter = UniversityPresenter()
+        let router = UniversityRouter()
         
         viewController.interactor = interactor
         interactor.presenter = presenter
         presenter.viewController = viewController
-        
+        viewController.router = router
+        router.viewController = viewController
         return viewController
     }
 }

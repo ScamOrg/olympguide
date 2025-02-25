@@ -48,16 +48,6 @@ class FieldTableViewCell: UITableViewCell {
         return stackView
     }()
     
-    private let favoriteButton: UIButton = {
-        let button = UIButton()
-        button.tintColor = .black
-        button.contentHorizontalAlignment = .fill
-        button.contentVerticalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        button.setImage(UIImage(systemName: CellConstants.Images.bookmark), for: .normal)
-        return button
-    }()
-    
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle,
                   reuseIdentifier: String?) {
@@ -72,19 +62,12 @@ class FieldTableViewCell: UITableViewCell {
     
     // MARK: - Private funcs
     private func setupUI() {
-        contentView.addSubview(favoriteButton)
         contentView.addSubview(information)
-        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         
         information.pinTop(to: contentView.topAnchor, 5)
         information.pinLeft(to: contentView.leadingAnchor, 40)
         information.pinBottom(to: contentView.bottomAnchor, 5)
-        information.pinRight(to: contentView.trailingAnchor, 57)
-        
-        favoriteButton.pinTop(to: contentView.topAnchor, 6)
-        favoriteButton.pinRight(to: contentView.trailingAnchor, 20)
-        favoriteButton.setWidth(CellConstants.Dimensions.favoriteButtonSize)
-        favoriteButton.setHeight(CellConstants.Dimensions.favoriteButtonSize)
+        information.pinRight(to: contentView.trailingAnchor, 20)
     }
     
     // MARK: - Methods
@@ -128,13 +111,5 @@ class FieldTableViewCell: UITableViewCell {
         nameLabel.textAlignment = .left
         nameLabel.lineBreakMode = .byWordWrapping
         information.addArrangedSubview(nameLabel)
-    }
-    
-    // MARK: - Objc funcs
-    @objc
-    private func favoriteButtonTapped() {
-        let isFavorite = (favoriteButton.image(for: .normal) == UIImage(systemName: CellConstants.Images.bookmarkFill))
-        let newImageName = isFavorite ? CellConstants.Images.bookmark : CellConstants.Images.bookmarkFill
-        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
 }

@@ -44,7 +44,7 @@ final class UniversityInteractor: UniversityBusinessLogic, UniversityDataStore {
             isFavorite: request.isFavorite
         ) { [weak self] result in
             switch result {
-            case .success(let university):
+            case .success:
                 let response = University.Favorite.Response(
                     error: nil
                 )

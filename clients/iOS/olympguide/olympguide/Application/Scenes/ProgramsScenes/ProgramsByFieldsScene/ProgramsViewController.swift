@@ -38,7 +38,7 @@ fileprivate enum Constants {
     }
 }
 
-class ProgramsByFieldsViewController: UIViewController, MainVC {
+class ProgramsViewController: UIViewController, MainVC {
     
     // MARK: - VIP
     var interactor: (ProgramsDataStore & ProgramsBusinessLogic)?
@@ -47,7 +47,8 @@ class ProgramsByFieldsViewController: UIViewController, MainVC {
     // MARK: - Variables
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
-    private let universityID: Int
+    private let university: UniversityModel
+    private let titleText: String
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
@@ -59,8 +60,9 @@ class ProgramsByFieldsViewController: UIViewController, MainVC {
     
     private var groupOfProgramsViewModel: [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
     
-    init(for universityID: Int) {
-        self.universityID = universityID
+    init(for university: UniversityModel, with title: String) {
+        self.university = university
+        self.titleText = title
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -77,15 +79,19 @@ class ProgramsByFieldsViewController: UIViewController, MainVC {
         configureRefreshControl()
         configureTableView()
         
-        let request = Programs.Load.Request(params: [], universityID: 1)
+        let request = Programs.Load.Request(
+            params: [],
+            universityID: university.universityID
+        )
         interactor?.loadPrograms(with: request)
         
         let backItem = UIBarButtonItem(
-            title: Constants.Strings.backButtonTitle,
+            title: titleText,
             style: .plain,
             target: nil,
             action: nil
         )
+        navigationItem.largeTitleDisplayMode = .always
         navigationItem.backBarButtonItem = backItem
         
         if #available(iOS 15.0, *) {
@@ -94,7 +100,7 @@ class ProgramsByFieldsViewController: UIViewController, MainVC {
     }
     
     private func configureNavigationBar() {
-        navigationItem.title = Constants.Strings.fieldsTitle
+        navigationItem.title = titleText
         
         if let navigationController = self.navigationController as? NavigationBarViewController {
             navigationController.searchButtonPressed = { [weak self] _ in
@@ -165,7 +171,7 @@ class ProgramsByFieldsViewController: UIViewController, MainVC {
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
-extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDelegate {
+extension ProgramsViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
         return groupOfProgramsViewModel.count
     }
@@ -188,6 +194,14 @@ extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDele
         
         let fieldViewModel = groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
         cell.configure(with: fieldViewModel)
+        
+        let totalRows = tableView.numberOfRows(inSection: indexPath.section)
+        let isLastCell = indexPath.row == totalRows - 1
+        
+        if isLastCell {
+            cell.hideSeparator()
+        }
+        
         return cell
     }
     
@@ -196,10 +210,6 @@ extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDele
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-//        guard let fieldModel = interactor?.groupsOfFields[indexPath.section].fields[indexPath.row] else {
-//            return
-//        }
-//        router?.routeToDetails(for: fieldModel)
     }
     
     func tableView(
@@ -238,7 +248,7 @@ extension ProgramsByFieldsViewController: UITableViewDataSource, UITableViewDele
 }
 
 // MARK: - FilterSortViewDelegate
-extension ProgramsByFieldsViewController: FilterSortViewDelegate {
+extension ProgramsViewController: FilterSortViewDelegate {
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
     }
     
@@ -248,7 +258,7 @@ extension ProgramsByFieldsViewController: FilterSortViewDelegate {
     }
 }
 
-extension ProgramsByFieldsViewController: ProgramsDisplayLogic {
+extension ProgramsViewController: ProgramsDisplayLogic {
     func displayLoadProgramsResult(with viewModel: Programs.Load.ViewModel) {
         groupOfProgramsViewModel = viewModel.groupsOfPrograms
         DispatchQueue.main.async {
