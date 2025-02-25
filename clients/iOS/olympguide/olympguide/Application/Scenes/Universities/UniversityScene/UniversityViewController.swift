@@ -48,6 +48,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     let logo: String
     let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
     let emailButton: UIInformationButton = UIInformationButton(type: .email)
+    let university: UniversityModel
     
     let tableView = UITableView(frame: .zero, style: .plain)
     
@@ -58,7 +59,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         self.universityID = university.universityID
         self.isFavorite = university.like
         self.startIsFavorite = university.like
-        
+        self.university = university
         super.init(nibName: nil, bundle: nil)
         
         self.nameLabel.text = university.name
@@ -276,9 +277,9 @@ extension UniversityViewController : UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         switch indexPath.row {
         case 0:
-            router?.routeToProgramsByFields(universityID: universityID)
+            router?.routeToProgramsByFields(for: university)
         case 1:
-            break
+            router?.routeToProgramsByFaculties(for: university)
         default:
             break
         }
