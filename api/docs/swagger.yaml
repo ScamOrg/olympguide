@@ -142,7 +142,6 @@ definitions:
     properties:
       code:
         description: HTTP-код ошибки
-        example: 400
         type: integer
       details:
         additionalProperties: true
@@ -150,11 +149,9 @@ definitions:
         type: object
       message:
         description: Сообщение об ошибке
-        example: Invalid request data
         type: string
       type:
         description: Тип ошибки
-        example: InvalidRequest
         type: string
     type: object
 info:
@@ -168,109 +165,6 @@ info:
   title: OlympGuide API
   version: "1.0"
 paths:
-  /api/v1/university/{id}/programs/by-faculty:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает список программ, распределенных по факультетам, с возможностью
-        фильтрации по предметам, уровню образования и поисковому запросу
-      parameters:
-      - description: ID университета
-        in: path
-        name: id
-        required: true
-        type: string
-      - collectionFormat: csv
-        description: 'Уровень образования (например: Бакалавриат, Магистратура)'
-        in: query
-        items:
-          type: string
-        name: degree
-        type: array
-      - collectionFormat: csv
-        description: 'Предметы ЕГЭ (например: Русский язык, Математика)'
-        in: query
-        items:
-          type: string
-        name: subject
-        type: array
-      - description: 'Поиск по названию программы (например: Программная инженерия)'
-        in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.FacultyProgramTree'
-            type: array
-        "400":
-          description: Некорректные параметры запроса
-          schema:
-            $ref: '#/definitions/errs.AppError'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/errs.AppError'
-      summary: Получить образовательные программы университета, сгруппированные по
-        факультетам
-      tags:
-      - programs
-  /api/v1/university/{id}/programs/by-field:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает список программ, распределенных по группам направлений
-        подготовки, с возможностью фильтрации по предметам, уровню образования и поисковому
-        запросу
-      parameters:
-      - description: ID университета
-        in: path
-        name: id
-        required: true
-        type: string
-      - collectionFormat: csv
-        description: 'Уровень образования (например: Бакалавриат, Магистратура)'
-        in: query
-        items:
-          type: string
-        name: degree
-        type: array
-      - collectionFormat: csv
-        description: 'Предметы ЕГЭ (например: Русский язык, Математика)'
-        in: query
-        items:
-          type: string
-        name: subject
-        type: array
-      - description: 'Поиск по названию программы (например: Программная инженерия)'
-        in: query
-        name: search
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.GroupProgramTree'
-            type: array
-        "400":
-          description: Некорректные параметры запроса
-          schema:
-            $ref: '#/definitions/errs.AppError'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/errs.AppError'
-      summary: Получить образовательные программы университета, сгруппированные по
-        направлениям подготовки
-      tags:
-      - programs
   /fields:
     get:
       consumes:
@@ -406,4 +300,107 @@ paths:
       summary: Получение списка университетов
       tags:
       - Университеты
+  /university/{id}/programs/by-faculty:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список программ, распределенных по факультетам, с возможностью
+        фильтрации по предметам, уровню образования и поисковому запросу
+      parameters:
+      - description: ID университета
+        in: path
+        name: id
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 'Уровень образования (например: Бакалавриат, Магистратура)'
+        in: query
+        items:
+          type: string
+        name: degree
+        type: array
+      - collectionFormat: csv
+        description: 'Предметы ЕГЭ (например: Русский язык, Математика)'
+        in: query
+        items:
+          type: string
+        name: subject
+        type: array
+      - description: 'Поиск по названию программы (например: Программная инженерия)'
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.FacultyProgramTree'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получить образовательные программы университета, сгруппированные по
+        факультетам
+      tags:
+      - Программы в университете с группировкой
+  /university/{id}/programs/by-field:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список программ, распределенных по группам направлений
+        подготовки, с возможностью фильтрации по предметам, уровню образования и поисковому
+        запросу
+      parameters:
+      - description: ID университета
+        in: path
+        name: id
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 'Уровень образования (например: Бакалавриат, Магистратура)'
+        in: query
+        items:
+          type: string
+        name: degree
+        type: array
+      - collectionFormat: csv
+        description: 'Предметы ЕГЭ (например: Русский язык, Математика)'
+        in: query
+        items:
+          type: string
+        name: subject
+        type: array
+      - description: 'Поиск по названию программы (например: Программная инженерия)'
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.GroupProgramTree'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получить образовательные программы университета, сгруппированные по
+        направлениям подготовки
+      tags:
+      - Программы в университете с группировкой
 swagger: "2.0"

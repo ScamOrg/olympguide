@@ -22,152 +22,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/university/{id}/programs/by-faculty": {
-            "get": {
-                "description": "Возвращает список программ, распределенных по факультетам, с возможностью фильтрации по предметам, уровню образования и поисковому запросу",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "programs"
-                ],
-                "summary": "Получить образовательные программы университета, сгруппированные по факультетам",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID университета",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Уровень образования (например: Бакалавриат, Магистратура)",
-                        "name": "degree",
-                        "in": "query"
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Предметы ЕГЭ (например: Русский язык, Математика)",
-                        "name": "subject",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Поиск по названию программы (например: Программная инженерия)",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.FacultyProgramTree"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректные параметры запроса",
-                        "schema": {
-                            "$ref": "#/definitions/errs.AppError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "$ref": "#/definitions/errs.AppError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/university/{id}/programs/by-field": {
-            "get": {
-                "description": "Возвращает список программ, распределенных по группам направлений подготовки, с возможностью фильтрации по предметам, уровню образования и поисковому запросу",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "programs"
-                ],
-                "summary": "Получить образовательные программы университета, сгруппированные по направлениям подготовки",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID университета",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Уровень образования (например: Бакалавриат, Магистратура)",
-                        "name": "degree",
-                        "in": "query"
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Предметы ЕГЭ (например: Русский язык, Математика)",
-                        "name": "subject",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Поиск по названию программы (например: Программная инженерия)",
-                        "name": "search",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.GroupProgramTree"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректные параметры запроса",
-                        "schema": {
-                            "$ref": "#/definitions/errs.AppError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "$ref": "#/definitions/errs.AppError"
-                        }
-                    }
-                }
-            }
-        },
         "/fields": {
             "get": {
                 "description": "Возвращает список групп и их направлений с возможностью фильтрации по уровню образования и поиску.",
@@ -351,6 +205,152 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/university/{id}/programs/by-faculty": {
+            "get": {
+                "description": "Возвращает список программ, распределенных по факультетам, с возможностью фильтрации по предметам, уровню образования и поисковому запросу",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Программы в университете с группировкой"
+                ],
+                "summary": "Получить образовательные программы университета, сгруппированные по факультетам",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID университета",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Уровень образования (например: Бакалавриат, Магистратура)",
+                        "name": "degree",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Предметы ЕГЭ (например: Русский язык, Математика)",
+                        "name": "subject",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поиск по названию программы (например: Программная инженерия)",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.FacultyProgramTree"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные параметры запроса",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/university/{id}/programs/by-field": {
+            "get": {
+                "description": "Возвращает список программ, распределенных по группам направлений подготовки, с возможностью фильтрации по предметам, уровню образования и поисковому запросу",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Программы в университете с группировкой"
+                ],
+                "summary": "Получить образовательные программы университета, сгруппированные по направлениям подготовки",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID университета",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Уровень образования (например: Бакалавриат, Магистратура)",
+                        "name": "degree",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Предметы ЕГЭ (например: Русский язык, Математика)",
+                        "name": "subject",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поиск по названию программы (например: Программная инженерия)",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.GroupProgramTree"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные параметры запроса",
                         "schema": {
                             "$ref": "#/definitions/errs.AppError"
                         }
@@ -562,8 +562,7 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "description": "HTTP-код ошибки",
-                    "type": "integer",
-                    "example": 400
+                    "type": "integer"
                 },
                 "details": {
                     "description": "Дополнительные сведения об ошибке (если есть)",
@@ -572,13 +571,11 @@ const docTemplate = `{
                 },
                 "message": {
                     "description": "Сообщение об ошибке",
-                    "type": "string",
-                    "example": "Invalid request data"
+                    "type": "string"
                 },
                 "type": {
                     "description": "Тип ошибки",
-                    "type": "string",
-                    "example": "InvalidRequest"
+                    "type": "string"
                 }
             }
         }
