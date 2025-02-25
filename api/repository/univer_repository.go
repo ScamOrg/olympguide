@@ -49,13 +49,15 @@ func (u *PgUniverRepo) GetUniver(universityID string, userID any) (*model.Univer
 func (u *PgUniverRepo) GetUnivers(search string, regions []string, userID any) ([]model.University, error) {
 	var universities []model.University
 	query := u.db.Debug().Preload("Region").
-		Joins("LEFT JOIN olympguide.liked_universities lu ON lu.university_id = olympguide.university.university_id AND lu.user_id = ?", userID).
+		Joins("LEFT JOIN olympguide.liked_universities lu "+
+			"ON lu.university_id = olympguide.university.university_id AND lu.user_id = ?", userID).
+		Joins("LEFT JOIN olympguide.region r ON r.region_id = olympguide.university.region_id").
 		Select("olympguide.university.*, CASE WHEN lu.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like")
 	if search != "" {
 		query = query.Where("name ILIKE ? OR short_name ILIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 	if len(regions) > 0 {
-		query = query.Where("Region.name IN (?)", regions)
+		query = query.Where("r.name IN (?)", regions)
 	}
 	if err := query.Order("popularity DESC").Find(&universities).Error; err != nil {
 		return nil, err

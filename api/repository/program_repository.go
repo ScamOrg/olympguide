@@ -62,12 +62,9 @@ func (p *PgProgramRepo) GetUniverProgramsWithFaculty(univerID string, userID any
 		Preload("Field").
 		Preload("Faculty").
 		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
+		Joins("LEFT JOIN olympguide.field_of_study f ON f.field_id = olympguide.educational_program.field_id").
 		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
 		Where("university_id = ?", univerID)
-
-	if params.Search != "" {
-		query = query.Where("faculty.name ILIKE ? ", "%"+params.Search+"%")
-	}
 
 	applyProgramTreeFilters(query, params)
 	err := query.Order("faculty_id, field_id").
@@ -85,11 +82,6 @@ func (p *PgProgramRepo) GetUniverProgramsWithGroup(univerID string, userID any, 
 		Joins("LEFT JOIN olympguide.field_of_study f ON f.field_id = olympguide.educational_program.field_id").
 		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
 		Where("university_id = ?", univerID)
-
-	if params.Search != "" {
-		query = query.Where("field.group.code ILIKE ? OR field.group.name ILIKE ?",
-			"%"+params.Search+"%", "%"+params.Search+"%")
-	}
 
 	applyProgramTreeFilters(query, params)
 	err := query.Order("f.group_id, f.code").Find(&programs).Error
@@ -166,21 +158,25 @@ func applyProgramTreeFilters(query *gorm.DB, params *dto.ProgramTreeQueryParams)
 	}
 
 	if params.Search != "" {
-		query = query.Where("name ILIKE ? OR field.name ILIKE ? OR field.code ILIKE ?",
-			"%"+params.Search+"%", "%"+params.Search+"%", "%"+params.Search+"%")
+		query = query.Where("olympguide.educational_program.name ILIKE ?", "%"+params.Search+"%")
 	}
 
 	if len(params.Subjects) > 0 {
-		query = query.Where("NOT EXISTS "+
-			"(SELECT 1 FROM olympguide.program_required_subjects prs "+
-			"JOIN olympguide.subjects rs ON rs.subject_id = prs.subject_id "+
-			"WHERE prs.program_id = olympguide.educational_program.program_id AND rs.name NOT IN (?))",
-			params.Subjects)
-		query = query.Where("EXISTS "+
-			"(SELECT 1 FROM olympguide.program_optional_subjects pos "+
-			"JOIN olympguide.subjects os ON os.subject_id = pos.subject_id "+
-			"WHERE pos.program_id = olympguide.educational_program.program_id AND os.name IN (?))",
-			params.Subjects)
+		query = query.Where(`NOT EXISTS (
+			SELECT 1 FROM olympguide.program_required_subjects prs
+			JOIN olympguide.subject rs ON rs.subject_id = prs.subject_id
+			WHERE prs.program_id = olympguide.educational_program.program_id AND rs.name NOT IN (?)
+		)`, params.Subjects)
+		query = query.Where(`NOT EXISTS (
+			SELECT 1 FROM olympguide.program_optional_subjects pos 
+        	JOIN olympguide.subject os ON os.subject_id = pos.subject_id 
+        	WHERE pos.program_id = olympguide.educational_program.program_id
+		) OR EXISTS (
+        	SELECT 1 FROM olympguide.program_optional_subjects pos 
+        	JOIN olympguide.subject os ON os.subject_id = pos.subject_id 
+        	WHERE pos.program_id = olympguide.educational_program.program_id 
+        	AND os.name IN (?)
+    	)`, params.Subjects)
 	}
 	return query
 }
