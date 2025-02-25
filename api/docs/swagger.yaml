@@ -181,28 +181,23 @@ paths:
         required: true
         type: string
       - collectionFormat: csv
-        description: Уровень образования
-        example:
-        - Бакалавриат
+        description: 'Уровень образования (например: Бакалавриат, Магистратура)'
         in: query
         items:
           type: string
         name: degree
         type: array
-      - description: Поиск по названию образовательной программы
-        example: Программная инженерия
-        in: query
-        name: search
-        type: string
       - collectionFormat: csv
-        description: Предметы ЕГЭ
-        example:
-        - Русский язык
+        description: 'Предметы ЕГЭ (например: Русский язык, Математика)'
         in: query
         items:
           type: string
         name: subject
         type: array
+      - description: 'Поиск по названию программы (например: Программная инженерия)'
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -238,28 +233,23 @@ paths:
         required: true
         type: string
       - collectionFormat: csv
-        description: Уровень образования
-        example:
-        - Бакалавриат
+        description: 'Уровень образования (например: Бакалавриат, Магистратура)'
         in: query
         items:
           type: string
         name: degree
         type: array
-      - description: Поиск по названию образовательной программы
-        example: Программная инженерия
-        in: query
-        name: search
-        type: string
       - collectionFormat: csv
-        description: Предметы ЕГЭ
-        example:
-        - Русский язык
+        description: 'Предметы ЕГЭ (например: Русский язык, Математика)'
         in: query
         items:
           type: string
         name: subject
         type: array
+      - description: 'Поиск по названию программы (например: Программная инженерия)'
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:

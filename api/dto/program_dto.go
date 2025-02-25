@@ -39,7 +39,7 @@ type ProgramBenefitInfo struct {
 }
 
 type ProgramTreeQueryParams struct {
-	Degrees  []string `form:"degree" example:"Бакалавриат"`           // Уровень образования
-	Subjects []string `form:"subject" example:"Русский язык"`         // Предметы ЕГЭ
-	Search   string   `form:"search" example:"Программная инженерия"` // Поиск по названию образовательной программы
+	Degrees  []string `form:"degree"`
+	Subjects []string `form:"subject"`
+	Search   string   `form:"search"`
 }

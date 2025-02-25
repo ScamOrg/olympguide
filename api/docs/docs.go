@@ -49,18 +49,8 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "example": [
-                            "Бакалавриат"
-                        ],
-                        "description": "Уровень образования",
+                        "description": "Уровень образования (например: Бакалавриат, Магистратура)",
                         "name": "degree",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "example": "Программная инженерия",
-                        "description": "Поиск по названию образовательной программы",
-                        "name": "search",
                         "in": "query"
                     },
                     {
@@ -69,11 +59,14 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "example": [
-                            "Русский язык"
-                        ],
-                        "description": "Предметы ЕГЭ",
+                        "description": "Предметы ЕГЭ (например: Русский язык, Математика)",
                         "name": "subject",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поиск по названию программы (например: Программная инженерия)",
+                        "name": "search",
                         "in": "query"
                     }
                 ],
@@ -129,18 +122,8 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "example": [
-                            "Бакалавриат"
-                        ],
-                        "description": "Уровень образования",
+                        "description": "Уровень образования (например: Бакалавриат, Магистратура)",
                         "name": "degree",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "example": "Программная инженерия",
-                        "description": "Поиск по названию образовательной программы",
-                        "name": "search",
                         "in": "query"
                     },
                     {
@@ -149,11 +132,14 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "example": [
-                            "Русский язык"
-                        ],
-                        "description": "Предметы ЕГЭ",
+                        "description": "Предметы ЕГЭ (например: Русский язык, Математика)",
                         "name": "subject",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поиск по названию программы (например: Программная инженерия)",
+                        "name": "search",
                         "in": "query"
                     }
                 ],
