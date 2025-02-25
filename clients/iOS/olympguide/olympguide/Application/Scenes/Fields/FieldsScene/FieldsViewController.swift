@@ -202,7 +202,11 @@ extension FieldsViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView,
                    viewForHeaderInSection section: Int) -> UIView? {
-        let headerButton = FieldsTableButton(name: fields[section].name, code: fields[section].code)
+        let headerButton = FieldsTableButton(
+            name: fields[section].name,
+            code: fields[section].code,
+            isExpanded: fields[section].isExpanded
+        )
         headerButton.tag = section
         headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
         
