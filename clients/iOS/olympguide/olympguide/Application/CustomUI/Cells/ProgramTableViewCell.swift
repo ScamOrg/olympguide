@@ -144,7 +144,9 @@ final class ProgramTableViewCell: UITableViewCell {
         separatorLine.pinBottom(to: contentView.bottomAnchor)
     }
     
-    func configure(with viewModel: ProgramViewModel) {
+    func configure(
+        with viewModel: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel
+    ) {
         informationStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let code = viewModel.code
         for char in code {

@@ -40,14 +40,17 @@ final class ProgramViewController : UIViewController {
     let university: UniversityModel
     let codeLabel: UILabel = UILabel()
     let programNameLabel = UILabel()
-    let program: ProgramViewModel
+    let program: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel
     
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
     private let subjectsStack: SubjectsStack = SubjectsStack()
     
-    init(for program: ProgramViewModel, by university: UniversityModel) {
+    init(
+        for program: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel,
+        by university: UniversityModel
+    ) {
         self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.isFavorite = university.like

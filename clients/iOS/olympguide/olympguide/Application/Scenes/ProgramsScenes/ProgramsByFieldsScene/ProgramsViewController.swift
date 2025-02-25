@@ -48,6 +48,7 @@ class ProgramsViewController: UIViewController, MainVC {
     private let tableView = UITableView()
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     private let university: UniversityModel
+    private let titleText: String
     
     private lazy var filterSortView: FilterSortView = {
         let view = FilterSortView(
@@ -59,8 +60,9 @@ class ProgramsViewController: UIViewController, MainVC {
     
     private var groupOfProgramsViewModel: [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
     
-    init(for university: UniversityModel) {
+    init(for university: UniversityModel, with title: String) {
         self.university = university
+        self.titleText = title
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -84,7 +86,7 @@ class ProgramsViewController: UIViewController, MainVC {
         interactor?.loadPrograms(with: request)
         
         let backItem = UIBarButtonItem(
-            title: Constants.Strings.backButtonTitle,
+            title: titleText,
             style: .plain,
             target: nil,
             action: nil
@@ -98,7 +100,7 @@ class ProgramsViewController: UIViewController, MainVC {
     }
     
     private func configureNavigationBar() {
-        navigationItem.title = Constants.Strings.fieldsTitle
+        navigationItem.title = titleText
         
         if let navigationController = self.navigationController as? NavigationBarViewController {
             navigationController.searchButtonPressed = { [weak self] _ in

@@ -9,7 +9,10 @@ import UIKit
 
 final class ProgramsByFieldsAssembly {
     static func build(for univesity: UniversityModel) -> UIViewController {
-        let viewController = ProgramsViewController(for: univesity)
+        let viewController = ProgramsViewController(
+            for: univesity,
+            with: "Направления"
+        )
         let interactor = ProgramInteractor()
         let presenter = ProgramPresenter()
         let router = ProgramsRouter()
@@ -28,7 +31,10 @@ final class ProgramsByFieldsAssembly {
 
 final class ProgramsByFacultiesAssembly {
     static func build(for univesity: UniversityModel) -> UIViewController {
-        let viewController = ProgramsViewController(for: univesity)
+        let viewController = ProgramsViewController(
+            for: univesity,
+            with: "Факультеты"
+        )
         let interactor = ProgramInteractor()
         let presenter = ProgramPresenter()
         let router = ProgramsRouter()

@@ -22,7 +22,11 @@ final class ProgramPresenter : ProgramsPresentationLogic {
                     name: groupOfPrograms.name,
                     code: groupOfPrograms.code ?? "",
                     programs: groupOfPrograms.programs.map { program in
-                        ProgramViewModel(
+                        Programs
+                            .Load
+                            .ViewModel
+                            .GroupOfProgramsViewModel
+                            .ProgramViewModel(
                             name: program.name,
                             code: program.field,
                             budgetPlaces: program.budgetPlaces,
