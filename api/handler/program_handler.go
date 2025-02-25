@@ -37,9 +37,7 @@ func (p *ProgramHandler) GetProgramsByFaculty(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID университета"
-// @Param degree query []string false "Уровень образования" example("Бакалавриат")
-// @Param subject query []string false "Предметы ЕГЭ" example("Русский язык")
-// @Param search query string false "Поиск по названию программы" example("Программная инженерия")
+// @Param filters query dto.ProgramTreeQueryParams false "Фильтры"
 // @Success 200 {object} []dto.FacultyProgramTree
 // @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
 // @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
@@ -69,9 +67,7 @@ func (p *ProgramHandler) GetUniverProgramsWithFaculty(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID университета"
-// @Param degree query []string false "Уровень образования" example("Бакалавриат")
-// @Param subject query []string false "Предметы ЕГЭ" example("Русский язык")
-// @Param search query string false "Поиск по названию программы" example("Программная инженерия")
+// @Param filters query dto.ProgramTreeQueryParams false "Фильтры"
 // @Success 200 {object} []dto.GroupProgramTree
 // @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
 // @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"

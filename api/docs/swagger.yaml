@@ -182,25 +182,27 @@ paths:
         type: string
       - collectionFormat: csv
         description: Уровень образования
-        example: '"Бакалавриат"'
+        example:
+        - Бакалавриат
         in: query
         items:
           type: string
         name: degree
         type: array
+      - description: Поиск по названию образовательной программы
+        example: Программная инженерия
+        in: query
+        name: search
+        type: string
       - collectionFormat: csv
         description: Предметы ЕГЭ
-        example: '"Русский язык"'
+        example:
+        - Русский язык
         in: query
         items:
           type: string
         name: subject
         type: array
-      - description: Поиск по названию программы
-        example: '"Программная инженерия"'
-        in: query
-        name: search
-        type: string
       produces:
       - application/json
       responses:
@@ -237,25 +239,27 @@ paths:
         type: string
       - collectionFormat: csv
         description: Уровень образования
-        example: '"Бакалавриат"'
+        example:
+        - Бакалавриат
         in: query
         items:
           type: string
         name: degree
         type: array
+      - description: Поиск по названию образовательной программы
+        example: Программная инженерия
+        in: query
+        name: search
+        type: string
       - collectionFormat: csv
         description: Предметы ЕГЭ
-        example: '"Русский язык"'
+        example:
+        - Русский язык
         in: query
         items:
           type: string
         name: subject
         type: array
-      - description: Поиск по названию программы
-        example: '"Программная инженерия"'
-        in: query
-        name: search
-        type: string
       produces:
       - application/json
       responses:
