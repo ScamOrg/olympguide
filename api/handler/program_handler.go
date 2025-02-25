@@ -31,10 +31,16 @@ func (p *ProgramHandler) GetProgramsByFaculty(c *gin.Context) {
 }
 
 func (p *ProgramHandler) GetUniverProgramsWithFaculty(c *gin.Context) {
+	var queryParams dto.ProgramTreeQueryParams
+	if err := c.ShouldBindQuery(&queryParams); err != nil {
+		errs.HandleError(c, errs.InvalidRequest)
+		return
+	}
+
 	univerID := c.Param("id")
 	userID, _ := c.Get(constants.ContextUserID)
 
-	facultyTree, err := p.programService.GetUniverProgramsByFaculty(univerID, userID)
+	facultyTree, err := p.programService.GetUniverProgramsByFaculty(univerID, userID, &queryParams)
 	if err != nil {
 		errs.HandleError(c, err)
 		return
@@ -43,10 +49,16 @@ func (p *ProgramHandler) GetUniverProgramsWithFaculty(c *gin.Context) {
 }
 
 func (p *ProgramHandler) GetUniverProgramsWithGroup(c *gin.Context) {
+	var queryParams dto.ProgramTreeQueryParams
+	if err := c.ShouldBindQuery(&queryParams); err != nil {
+		errs.HandleError(c, errs.InvalidRequest)
+		return
+	}
+
 	univerID := c.Param("id")
 	userID, _ := c.Get(constants.ContextUserID)
 
-	groupTree, err := p.programService.GetUniverProgramsByField(univerID, userID)
+	groupTree, err := p.programService.GetUniverProgramsByField(univerID, userID, &queryParams)
 	if err != nil {
 		errs.HandleError(c, err)
 		return

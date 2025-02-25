@@ -37,7 +37,7 @@ func (u *UniverHandler) GetUniver(c *gin.Context) {
 // @Tags Университеты
 // @Accept json
 // @Produce json
-// @Param region_id query []string false "Фильтр по ID регионов" collectionFormat(multi)
+// @Param region_id query []string false "Фильтр по названию регионов" collectionFormat(multi)
 // @Param from_my_region query boolean false "Фильтр: только университеты из региона пользователя"
 // @Param search query string false "Поиск по названию или сокращенному названию"
 // @Success 200 {array} dto.UniversityShortResponse "Список университетов"

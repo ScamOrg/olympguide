@@ -8,7 +8,7 @@ import (
 type IUniverRepo interface {
 	UniverExists(univerID uint) bool
 	GetUniver(universityID string, userID any) (*model.University, error)
-	GetUnivers(search string, regionIDs []string, userID any) ([]model.University, error)
+	GetUnivers(search string, regions []string, userID any) ([]model.University, error)
 	GetLikedUnivers(userID uint) ([]model.University, error)
 	NewUniver(univer *model.University) (uint, error)
 	UpdateUniver(univer *model.University) error
@@ -46,7 +46,7 @@ func (u *PgUniverRepo) GetUniver(universityID string, userID any) (*model.Univer
 	return &university, nil
 }
 
-func (u *PgUniverRepo) GetUnivers(search string, regionIDs []string, userID any) ([]model.University, error) {
+func (u *PgUniverRepo) GetUnivers(search string, regions []string, userID any) ([]model.University, error) {
 	var universities []model.University
 	query := u.db.Debug().Preload("Region").
 		Joins("LEFT JOIN olympguide.liked_universities lu ON lu.university_id = olympguide.university.university_id AND lu.user_id = ?", userID).
@@ -54,8 +54,8 @@ func (u *PgUniverRepo) GetUnivers(search string, regionIDs []string, userID any)
 	if search != "" {
 		query = query.Where("name ILIKE ? OR short_name ILIKE ?", "%"+search+"%", "%"+search+"%")
 	}
-	if len(regionIDs) > 0 {
-		query = query.Where("region_id IN (?)", regionIDs)
+	if len(regions) > 0 {
+		query = query.Where("Region.name IN (?)", regions)
 	}
 	if err := query.Order("popularity DESC").Find(&universities).Error; err != nil {
 		return nil, err

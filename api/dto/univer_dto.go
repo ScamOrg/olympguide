@@ -24,7 +24,7 @@ type UniversityShortResponse struct {
 
 // UniversityQueryParams представляет параметры запроса для поиска университетов.
 type UniversityQueryParams struct {
-	RegionIDs    []string `form:"region_id"`      // Список ID регионов для фильтрации
+	Regions      []string `form:"region"`         // Список регионов для фильтрации
 	FromMyRegion bool     `form:"from_my_region"` // Искать университеты только из региона пользователя
 	Search       string   `form:"search"`         // Поиск по названию или сокращенному названию
 	UserID       any      `swaggerignore:"true"`  // ID пользователя (не передаётся в запросе)
