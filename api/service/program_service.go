@@ -10,8 +10,8 @@ import (
 
 type IProgramService interface {
 	GetProgramsByFacultyID(facultyID string, userID any) ([]dto.ProgramShortResponse, error)
-	GetUniverProgramsByFaculty(univerID string, userID any) ([]dto.FacultyProgramTree, error)
-	GetUniverProgramsByField(univerID string, userID any) ([]dto.GroupProgramTree, error)
+	GetUniverProgramsByFaculty(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]dto.FacultyProgramTree, error)
+	GetUniverProgramsByField(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]dto.GroupProgramTree, error)
 	LikeProgram(programID string, userID uint) (bool, error)
 	DislikeProgram(programID string, userID uint) (bool, error)
 	GetLikedPrograms(userID uint) ([]dto.ProgramResponse, error)
@@ -111,16 +111,16 @@ func (p *ProgramService) GetProgramsByFacultyID(facultyID string, userID any) ([
 	return response, nil
 }
 
-func (p *ProgramService) GetUniverProgramsByFaculty(univerID string, userID any) ([]dto.FacultyProgramTree, error) {
-	programs, err := p.programRepo.GetUniverProgramsWithFaculty(univerID, userID)
+func (p *ProgramService) GetUniverProgramsByFaculty(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]dto.FacultyProgramTree, error) {
+	programs, err := p.programRepo.GetUniverProgramsWithFaculty(univerID, userID, params)
 	if err != nil {
 		return nil, err
 	}
 	return newFacultyProgramTree(programs), nil
 }
 
-func (p *ProgramService) GetUniverProgramsByField(univerID string, userID any) ([]dto.GroupProgramTree, error) {
-	programs, err := p.programRepo.GetUniverProgramsWithGroup(univerID, userID)
+func (p *ProgramService) GetUniverProgramsByField(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]dto.GroupProgramTree, error) {
+	programs, err := p.programRepo.GetUniverProgramsWithGroup(univerID, userID, params)
 	if err != nil {
 		return nil, err
 	}
@@ -201,44 +201,54 @@ func newProgramModel(request *dto.ProgramRequest) *model.Program {
 }
 
 func newFacultyProgramTree(programs []model.Program) []dto.FacultyProgramTree {
-	facultyMap := make(map[uint]*dto.FacultyProgramTree)
-	for i := range programs {
-		if _, ok := facultyMap[programs[i].FacultyID]; !ok {
-			facultyMap[programs[i].FacultyID] = &dto.FacultyProgramTree{
-				FacultyID: programs[i].FacultyID,
-				Name:      programs[i].Faculty.Name,
-				Programs:  []dto.ProgramShortResponse{},
+	var result []dto.FacultyProgramTree
+	var currentTree *dto.FacultyProgramTree
+	var currentFacultyID uint
+
+	for _, program := range programs {
+		if program.FacultyID != currentFacultyID {
+			currentFacultyID = program.FacultyID
+			tree := dto.FacultyProgramTree{
+				FacultyID: program.FacultyID,
+				Name:      program.Faculty.Name,
 			}
+			result = append(result, tree)
+			currentTree = &result[len(result)-1]
 		}
 
-		facultyMap[programs[i].FacultyID].Programs = append(facultyMap[programs[i].FacultyID].Programs,
-			*newProgramShortResponse(&programs[i]))
+		if currentTree == nil {
+			continue
+		}
+
+		currentTree.Programs = append(currentTree.Programs, *newProgramShortResponse(&program))
 	}
-	facultyProgramTrees := make([]dto.FacultyProgramTree, 0, len(facultyMap)) // Предварительное выделение памяти
-	for _, facultyResponse := range facultyMap {
-		facultyProgramTrees = append(facultyProgramTrees, *facultyResponse)
-	}
-	return facultyProgramTrees
+
+	return result
 }
 
 func newGroupProgramTree(programs []model.Program) []dto.GroupProgramTree {
-	groupMap := make(map[uint]*dto.GroupProgramTree)
-	for i := range programs {
-		if _, ok := groupMap[programs[i].Field.GroupID]; !ok {
-			groupMap[programs[i].Field.GroupID] = &dto.GroupProgramTree{
-				GroupID:  programs[i].Field.GroupID,
-				Name:     programs[i].Field.Name,
-				Code:     programs[i].Field.Code,
-				Programs: []dto.ProgramShortResponse{},
+	var result []dto.GroupProgramTree
+	var currentTree *dto.GroupProgramTree
+	var currentGroupID uint
+
+	for _, program := range programs {
+		if program.Field.GroupID != currentGroupID {
+			currentGroupID = program.Field.GroupID
+			tree := dto.GroupProgramTree{
+				GroupID: program.Field.GroupID,
+				Name:    program.Field.Name,
+				Code:    program.Field.Group.Code,
 			}
+			result = append(result, tree)
+			currentTree = &result[len(result)-1]
 		}
 
-		groupMap[programs[i].Field.GroupID].Programs = append(groupMap[programs[i].Field.GroupID].Programs,
-			*newProgramShortResponse(&programs[i]))
+		if currentTree == nil {
+			continue
+		}
+
+		currentTree.Programs = append(currentTree.Programs, *newProgramShortResponse(&program))
 	}
-	groupProgramTrees := make([]dto.GroupProgramTree, 0, len(groupMap))
-	for _, groupResponse := range groupMap {
-		groupProgramTrees = append(groupProgramTrees, *groupResponse)
-	}
-	return groupProgramTrees
+
+	return result
 }

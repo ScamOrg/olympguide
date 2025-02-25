@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"api/dto"
 	"api/model"
 	"gorm.io/gorm"
 )
@@ -15,8 +16,8 @@ type IProgramRepo interface {
 	LikeProgram(programID uint, userID uint) error
 	DislikeProgram(programID uint, userID uint) error
 	GetSubjects() ([]model.Subject, error)
-	GetUniverProgramsWithFaculty(univerID string, userID any) ([]model.Program, error)
-	GetUniverProgramsWithGroup(univerID string, userID any) ([]model.Program, error)
+	GetUniverProgramsWithFaculty(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]model.Program, error)
+	GetUniverProgramsWithGroup(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]model.Program, error)
 	ChangeProgramPopularity(program *model.Program, value int)
 }
 
@@ -54,31 +55,36 @@ func (p *PgProgramRepo) GetProgramsByFacultyID(facultyID string, userID any) ([]
 	return programs, err
 }
 
-func (p *PgProgramRepo) GetUniverProgramsWithFaculty(univerID string, userID any) ([]model.Program, error) {
+func (p *PgProgramRepo) GetUniverProgramsWithFaculty(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]model.Program, error) {
 	var programs []model.Program
-	err := p.db.Preload("OptionalSubjects").
+	query := p.db.Preload("OptionalSubjects").
 		Preload("RequiredSubjects").
 		Preload("Field").
 		Preload("Faculty").
 		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
+		Joins("LEFT JOIN olympguide.field_of_study f ON f.field_id = olympguide.educational_program.field_id").
 		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
-		Where("university_id = ?", univerID).
-		Order("field_id").
+		Where("university_id = ?", univerID)
+
+	applyProgramTreeFilters(query, params)
+	err := query.Order("faculty_id, field_id").
 		Find(&programs).Error
 	return programs, err
 }
 
-func (p *PgProgramRepo) GetUniverProgramsWithGroup(univerID string, userID any) ([]model.Program, error) {
+func (p *PgProgramRepo) GetUniverProgramsWithGroup(univerID string, userID any, params *dto.ProgramTreeQueryParams) ([]model.Program, error) {
 	var programs []model.Program
-	err := p.db.Preload("OptionalSubjects").
+	query := p.db.Preload("OptionalSubjects").
 		Preload("RequiredSubjects").
 		Preload("Field").
 		Preload("Field.Group").
 		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
+		Joins("LEFT JOIN olympguide.field_of_study f ON f.field_id = olympguide.educational_program.field_id").
 		Select("olympguide.educational_program.*, CASE WHEN lp.user_id IS NOT NULL THEN TRUE ELSE FALSE END as like").
-		Where("university_id = ?", univerID).
-		Order("field_id").
-		Find(&programs).Error
+		Where("university_id = ?", univerID)
+
+	applyProgramTreeFilters(query, params)
+	err := query.Order("f.group_id, f.code").Find(&programs).Error
 	return programs, err
 }
 
@@ -144,4 +150,33 @@ func (p *PgProgramRepo) GetSubjects() ([]model.Subject, error) {
 func (p *PgProgramRepo) ChangeProgramPopularity(program *model.Program, value int) {
 	program.Popularity += value
 	p.db.Save(program)
+}
+
+func applyProgramTreeFilters(query *gorm.DB, params *dto.ProgramTreeQueryParams) *gorm.DB {
+	if len(params.Degrees) > 0 {
+		query = query.Where("f.degree IN (?)", params.Degrees)
+	}
+
+	if params.Search != "" {
+		query = query.Where("olympguide.educational_program.name ILIKE ?", "%"+params.Search+"%")
+	}
+
+	if len(params.Subjects) > 0 {
+		query = query.Where(`NOT EXISTS (
+			SELECT 1 FROM olympguide.program_required_subjects prs
+			JOIN olympguide.subject rs ON rs.subject_id = prs.subject_id
+			WHERE prs.program_id = olympguide.educational_program.program_id AND rs.name NOT IN (?)
+		)`, params.Subjects)
+		query = query.Where(`NOT EXISTS (
+			SELECT 1 FROM olympguide.program_optional_subjects pos 
+        	JOIN olympguide.subject os ON os.subject_id = pos.subject_id 
+        	WHERE pos.program_id = olympguide.educational_program.program_id
+		) OR EXISTS (
+        	SELECT 1 FROM olympguide.program_optional_subjects pos 
+        	JOIN olympguide.subject os ON os.subject_id = pos.subject_id 
+        	WHERE pos.program_id = olympguide.educational_program.program_id 
+        	AND os.name IN (?)
+    	)`, params.Subjects)
+	}
+	return query
 }

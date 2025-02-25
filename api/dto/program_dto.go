@@ -37,3 +37,9 @@ type ProgramBenefitInfo struct {
 	Field           string `json:"field"`
 	UniverShortName string `json:"university"`
 }
+
+type ProgramTreeQueryParams struct {
+	Degrees  []string `form:"degree"`
+	Subjects []string `form:"subject"`
+	Search   string   `form:"search"`
+}

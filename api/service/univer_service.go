@@ -5,7 +5,6 @@ import (
 	"api/model"
 	"api/repository"
 	"api/utils/constants"
-	"strconv"
 )
 
 type IUniverService interface {
@@ -42,10 +41,10 @@ func (u *UniverService) GetUnivers(params *dto.UniversityQueryParams) ([]dto.Uni
 		if err != nil {
 			return nil, err
 		}
-		params.RegionIDs = []string{strconv.Itoa(int(region.RegionID))}
+		params.Regions = []string{region.Name}
 	}
 
-	univers, err := u.univerRepo.GetUnivers(params.Search, params.RegionIDs, params.UserID)
+	univers, err := u.univerRepo.GetUnivers(params.Search, params.Regions, params.UserID)
 	if err != nil {
 		return nil, err
 	}
