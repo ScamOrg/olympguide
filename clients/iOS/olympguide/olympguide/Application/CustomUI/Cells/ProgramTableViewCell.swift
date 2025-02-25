@@ -45,11 +45,14 @@ final class ProgramTableViewCell: UITableViewCell {
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
     private let costLabel: UIInformationLabel = UIInformationLabel()
+    private let subjectsStack: SubjectsStack = SubjectsStack()
     private let separatorLine: UIView = UIView()
     
     // MARK: - Lifecycle
-    override init(style: UITableViewCell.CellStyle,
-                  reuseIdentifier: String?) {
+    override init(
+        style: UITableViewCell.CellStyle,
+        reuseIdentifier: String?
+    ) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureUI()
     }
@@ -65,6 +68,7 @@ final class ProgramTableViewCell: UITableViewCell {
         configureBudgetLabel()
         configurePaidLabel()
         configureCostLabel()
+        configureSubjectsStack()
         configureSeparatorLine()
     }
     
@@ -122,18 +126,25 @@ final class ProgramTableViewCell: UITableViewCell {
         costLabel.pinLeft(to: contentView.leadingAnchor, 40)
     }
     
+    private func configureSubjectsStack() {
+        contentView.addSubview(subjectsStack)
+        
+        subjectsStack.pinTop(to: costLabel.bottomAnchor, 11)
+        subjectsStack.pinLeft(to: contentView.leadingAnchor, 40)
+    }
+    
     private func configureSeparatorLine() {
         separatorLine.backgroundColor = UIColor(hex: "#D9D9D9")
         
         contentView.addSubview(separatorLine)
-        separatorLine.pinTop(to: costLabel.bottomAnchor, 11)
+        separatorLine.pinTop(to: subjectsStack.bottomAnchor, 11)
         separatorLine.pinLeft(to: contentView.leadingAnchor, 40)
         separatorLine.pinRight(to: contentView.trailingAnchor, 20)
         separatorLine.setHeight(1)
         separatorLine.pinBottom(to: contentView.bottomAnchor)
     }
     
-    func configure(with viewModel: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel) {
+    func configure(with viewModel: ProgramViewModel) {
         informationStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let code = viewModel.code
         for char in code {
@@ -173,8 +184,24 @@ final class ProgramTableViewCell: UITableViewCell {
         nameLabel.lineBreakMode = .byWordWrapping
         informationStack.addArrangedSubview(nameLabel)
         
-        budgtetLabel.setBoldText(viewModel.budgetPlaces)
-        paidLabel.setBoldText(viewModel.paidPlaces)
-        costLabel.setBoldText(viewModel.cost)
+        budgtetLabel.setBoldText(String(viewModel.budgetPlaces))
+        paidLabel.setBoldText(String(viewModel.paidPlaces))
+        costLabel.setBoldText("\(formatNumber(viewModel.cost)) ₽/год")
+        subjectsStack.configure(
+            requiredSubjects: viewModel.requiredSubjects,
+            optionalSubjects: viewModel.optionalSubjects ?? []
+        )
+        separatorLine.isHidden = false
+    }
+    
+    func formatNumber(_ number: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = " "
+        return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
+    }
+    
+    func hideSeparator() {
+        separatorLine.isHidden = true
     }
 }
