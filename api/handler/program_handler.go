@@ -30,6 +30,20 @@ func (p *ProgramHandler) GetProgramsByFaculty(c *gin.Context) {
 	c.JSON(http.StatusOK, programs)
 }
 
+// GetUniverProgramsWithFaculty
+// @Summary Получить образовательные программы университета, сгруппированные по факультетам
+// @Description Возвращает список программ, распределенных по факультетам, с возможностью фильтрации по предметам, уровню образования и поисковому запросу
+// @Tags programs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID университета"
+// @Param degree query []string false "Уровень образования" example("Бакалавриат")
+// @Param subject query []string false "Предметы ЕГЭ" example("Русский язык")
+// @Param search query string false "Поиск по названию программы" example("Программная инженерия")
+// @Success 200 {object} []dto.FacultyProgramTree
+// @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
+// @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
+// @Router /api/v1/university/{id}/programs/by-faculty [get]
 func (p *ProgramHandler) GetUniverProgramsWithFaculty(c *gin.Context) {
 	var queryParams dto.ProgramTreeQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {
@@ -48,6 +62,20 @@ func (p *ProgramHandler) GetUniverProgramsWithFaculty(c *gin.Context) {
 	c.JSON(http.StatusOK, facultyTree)
 }
 
+// GetUniverProgramsWithGroup
+// @Summary Получить образовательные программы университета, сгруппированные по направлениям подготовки
+// @Description Возвращает список программ, распределенных по группам направлений подготовки, с возможностью фильтрации по предметам, уровню образования и поисковому запросу
+// @Tags programs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID университета"
+// @Param degree query []string false "Уровень образования" example("Бакалавриат")
+// @Param subject query []string false "Предметы ЕГЭ" example("Русский язык")
+// @Param search query string false "Поиск по названию программы" example("Программная инженерия")
+// @Success 200 {object} []dto.GroupProgramTree
+// @Failure 400 {object} errs.AppError "Некорректные параметры запроса"
+// @Failure 500 {object} errs.AppError "Внутренняя ошибка сервера"
+// @Router /api/v1/university/{id}/programs/by-field [get]
 func (p *ProgramHandler) GetUniverProgramsWithGroup(c *gin.Context) {
 	var queryParams dto.ProgramTreeQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {
