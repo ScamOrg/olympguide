@@ -19,6 +19,9 @@ final class UniversityAssembly {
         presenter.viewController = viewController
         viewController.router = router
         router.viewController = viewController
+        router.dataStore = interactor
+        interactor.university = university
+        
         return viewController
     }
 }
