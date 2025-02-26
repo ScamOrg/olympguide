@@ -14,6 +14,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
+
 def add_empty_columns_if_needed(df, required_columns=11):
     """
     Добавляет пустые столбцы в начало DataFrame, если число столбцов меньше required_columns.
@@ -37,7 +38,7 @@ def adjust_combined_df(df, newline_replacement=''):
     """
     df = df.iloc[:, 2:]
     df = df.drop(index=1)
-    df = df.drop(columns=df.columns[[1, 2]])
+    df = df.drop(columns=df.columns[[2]])
     df = df.reset_index(drop=True)
     df = df.replace(r'\n', newline_replacement, regex=True)
     return df
@@ -88,36 +89,42 @@ def process_subjects(subject_str, exist_subjects, pdf_path):
     return ','.join(map(str, result))
 
 
-def create_benefit_from_row(row, is_bvi, min_level, data):
+def create_benefit_from_row(row, is_bvi, min_level, data, program_id):
     """
     Создаёт объект Benefit на основе обработанной строки.
     """
-    confirmation_subjects = [{'subject_id': s, 'min_score': row[2]} for s in row[1].split(',')]
-    fullscore_subjects = row[4].split(',')
+    confirmation_subjects = [{'subject_id': int(s), 'score': int(row[3])} for s in list(filter(lambda y: y.strip(), row[2].split(',')))]
+    full_score_subjects = [int(x) for x in list(filter(lambda y: y.strip(), row[5].split(',')))]
+    if len(full_score_subjects) == 0 or len(confirmation_subjects) == 0:
+        return None
     try:
         olympiad_id = int(row[0])
+        if olympiad_id == -1:
+            return None
+
     except ValueError:
         logger.error(f"Некорректный идентификатор олимпиады: {row[0]}")
         olympiad_id = 0
     try:
         # Берём первые два символа для min_class, как и в обработке
-        min_class = int(row[6][:2])
+        min_class = int(row[7][:2])
     except ValueError:
-        logger.error(f"Некорректное значение min_class: {row[6]}")
+        logger.error(f"Некорректное значение min_class: {row[7]}")
         min_class = 0
+        return None
 
     return Benefit(
         olympiad_id=olympiad_id,
-        program_id=1,
+        program_id=program_id,
         is_bvi=is_bvi,
-        min_level=min_level,
+        min_diploma_level=min_level,
         min_class=min_class,
         confirmation_subjects=confirmation_subjects,
-        fullscore_subjects=fullscore_subjects
+        full_score_subjects=full_score_subjects
     )
 
 
-def process_data_rows(data, exist_olympiads, exist_subjects, pdf_path):
+def process_data_rows(data, exist_olympiads, exist_subjects, pdf_path, program_id):
     """
     Обрабатывает каждую строку массива данных и формирует список объектов Benefit.
     """
@@ -125,14 +132,31 @@ def process_data_rows(data, exist_olympiads, exist_subjects, pdf_path):
 
     # Обновляем идентификаторы олимпиады, если они присутствуют в списке существующих
     for i in range(len(data)):
-        if data[i, 0] != '':
-            olympiad_key = data[i, 0]
-            if olympiad_key not in exist_olympiads:
-                logger.error(f"Олимпиада {olympiad_key} не найдена в списке существующих")
+        if data[i, 0] == '':
+            if i != 0:
+                data[i, 0] = data[i - 1, 0]
             else:
-                data[i, 0] = exist_olympiads[olympiad_key]
+                continue
+        if data[i, 1] == '':
+            if i != 0:
+                data[i, 1] = data[i - 1, 1]
+            else:
+                continue
 
-    # Обрабатываем каждую строку для создания Benefit
+    for i in range(len(data)):
+        olympiad_key = data[i, 0]
+        profile = data[i, 1]
+        if olympiad_key not in exist_olympiads:
+            logger.error(f"Олимпиада {olympiad_key} не найдена в списке существующих")
+        else:
+            ol = exist_olympiads[olympiad_key]
+            if profile.lower().strip() not in ol:
+                logger.error(f"Олимпиада {olympiad_key} с профилем {profile} не найдена в списке существующих")
+                data[i, 0] = -1
+            else:
+                data[i, 0] = ol[profile.lower().strip()]
+
+
     prev_row = None
     for i in range(len(data)):
         is_bvi = False
@@ -142,25 +166,26 @@ def process_data_rows(data, exist_olympiads, exist_subjects, pdf_path):
         for j in range(len(row)):
             if row[j] == '' and prev_row is not None:
                 row[j] = prev_row[j]
-                if j in [1, 4, 5]:
+                if j in [2, 5, 6]:
                     continue
 
-            if j in [1, 4]:
+            if j in [2, 5]:
                 row[j] = process_subjects(row[j], exist_subjects, pdf_path)
-            elif j == 2:
-                row[j] = row[j][:2]
             elif j == 3:
+                row[j] = row[j][:2]
+            elif j == 4:
                 if 'БВИ' in row[j]:
                     is_bvi = True
-            elif j == 5:
+            elif j == 6:
                 if 'приз' not in row[j].lower():
                     min_level = 1
                 row[j] = str(min_level)
-            elif j == 6:
+            elif j == 7:
                 row[j] = row[j][:2]
         prev_row = row
-        benefit = create_benefit_from_row(row, is_bvi, min_level, data)
-        benefits.append(benefit)
+        benefit = create_benefit_from_row(row, is_bvi, min_level, data, program_id)
+        if benefit is not None:
+            benefits.append(benefit)
 
     return benefits
 
@@ -184,7 +209,6 @@ def process_pdf_with_camelot(pdf_path):
         return pd.DataFrame()
 
     combined_df = pd.concat(all_dataframes, ignore_index=True)
-    # При использовании Camelot заменяем \n на пустую строку
     combined_df = adjust_combined_df(combined_df, newline_replacement='')
     return combined_df
 
@@ -197,11 +221,20 @@ def load_benefits():
     file_list = get_links()
     exist_subjects = get_subjects()
     exist_olympiads = get_olympiads()
-
+    exist_programs = get_programs(1)
     count_of_benefits = 0
+    all_benefits = []
     for link in file_list:
         pdf_path = link.path
 
+        program_name = pdf_path.replace('.pdf', '').replace('\xa0', ' ')
+        if program_name == "Совместный бакалавриат НИУ ВШЭ и Центра педагогического мастерства":
+            program_name = "Совместный бакалавриат НИУ ВШЭ и ЦПМ"
+        if program_name not in exist_programs:
+            logger.error(f"Программы {program_name} нет")
+            continue
+
+        program_id = exist_programs[program_name]
         logger.info(f"Обработка файла: {pdf_path}")
         download_file(link)
 
@@ -212,7 +245,13 @@ def load_benefits():
             continue
 
         raw_data_list = combined_df.to_numpy().tolist()[1:]
-        cleared_data = clear(raw_data_list)
+        cleared_data = clear_name(raw_data_list)
+        cleared_data = clear_profile(cleared_data)
+        cleared_data = clear_subjects(2, cleared_data)
+        cleared_data = clear_subjects(5, cleared_data)
+        cleared_data = clear_class(cleared_data)
+        cleared_data = clear_level(cleared_data)
+        cleared_data = [row for row in cleared_data if any(cell != "" for cell in row)]
         data = np.array(cleared_data, dtype=str)
 
         if pdf_path in ['Прикладной анализ данных.pdf', 'Компьютерные науки и анализ данных.pdf']:
@@ -232,15 +271,33 @@ def load_benefits():
                     data_list.insert(i, list(new_data[i]))
             data = np.array(data_list, dtype=str)
 
-        benefits = process_data_rows(data, exist_olympiads, exist_subjects, pdf_path)
+        benefits = process_data_rows(data, exist_olympiads, exist_subjects, pdf_path, program_id)
+
+        for benefit in benefits:
+            all_benefits.append(benefit)
+
         logger.info(f"Из файла {pdf_path} сформировано {len(benefits)} бенефитов.")
         count_of_benefits += len(benefits)
 
         delete_file(link)
         logger.info(f"Удалён файл: {pdf_path}")
-
     logger.info(f"Завершение процесса загрузки бенефитов, было загружено {count_of_benefits} бенефитов.")
 
+    for benefit in all_benefits:
+        upload_benefit(benefit)
+        # print(benefit)
+    # i = 0
+    # repairing = 0
 
-if __name__ == '__main__':
-    load_benefits()
+    # while i < len(all_benefits):
+    #     rep_ind = []
+    #     for j in range(i + 1,  len(all_benefits)):
+    #         if all_benefits[i] == all_benefits[j]:
+    #             repairing += 1
+    #             rep_ind.append(j)
+    #     if len(rep_ind) > 0:
+    #         print(all_benefits[i])
+    #         for j in range(len(rep_ind)):
+    #             del all_benefits[rep_ind[j] - j]
+    #     i += 1
+    # print(repairing)
