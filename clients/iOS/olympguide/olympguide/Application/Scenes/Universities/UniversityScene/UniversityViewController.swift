@@ -341,67 +341,55 @@ extension UniversityViewController : UITableViewDataSource {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return groupOfProgramsViewModel.count
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
+        return groupOfProgramsViewModel[section].isExpanded ? groupOfProgramsViewModel[section].programs.count : 0
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = ProfileTableViewCell()
-        switch indexPath.row {
-        case 0:
-            cell.configure(title: "Направления")
-        case 1:
-            cell.configure(title: "Факультеты")
-            cell.hideSeparator(true)
-        default:
-            break
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: ProgramTableViewCell.identifier,
+            for: indexPath
+        ) as! ProgramTableViewCell
+        
+        let fieldViewModel = groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
+        cell.configure(with: fieldViewModel)
+        
+        let totalRows = tableView.numberOfRows(inSection: indexPath.section)
+        let isLastCell = indexPath.row == totalRows - 1
+        
+        if isLastCell {
+            cell.hideSeparator()
         }
+        
         return cell
     }
-}
-
-extension UniversityViewController : UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        switch indexPath.row {
-        case 0:
-            router?.routeToProgramsByFields(for: university)
-        case 1:
-            router?.routeToProgramsByFaculties(for: university)
-        default:
-            break
+    
+    func tableView(
+        _ tableView: UITableView,
+        viewForHeaderInSection section: Int
+    ) -> UIView? {
+        let headerButton = FieldsTableButton(name: groupOfProgramsViewModel[section].name, code: groupOfProgramsViewModel[section].code)
+        headerButton.tag = section
+        headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
+        
+        if groupOfProgramsViewModel[section].isExpanded {
+            headerButton.backgroundView.backgroundColor = UIColor(hex: "#E0E8FE")
         }
-    }
-}
-
-import SwiftUI
-
-
-struct UniversityViewControllerWrapper: UIViewControllerRepresentable {
-    
-    func makeUIViewController(context: Context) -> UINavigationController {
-        let sampleUniversity = UniversityModel(
-            email: nil,
-            site: nil,
-            description: nil,
-            phone: nil,
-            universityID: 1,
-            name: "Национальный исследовательский университет «Высшая школа экономики»",
-            shortName: "ВШЭ",
-            logo: "https://drive.google.com/uc?export=download&id=1UIXzJTDYv2ys_Bq5n_EPiQrRBhfujq1k",
-            region: "Москва и Московскя область",
-            like: true
-        )
-        
-        let universityVC = UniversityViewController(for: sampleUniversity)
-        
-        let navigationController = NavigationBarViewController(rootViewController: universityVC)
-        return navigationController
+        return headerButton
     }
     
-    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+        
+        
+    }
+    
 }
 
