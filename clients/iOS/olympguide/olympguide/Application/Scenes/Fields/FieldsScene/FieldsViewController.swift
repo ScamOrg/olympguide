@@ -121,6 +121,7 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(
             FieldTableViewCell.self,
@@ -145,13 +146,16 @@ class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
         filterSortView.pinBottom(to: headerContainer.bottomAnchor, 21)
         
-        
+        headerContainer.setNeedsLayout()
         headerContainer.layoutIfNeeded()
         
-        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
-        let height = headerContainer.systemLayoutSizeFitting(targetSize).height
-        
-        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: height)
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let fittingSize = headerContainer.systemLayoutSizeFitting(targetSize)
+        headerContainer.frame.size.height = fittingSize.height
+        tableView.tableHeaderView = headerContainer
         
         tableView.tableHeaderView = headerContainer
     }
