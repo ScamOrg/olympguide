@@ -34,6 +34,7 @@ fileprivate enum Constants {
 
 protocol WithBookMarkButton { }
 
+// MARK: - UniversityViewController
 final class UniversityViewController: UIViewController, WithBookMarkButton {
     var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic)?
     
@@ -92,10 +93,11 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         }
         
         interactor?.loadUniversity(with: University.Load.Request(universityID: universityID))
-        
-        navigationItem.largeTitleDisplayMode = .never
-        let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
+        let request = Programs.Load.Request(
+            params: [],
+            university: university
+        )
+        interactor?.loadPrograms(with: request)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -109,7 +111,10 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         }
         
     }
-    
+}
+
+// MARK: - UI Configuration
+extension UniversityViewController {
     private func configureUI() {
         view.backgroundColor = .white
         configureNavigationBar()
@@ -281,6 +286,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     }
 }
 
+// MARK: - UniversityDisplayLogic
 extension UniversityViewController : UniversityDisplayLogic {
     func displayToggleFavoriteResult(with viewModel: University.Favorite.ViewModel) {
         DispatchQueue.main.async { [weak self] in
@@ -296,6 +302,18 @@ extension UniversityViewController : UniversityDisplayLogic {
     }
 }
 
+// MARK: - ProgramsDisplayLogic
+extension UniversityViewController : ProgramsDisplayLogic {
+    func displayLoadProgramsResult(with viewModel: Programs.Load.ViewModel) {
+        groupOfProgramsViewModel = viewModel.groupsOfPrograms
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
+        }
+    }
+}
+
+// MARK: - MFMailComposeViewControllerDelegate
 extension UniversityViewController : MFMailComposeViewControllerDelegate{
     @objc func openMailCompose(sender: UIButton) {
         guard MFMailComposeViewController.canSendMail() else {
@@ -315,29 +333,57 @@ extension UniversityViewController : MFMailComposeViewControllerDelegate{
         present(mailVC, animated: true, completion: nil)
     }
     
-    // MARK: - MFMailComposeViewControllerDelegate
-    func mailComposeController(_ controller: MFMailComposeViewController,
-                               didFinishWith result: MFMailComposeResult,
-                               error: Error?) {
+    func mailComposeController(
+        _ controller: MFMailComposeViewController,
+        didFinishWith result: MFMailComposeResult,
+        error: Error?
+    ) {
         controller.dismiss(animated: true, completion: nil)
     }
 }
 
+// MARK: - UITableViewDataSource
 extension UniversityViewController : UITableViewDataSource {
+    func configureRefreshControl() {
+        refreshControl.tintColor = .systemCyan
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+    
     private func configureTableView() {
         view.addSubview(tableView)
         
-        tableView.separatorStyle = .none
+        tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
-        tableView.pinTop(to: emailButton.bottomAnchor, 12)
-        tableView.pinLeft(to: view.leadingAnchor)
-        tableView.pinRight(to: view.trailingAnchor)
-        tableView.pinBottom(to: view.bottomAnchor)
-
+        tableView.register(
+            ProgramTableViewCell.self,
+            forCellReuseIdentifier: ProgramTableViewCell.identifier
+        )
+        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
+        
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
+        tableView.refreshControl = refreshControl
+        tableView.showsVerticalScrollIndicator = false
         
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
         
+        informationContainer.setNeedsLayout()
+        informationContainer.layoutIfNeeded()
+        
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let fittingSize = informationContainer.systemLayoutSizeFitting(targetSize)
+        informationContainer.frame.size.height = fittingSize.height
+        tableView.tableHeaderView = informationContainer
+        
+        tableView.tableHeaderView = informationContainer
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -387,9 +433,51 @@ extension UniversityViewController : UITableViewDataSource {
         return headerButton
     }
     
+    @objc
+    func toggleSection(_ sender: UIButton) {
+        let section = sender.tag
         
+        var currentOffset = tableView.contentOffset
+        let headerRectBefore = tableView.rectForHeader(inSection: section)
         
+        groupOfProgramsViewModel[section].isExpanded.toggle()
+        
+        UIView.performWithoutAnimation {
+            tableView.reloadSections(IndexSet(integer: section), with: .none)
+            tableView.layoutIfNeeded()
+        }
+        let headerRectAfter = tableView.rectForHeader(inSection: section)
+        
+        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+        currentOffset.y += deltaY
+        tableView.setContentOffset(currentOffset, animated: false)
     }
     
+    @objc
+    private func handleRefresh() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            var request = Programs.Load.Request(
+                params: [],
+                university: self?.university
+            )
+            if self?.segmentedControl.selectedSegmentIndex == 1 {
+                request.groups = .faculties
+            }
+            
+            self?.interactor?.loadPrograms(with: request)
+            self?.refreshControl.endRefreshing()
+        }
+    }
+}
+
+// MARK: - UITableViewDelegate
+extension UniversityViewController : UITableViewDelegate {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToProgram(with: indexPath)
+    }
 }
 
