@@ -50,9 +50,14 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
     let emailButton: UIInformationButton = UIInformationButton(type: .email)
     let university: UniversityModel
+    let programsLabel: UILabel = UILabel()
+    let segmentedControl: UISegmentedControl = UISegmentedControl()
+    let filterSortView: FilterSortView = FilterSortView()
     
+    private var groupOfProgramsViewModel : [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
+    
+    let refreshControl: UIRefreshControl = UIRefreshControl()
     let tableView = UITableView(frame: .zero, style: .plain)
-    
     
     init(for university: UniversityModel) {
         self.logoImageView.contentMode = .scaleAspectFit
@@ -61,6 +66,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         self.isFavorite = university.like
         self.startIsFavorite = university.like
         self.university = university
+        
         super.init(nibName: nil, bundle: nil)
         
         self.nameLabel.text = university.name
@@ -112,6 +118,11 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         configureNameLabel()
         configureWebSiteButton()
         configureEmailButton()
+        configureProgramsLabel()
+        configureSearchButton()
+        configureSegmentedControl()
+        
+        configureRefreshControl()
         configureTableView()
         
         logoImageView.startShimmer()
@@ -187,11 +198,86 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         emailButton.addTarget(self, action: #selector(openMailCompose), for: .touchUpInside)
     }
     
+    private func configureProgramsLabel() {
+        let text = "Программы"
+        let font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)!
+        programsLabel.text = text
+        programsLabel.font = font
+        
+        informationContainer.addSubview(programsLabel)
+        programsLabel.pinTop(to: emailButton.bottomAnchor, 20)
+        programsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
+        
+        let textSize = text.size(withAttributes: [.font: font])
+        
+        programsLabel.setHeight(textSize.height)
+    }
+    
+    private func configureSegmentedControl() {
+        segmentedControl.insertSegment(withTitle: "По направлениям", at: 0, animated: false)
+        segmentedControl.insertSegment(withTitle: "По факультетам", at: 1, animated: false)
+        segmentedControl.selectedSegmentIndex = 0
+        
+        let customFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        let customAttributes: [NSAttributedString.Key: Any] = [.font: customFont]
+
+        segmentedControl.setTitleTextAttributes(customAttributes, for: .normal)
+        segmentedControl.setTitleTextAttributes(customAttributes, for: .selected)
+        
+        
+        informationContainer.addSubview(segmentedControl)
+        
+        segmentedControl.pinTop(to: programsLabel.bottomAnchor, 13)
+        segmentedControl.pinLeft(to: informationContainer.leadingAnchor, 20)
+        segmentedControl.pinRight(to: informationContainer.trailingAnchor, 20)
+        segmentedControl.pinBottom(to: informationContainer.bottomAnchor, 17)
+        segmentedControl.setHeight(35)
+        
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+    }
+    
+    private func configureSearchButton() {
+        let searchButton = UIClosureButton()
+        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchButton.tintColor = .black
+        searchButton.contentHorizontalAlignment = .fill
+        searchButton.contentVerticalAlignment = .fill
+        searchButton.imageView?.contentMode = .scaleAspectFit
+        
+        searchButton.action = { [weak self] in
+            self?.router?.routeToSearch()
+        }
+        
+        informationContainer.addSubview(searchButton)
+        
+        searchButton.pinRight(to: informationContainer.trailingAnchor, 20)
+        searchButton.pinCenterY(to: programsLabel.centerYAnchor)
+        
+        searchButton.setWidth(28)
+        searchButton.setHeight(28)
+    }
+    
+    private func configureFilterSortView() {
+        filterSortView.configure(filteringOptions: ["Формат обучения"])
+    }
+    
     @objc func openWebPage(sender: UIButton) {
         guard let url = URL(string: "https://\(sender.currentTitle ?? "")") else { return }
         let safariVC = SFSafariViewController(url: url)
         safariVC.modalPresentationStyle = .pageSheet
         present(safariVC, animated: true, completion: nil)
+    }
+    
+    @objc func segmentChanged() {
+        var request = Programs.Load.Request(
+            params: [],
+            university: university
+        )
+        if segmentedControl.selectedSegmentIndex == 1 {
+            request.groups = .faculties
+        }
+        
+        interactor?.loadPrograms(with: request)
     }
 }
 
