@@ -1,8 +1,8 @@
 from typing import Tuple, Any
 
 from bs4 import BeautifulSoup
-from utils import fetch_html
-from EducationalProgram import EducationalProgram
+from hse_loader.educational_programs_loader.utils import fetch_html
+from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
 
 def extract_rows_second_source(soup: BeautifulSoup) -> list:
     table = soup.find('table')
@@ -34,7 +34,8 @@ def load_costs_from_second_source(programs: dict[str, EducationalProgram]):
         if result:
             name, cost = result
             if name in programs:
-                programs[name].cost = cost
+                if programs[name].cost == None or programs[name].cost == 0:
+                    programs[name].cost = cost
 
 
 def extract_rows_first_source(soup: BeautifulSoup) -> list:

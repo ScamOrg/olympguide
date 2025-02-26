@@ -4,7 +4,7 @@ import logging
 import re
 
 from bs4 import BeautifulSoup
-from EducationalProgram import EducationalProgram
+from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
 from clients.get_client import get_subjects, get_fields
 from clients.post_client import upload_programs
 

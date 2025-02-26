@@ -1,13 +1,14 @@
 import camelot
 import pdfplumber
 import pandas as pd
-from filter_df import clear
-from clients.get_client import get_olympiads, get_subjects
+from hse_loader.benefits_loader.filter_df import clear_name, clear_profile, clear_subjects, clear_class, clear_level
+from clients.get_client import get_olympiads, get_subjects, get_programs
 import numpy as np
 import logging
 from logging_config.setup_logging import setup_logging
-from Benefit import Benefit
-from load_files import download_file, delete_file, get_links
+from hse_loader.benefits_loader.Benefit import Benefit
+from hse_loader.benefits_loader.load_files import download_file, delete_file, get_links
+from clients.post_client import upload_benefit
 
 setup_logging()
 logger = logging.getLogger(__name__)
