@@ -14,7 +14,8 @@ protocol ProgramsBusinessLogic {
 
 // MARK: - Data Store
 protocol ProgramsDataStore {
-    var groupsOfProgramsByFieldModel: [GroupOfProgramsModel] { get }
+    var groupsOfPrograms: [GroupOfProgramsModel]? { get }
+    var university: UniversityModel? { get }
 }
 
 // MARK: - Presentation Logic
@@ -29,11 +30,11 @@ protocol ProgramsDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol ProgramsRoutingLogic {
-    func routeToProgram()
+    func routeToProgram(with indexPath: IndexPath)
     func routeToSearch()
 }
 
 // MARK: - Data Passing
 protocol ProgramsDataPassing {
-    var dataStore: ProgramsDataStore? { get }
+    var programsDataStore: ProgramsDataStore? { get }
 }
