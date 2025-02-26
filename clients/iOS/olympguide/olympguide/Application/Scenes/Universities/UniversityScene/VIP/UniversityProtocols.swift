@@ -39,5 +39,5 @@ protocol UniversityRoutingLogic {
 
 // MARK: - Data Passing
 protocol UniversityDataPassing {
-    var dataStore: UniversityDataStore? { get }
+    var universityDataStore: UniversityDataStore? { get }
 }
