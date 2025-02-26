@@ -24,6 +24,7 @@ final class ProgramsByFieldsAssembly {
         presenter.viewController = viewController
         viewController.router = router
         router.viewController = viewController
+        router.programsDataStore = interactor
         
         return viewController
     }
@@ -46,6 +47,7 @@ final class ProgramsByFacultiesAssembly {
         presenter.viewController = viewController
         viewController.router = router
         router.viewController = viewController
+        router.programsDataStore = interactor
         
         return viewController
     }
