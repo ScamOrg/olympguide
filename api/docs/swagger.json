@@ -149,6 +149,226 @@
                 }
             }
         },
+        "/olympiads/{id}/benefits": {
+            "get": {
+                "description": "Возвращает список льгот по программам для указанной олимпиады.\nПоддерживаются фильтры по направлениям, признаку BVI, минимальному уровню диплома, минимальному классу, а также поиск и сортировка.\nльготы сгруппированы по программам, сортировка внутри программы: сначала БВИ, сначала 1 степень.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Льготы по олимпиаде"
+                ],
+                "summary": "Получить льготы по олимпиаде",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор олимпиады",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по кодам направлений (01.03.04)",
+                        "name": "field",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "boolean"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по BVI",
+                        "name": "is_bvi",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по минимальному уровню диплома (1, 2, 3)",
+                        "name": "min_diploma_level",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по минимальному классу (9, 10, 11)",
+                        "name": "min_class",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поиск по названию программы и названию университета",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поле сортировки программ (field - по коду, university - по популярности университета), по умолчанию по убыванию популярности программы.",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Порядок сортировки (asc или desc)",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список льгот, сгруппированных по программам",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ProgramBenefitTree"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/programs/{id}/benefits": {
+            "get": {
+                "description": "Возвращает список льгот по олимпиадам для указанной образовательной программы.\nПоддерживаются фильтры по уровням олимпиады, профилям олимпиады, признаку BVI, минимальному уровню диплома,\nминимальному классу, а также поиск и сортировка. Льготы сгруппированы по олимпиадам, сортировка внутри программы: сначала БВИ, сначала 1 степень.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Льготы по программе"
+                ],
+                "summary": "Получить льготы по программе",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор программы",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по уровням олимпиады (1, 2, 3)",
+                        "name": "level",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по профилям (Математика)",
+                        "name": "profile",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "boolean"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по BVI",
+                        "name": "is_bvi",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по минимальному уровню диплома (1, 2, 3)",
+                        "name": "min_diploma_level",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Фильтр по минимальному классу (9, 10, 11)",
+                        "name": "min_class",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поиск по названию олимпиады",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поле сортировки (level - по уровню олимпиады, profile - по профилю олимпиады), по умолчанию по убыванию популярности олимпиады.",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Порядок сортировки (asc или desc)",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список льгот, сгруппированных по олимпиадам",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.OlympiadBenefitTree"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/errs.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/universities": {
             "get": {
                 "description": "Возвращает список университетов с учетом фильтров поиска и сортировкой по убыванию популярности.",
@@ -359,6 +579,43 @@
         }
     },
     "definitions": {
+        "dto.BenefitInfo": {
+            "type": "object",
+            "properties": {
+                "confirmation_subjects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ConfirmSubjectResp"
+                    }
+                },
+                "full_score_subjects": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_bvi": {
+                    "type": "boolean"
+                },
+                "min_class": {
+                    "type": "integer"
+                },
+                "min_diploma_level": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ConfirmSubjectResp": {
+            "type": "object",
+            "properties": {
+                "score": {
+                    "type": "integer"
+                },
+                "subject": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.FacultyProgramTree": {
             "type": "object",
             "properties": {
@@ -445,6 +702,37 @@
                 }
             }
         },
+        "dto.OlympiadBenefitInfo": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "olympiad_id": {
+                    "type": "integer"
+                },
+                "profile": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OlympiadBenefitTree": {
+            "type": "object",
+            "properties": {
+                "benefits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BenefitInfo"
+                    }
+                },
+                "olympiad": {
+                    "$ref": "#/definitions/dto.OlympiadBenefitInfo"
+                }
+            }
+        },
         "dto.OlympiadShortResponse": {
             "type": "object",
             "properties": {
@@ -472,6 +760,37 @@
                     "description": "Профиль олимпиады",
                     "type": "string",
                     "example": "физика"
+                }
+            }
+        },
+        "dto.ProgramBenefitInfo": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "university": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProgramBenefitTree": {
+            "type": "object",
+            "properties": {
+                "benefits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BenefitInfo"
+                    }
+                },
+                "program": {
+                    "$ref": "#/definitions/dto.ProgramBenefitInfo"
                 }
             }
         },

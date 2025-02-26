@@ -1,5 +1,29 @@
 basePath: /api/v1
 definitions:
+  dto.BenefitInfo:
+    properties:
+      confirmation_subjects:
+        items:
+          $ref: '#/definitions/dto.ConfirmSubjectResp'
+        type: array
+      full_score_subjects:
+        items:
+          type: string
+        type: array
+      is_bvi:
+        type: boolean
+      min_class:
+        type: integer
+      min_diploma_level:
+        type: integer
+    type: object
+  dto.ConfirmSubjectResp:
+    properties:
+      score:
+        type: integer
+      subject:
+        type: string
+    type: object
   dto.FacultyProgramTree:
     properties:
       faculty_id:
@@ -61,6 +85,26 @@ definitions:
         example: Математические науки
         type: string
     type: object
+  dto.OlympiadBenefitInfo:
+    properties:
+      level:
+        type: integer
+      name:
+        type: string
+      olympiad_id:
+        type: integer
+      profile:
+        type: string
+    type: object
+  dto.OlympiadBenefitTree:
+    properties:
+      benefits:
+        items:
+          $ref: '#/definitions/dto.BenefitInfo'
+        type: array
+      olympiad:
+        $ref: '#/definitions/dto.OlympiadBenefitInfo'
+    type: object
   dto.OlympiadShortResponse:
     properties:
       level:
@@ -83,6 +127,26 @@ definitions:
         description: Профиль олимпиады
         example: физика
         type: string
+    type: object
+  dto.ProgramBenefitInfo:
+    properties:
+      field:
+        type: string
+      name:
+        type: string
+      program_id:
+        type: integer
+      university:
+        type: string
+    type: object
+  dto.ProgramBenefitTree:
+    properties:
+      benefits:
+        items:
+          $ref: '#/definitions/dto.BenefitInfo'
+        type: array
+      program:
+        $ref: '#/definitions/dto.ProgramBenefitInfo'
     type: object
   dto.ProgramShortResponse:
     properties:
@@ -258,6 +322,163 @@ paths:
       summary: Получение список олимпиад
       tags:
       - Олимпиады
+  /olympiads/{id}/benefits:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Возвращает список льгот по программам для указанной олимпиады.
+        Поддерживаются фильтры по направлениям, признаку BVI, минимальному уровню диплома, минимальному классу, а также поиск и сортировка.
+        льготы сгруппированы по программам, сортировка внутри программы: сначала БВИ, сначала 1 степень.
+      parameters:
+      - description: Идентификатор олимпиады
+        in: path
+        name: id
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: Фильтр по кодам направлений (01.03.04)
+        in: query
+        items:
+          type: string
+        name: field
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по BVI
+        in: query
+        items:
+          type: boolean
+        name: is_bvi
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по минимальному уровню диплома (1, 2, 3)
+        in: query
+        items:
+          type: integer
+        name: min_diploma_level
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по минимальному классу (9, 10, 11)
+        in: query
+        items:
+          type: integer
+        name: min_class
+        type: array
+      - description: Поиск по названию программы и названию университета
+        in: query
+        name: search
+        type: string
+      - description: Поле сортировки программ (field - по коду, university - по популярности
+          университета), по умолчанию по убыванию популярности программы.
+        in: query
+        name: sort
+        type: string
+      - description: Порядок сортировки (asc или desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список льгот, сгруппированных по программам
+          schema:
+            items:
+              $ref: '#/definitions/dto.ProgramBenefitTree'
+            type: array
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получить льготы по олимпиаде
+      tags:
+      - Льготы по олимпиаде
+  /programs/{id}/benefits:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Возвращает список льгот по олимпиадам для указанной образовательной программы.
+        Поддерживаются фильтры по уровням олимпиады, профилям олимпиады, признаку BVI, минимальному уровню диплома,
+        минимальному классу, а также поиск и сортировка. Льготы сгруппированы по олимпиадам, сортировка внутри программы: сначала БВИ, сначала 1 степень.
+      parameters:
+      - description: Идентификатор программы
+        in: path
+        name: id
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: Фильтр по уровням олимпиады (1, 2, 3)
+        in: query
+        items:
+          type: string
+        name: level
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по профилям (Математика)
+        in: query
+        items:
+          type: string
+        name: profile
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по BVI
+        in: query
+        items:
+          type: boolean
+        name: is_bvi
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по минимальному уровню диплома (1, 2, 3)
+        in: query
+        items:
+          type: integer
+        name: min_diploma_level
+        type: array
+      - collectionFormat: csv
+        description: Фильтр по минимальному классу (9, 10, 11)
+        in: query
+        items:
+          type: integer
+        name: min_class
+        type: array
+      - description: Поиск по названию олимпиады
+        in: query
+        name: search
+        type: string
+      - description: Поле сортировки (level - по уровню олимпиады, profile - по профилю
+          олимпиады), по умолчанию по убыванию популярности олимпиады.
+        in: query
+        name: sort
+        type: string
+      - description: Порядок сортировки (asc или desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список льгот, сгруппированных по олимпиадам
+          schema:
+            items:
+              $ref: '#/definitions/dto.OlympiadBenefitTree'
+            type: array
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/errs.AppError'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/errs.AppError'
+      summary: Получить льготы по программе
+      tags:
+      - Льготы по программе
   /universities:
     get:
       consumes:
