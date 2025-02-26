@@ -81,7 +81,7 @@ class ProgramsViewController: UIViewController, MainVC {
         
         let request = Programs.Load.Request(
             params: [],
-            universityID: university.universityID
+            university: university
         )
         interactor?.loadPrograms(with: request)
         
@@ -124,6 +124,7 @@ class ProgramsViewController: UIViewController, MainVC {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(
             ProgramTableViewCell.self,
@@ -162,10 +163,13 @@ class ProgramsViewController: UIViewController, MainVC {
     // MARK: - Actions
     @objc
     private func handleRefresh() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            let request = Programs.Load.Request(params: [], universityID: 1)
-            self.interactor?.loadPrograms(with: request)
-            self.refreshControl.endRefreshing()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            let request = Programs.Load.Request(
+                params: [],
+                university: self?.university
+            )
+            self?.interactor?.loadPrograms(with: request)
+            self?.refreshControl.endRefreshing()
         }
     }
 }
@@ -210,6 +214,7 @@ extension ProgramsViewController: UITableViewDataSource, UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToProgram(with: indexPath)
     }
     
     func tableView(
