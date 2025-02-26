@@ -69,3 +69,32 @@ class UniversityWorker : UniversityWorkerLogic {
     }
 }
 
+extension UniversityWorker : ProgramsWorkerLogic {
+    func loadPrograms(
+        with params: [Param],
+        for universityId: Int,
+        by groups: Groups,
+        completion: @escaping (Result<[GroupOfProgramsModel], Error>) -> Void
+    ) {
+        var queryItems = [URLQueryItem]()
+        
+        params.forEach {
+            queryItems.append(URLQueryItem(name: $0.key, value: $0.value))
+        }
+        
+        networkService.request(
+            endpoint: "/university/\(universityId)/programs/\(groups.endpoint)",
+            method: .get,
+            queryItems: queryItems,
+            body: nil
+        ) { (result: Result<[GroupOfProgramsModel], NetworkError>) in
+            switch result {
+            case .success(let groupsOfPrograms):
+                completion(.success(groupsOfPrograms))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+}
+
