@@ -40,6 +40,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     
     var router: (UniversityRoutingLogic & ProgramsRoutingLogic)?
     
+    let informationContainer: UIView = UIView()
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     let universityID: Int
     let startIsFavorite: Bool
@@ -120,6 +121,10 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     }
     
     private func configureNavigationBar() {
+        navigationItem.largeTitleDisplayMode = .never
+        let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
+        
         if let navigationController = navigationController as? NavigationBarViewController {
             let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
             navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
@@ -132,28 +137,28 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     }
     
     private func configureLogoImageView() {
-        view.addSubview(logoImageView)
+        informationContainer.addSubview(logoImageView)
         
         logoImageView.contentMode = .scaleAspectFit
         
         regionLabel.font = Constants.Fonts.regionLabelFont
         regionLabel.textColor = Constants.Colors.regionTextColor
         
-        logoImageView.pinLeft(to: view.leadingAnchor, Constants.Dimensions.logoLeftMargin)
-        logoImageView.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
+        logoImageView.pinLeft(to: informationContainer.leadingAnchor, Constants.Dimensions.logoLeftMargin)
+        logoImageView.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
         logoImageView.setWidth(Constants.Dimensions.logoSize)
         logoImageView.setHeight(Constants.Dimensions.logoSize)
     }
     
     private func configureRegionLabel() {
-        view.addSubview(regionLabel)
+        informationContainer.addSubview(regionLabel)
         
-        regionLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
+        regionLabel.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
         regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
     }
     
     private func configureNameLabel() {
-        view.addSubview(nameLabel)
+        informationContainer.addSubview(nameLabel)
         
         nameLabel.font = Constants.Fonts.nameLabelFont
         nameLabel.numberOfLines = 0
@@ -161,25 +166,25 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         
         nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        nameLabel.pinRight(to: view.trailingAnchor, Constants.Dimensions.interItemSpacing)
+        nameLabel.pinRight(to: informationContainer.trailingAnchor, Constants.Dimensions.interItemSpacing)
     }
     
     private func configureWebSiteButton() {
-        view.addSubview(webSiteButton)
+        informationContainer.addSubview(webSiteButton)
         
         webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
         webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
-        webSiteButton.pinLeft(to: view.leadingAnchor, 20)
-        webSiteButton.pinRight(to: view.centerXAnchor)
+        webSiteButton.pinLeft(to: informationContainer.leadingAnchor, 20)
+        webSiteButton.pinRight(to: informationContainer.centerXAnchor)
         webSiteButton.addTarget(self, action: #selector(openWebPage), for: .touchUpInside)
     }
     
     private func configureEmailButton() {
-        view.addSubview(emailButton)
+        informationContainer.addSubview(emailButton)
         
         emailButton.pinTop(to: webSiteButton.bottomAnchor, 20)
-        emailButton.pinLeft(to: view.leadingAnchor, 20)
-        emailButton.pinRight(to: view.centerXAnchor)
+        emailButton.pinLeft(to: informationContainer.leadingAnchor, 20)
+        emailButton.pinRight(to: informationContainer.centerXAnchor)
         emailButton.addTarget(self, action: #selector(openMailCompose), for: .touchUpInside)
     }
     
