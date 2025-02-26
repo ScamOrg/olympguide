@@ -121,6 +121,7 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Ma
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(OlympiadTableViewCell.self,
                            forCellReuseIdentifier: "OlympiadTableViewCell")
