@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 from clients.post_client import upload_faculties
 
-def parse_faculty(url: str) -> list:
+
+def load_faculties(university_id) -> list:
+    url = "https://www.hse.ru/education/faculty/"
     response = requests.get(url)
     response.encoding = 'utf-8'
 
@@ -20,13 +22,9 @@ def parse_faculty(url: str) -> list:
     result = []
     for faculty in faculties:
         for f in faculty.split('\n'):
-
             result.append(f.replace('\xa0', ' ').replace('\u00AD', ' '))
-    return result
 
+    upload_faculties(university_id, result)
 
 if __name__ == '__main__':
-    url = "https://www.hse.ru/education/faculty/"
-    # parse_faculty(url)
-    faculties = parse_faculty(url)
-    upload_faculties(1, faculties)
+    load_faculties(1)
