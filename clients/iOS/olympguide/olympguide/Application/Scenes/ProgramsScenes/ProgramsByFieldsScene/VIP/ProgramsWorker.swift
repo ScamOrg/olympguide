@@ -5,11 +5,26 @@
 //  Created by Tom Tim on 24.02.2025.
 //
 
+enum Groups {
+    case fields
+    case faculties
+    
+    var endpoint: String {
+        switch self {
+        case .fields:
+            return "by-field"
+        case .faculties:
+            return "by-faculty"
+        }
+    }
+}
+
 import Foundation
 protocol ProgramsWorkerLogic {
-    func fetch(
+    func loadPrograms(
         with params: [Param],
         for universityId: Int,
+        by groups: Groups,
         completion: @escaping (Result<[GroupOfProgramsModel], Error>) -> Void
     )
 }
@@ -22,9 +37,10 @@ class ProgramsByFieldsWorker : ProgramsWorkerLogic {
         self.networkService = networkService
     }
     
-    func fetch(
+    func loadPrograms(
         with params: [Param],
         for universityId: Int,
+        by groups: Groups,
         completion: @escaping (Result<[GroupOfProgramsModel], Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
@@ -57,9 +73,10 @@ class ProgramsByFacultiesWorker : ProgramsWorkerLogic {
         self.networkService = networkService
     }
     
-    func fetch(
+    func loadPrograms(
         with params: [Param],
         for universityId: Int,
+        by groups: Groups,
         completion: @escaping (Result<[GroupOfProgramsModel], Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
