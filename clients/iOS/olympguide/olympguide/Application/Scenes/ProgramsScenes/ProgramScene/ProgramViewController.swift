@@ -30,7 +30,7 @@ fileprivate enum Constants {
     }
 }
 
-final class ProgramViewController : UIViewController {
+final class ProgramViewController : UIViewController, WithBookMarkButton {
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     let startIsFavorite: Bool
     var isFavorite: Bool
@@ -40,7 +40,7 @@ final class ProgramViewController : UIViewController {
     let university: UniversityModel
     let codeLabel: UILabel = UILabel()
     let programNameLabel = UILabel()
-    let program: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel
+    let program: GroupOfProgramsModel.ProgramModel
     
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
     private let paidLabel: UIInformationLabel = UIInformationLabel()
@@ -48,7 +48,7 @@ final class ProgramViewController : UIViewController {
     private let subjectsStack: SubjectsStack = SubjectsStack()
     
     init(
-        for program: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel,
+        for program: GroupOfProgramsModel.ProgramModel,
         by university: UniversityModel
     ) {
         self.logoImageView.contentMode = .scaleAspectFit
@@ -56,7 +56,7 @@ final class ProgramViewController : UIViewController {
         self.isFavorite = university.like
         self.startIsFavorite = university.like
         self.university = university
-        self.codeLabel.text = program.code
+        self.codeLabel.text = program.field
         self.programNameLabel.text = program.name
         self.program = program
         
@@ -99,6 +99,10 @@ final class ProgramViewController : UIViewController {
     }
     
     private func configureNavigationBar() {
+        navigationItem.largeTitleDisplayMode = .never
+        let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
+        
         if let navigationController = navigationController as? NavigationBarViewController {
             let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
             navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
@@ -154,10 +158,13 @@ final class ProgramViewController : UIViewController {
     
     private func configureProgramNameLabel() {
         programNameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
+        programNameLabel.numberOfLines = 0
+        programNameLabel.lineBreakMode = .byWordWrapping
         
         view.addSubview(programNameLabel)
-        programNameLabel.pinTop(to: codeLabel.bottomAnchor, 10)
+        programNameLabel.pinTop(to: codeLabel.bottomAnchor, 5)
         programNameLabel.pinLeft(to: view.leadingAnchor, 20)
+        programNameLabel.pinRight(to: view.trailingAnchor, 20)
     }
     
     private func configureBudgetLabel() {
@@ -166,7 +173,7 @@ final class ProgramViewController : UIViewController {
         view.addSubview(budgtetLabel)
         
         budgtetLabel.pinTop(to: programNameLabel.bottomAnchor, 11)
-        budgtetLabel.pinLeft(to: view.leadingAnchor, 40)
+        budgtetLabel.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configurePaidLabel() {
@@ -175,7 +182,7 @@ final class ProgramViewController : UIViewController {
         view.addSubview(paidLabel)
         
         paidLabel.pinTop(to: budgtetLabel.bottomAnchor, 7)
-        paidLabel.pinLeft(to: view.leadingAnchor, 40)
+        paidLabel.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configureCostLabel() {
@@ -184,7 +191,7 @@ final class ProgramViewController : UIViewController {
         view.addSubview(costLabel)
         
         costLabel.pinTop(to: paidLabel.bottomAnchor, 7)
-        costLabel.pinLeft(to: view.leadingAnchor, 40)
+        costLabel.pinLeft(to: view.leadingAnchor, 20)
     }
     
     private func configureSubjectsStack() {
@@ -196,7 +203,7 @@ final class ProgramViewController : UIViewController {
         view.addSubview(subjectsStack)
         
         subjectsStack.pinTop(to: costLabel.bottomAnchor, 11)
-        subjectsStack.pinLeft(to: view.leadingAnchor, 40)
+        subjectsStack.pinLeft(to: view.leadingAnchor, 20)
     }
     
     func formatNumber(_ number: Int) -> String {
