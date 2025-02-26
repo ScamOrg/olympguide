@@ -314,6 +314,3 @@ struct UniversityViewControllerWrapper: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
-//#Preview {
-//    UniversityViewControllerWrapper()
-//}
