@@ -36,8 +36,9 @@ fileprivate enum Constants {
 protocol WithBookMarkButton { }
 
 final class UniversityViewController: UIViewController, WithBookMarkButton {
-    var interactor: UniversityInteractor?
-    var router: UniversityRouter?
+    var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic)?
+    
+    var router: (UniversityRoutingLogic & ProgramsRoutingLogic)?
     
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     let universityID: Int
