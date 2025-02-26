@@ -38,7 +38,7 @@ protocol WithBookMarkButton { }
 final class UniversityViewController: UIViewController, WithBookMarkButton {
     var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic)?
     
-    var router: (UniversityRoutingLogic & ProgramsRoutingLogic)?
+    var router: ProgramsRoutingLogic?
     
     let informationContainer: UIView = UIView()
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
