@@ -25,18 +25,6 @@ final class UniversityRouter: UniversityDataPassing, ProgramsDataPassing {
     weak var viewController: UIViewController?
 }
 
-extension UniversityRouter: UniversityRoutingLogic {
-    func routeToProgramsByFields(for university: UniversityModel) {
-        let programsByFieldsVC = ProgramsByFieldsAssembly.build(for: university)
-        viewController?.navigationController?.pushViewController(programsByFieldsVC, animated: true)
-    }
-    
-    func routeToProgramsByFaculties(for university: UniversityModel) {
-        let programsByFacultiesVC = ProgramsByFacultiesAssembly.build(for: university)
-        viewController?.navigationController?.pushViewController(programsByFacultiesVC, animated: true)
-    }
-}
-
 extension UniversityRouter: ProgramsRoutingLogic {
     func routeToProgram(with indexPath: IndexPath) {
         guard
