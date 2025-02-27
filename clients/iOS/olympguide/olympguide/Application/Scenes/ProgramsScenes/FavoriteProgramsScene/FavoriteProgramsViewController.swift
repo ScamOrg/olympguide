@@ -101,6 +101,7 @@ extension FavoriteProgramsViewController : UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToProgram(with: indexPath.row)
     }
 }
 
