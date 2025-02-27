@@ -48,8 +48,8 @@ struct UniversityModel: Codable {
     let name: String
     let shortName: String
     let logo: String
-    let region: String?
-    let like: Bool?
+    let region: String
+    let like: Bool
     
     enum CodingKeys: String, CodingKey {
         case universityID = "university_id"
