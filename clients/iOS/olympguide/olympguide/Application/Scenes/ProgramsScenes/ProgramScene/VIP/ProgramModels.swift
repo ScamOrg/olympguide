@@ -40,12 +40,6 @@ enum Program {
 
 
 struct ProgramModel : Codable {
-    struct University: Codable {
-        let university_id: Int
-        let name: String
-        let logo: String
-    }
-    
     let programID: Int
     let name: String
     let field: String
@@ -55,7 +49,7 @@ struct ProgramModel : Codable {
     let requiredSubjects: [String]
     let optionalSubjects: [String]
     let like: Bool
-    let university: University
+    let university: UniversityModel
     let link: String
     
     enum CodingKeys: String, CodingKey {
