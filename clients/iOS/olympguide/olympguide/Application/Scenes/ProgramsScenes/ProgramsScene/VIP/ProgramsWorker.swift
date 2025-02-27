@@ -5,8 +5,6 @@
 //  Created by Tom Tim on 24.02.2025.
 //
 
-import Foundation
-
 enum Groups {
     case fields
     case faculties
