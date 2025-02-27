@@ -12,9 +12,16 @@ final class ProgramAssembly {
         for program: GroupOfProgramsModel.ProgramModel,
         by university: UniversityModel
     ) -> UIViewController {
-        ProgramViewController(
-            for: program,
-            by: university
-        )
+        let viewContoller = ProgramViewController(for: program, by: university)
+        let interactor = ProgramInteractor()
+        let presenter = ProgramPresenter()
+        let worker = ProgramWorker()
+        
+        viewContoller.interactor = interactor
+        interactor.presenter = presenter
+        interactor.worker = worker
+        presenter.viewController = viewContoller
+        
+        return viewContoller
     }
 }
