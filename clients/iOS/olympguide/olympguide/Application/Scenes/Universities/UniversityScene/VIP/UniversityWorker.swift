@@ -21,7 +21,6 @@ protocol UniversityWorkerLogic {
 }
 
 class UniversityWorker : UniversityWorkerLogic {
-    
     private let networkService: NetworkServiceProtocol
     
     init(networkService: NetworkServiceProtocol = NetworkService()) {
