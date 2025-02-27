@@ -6,7 +6,7 @@
 //
 
 import Foundation
-final class ProgramInteractor {
+final class ProgramInteractor  {
     var presenter: (ProgramPresentationLogic & BenefitsPresentationLogic)?
     var worker: (ProgramWorkerLogic & BenefitsWorkerLogic)?
     var olympiads: [OlympiadWithBenefitsModel] = []
