@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol MainVC { }
+protocol WithSearchButton { }
 
 // MARK: - Constants
 fileprivate enum Constants {
