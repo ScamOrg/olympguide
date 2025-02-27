@@ -7,27 +7,27 @@
 
 // MARK: - Business Logic
 protocol FavoriteProgramsBusinessLogic {
-    func action(with request: FavoriteProgramsModels.Action.Request)
+    func loadPrograms(with request: FavoritePrograms.Load.Request)
 }
 
 // MARK: - Data Store
 protocol FavoriteProgramsDataStore {
-    
+    var programs: [ProgramModel] { get }
 }
 
 // MARK: - Presentation Logic
 protocol FavoriteProgramsPresentationLogic {
-    func presentActioon(with response: FavoriteProgramsModels.Action.Response)
+    func presentLoadPrograms(with response: FavoritePrograms.Load.Response)
 }
 
 // MARK: - Display Logic
 protocol FavoriteProgramsDisplayLogic: AnyObject {
-    func displayActionResult(with viewModel: FavoriteProgramsModels.Action.ViewModel)
+    func displayLoadProgramsResult(with viewModel: FavoritePrograms.Load.ViewModel)
 }
 
 // MARK: - Routing Logic
 protocol FavoriteProgramsRoutingLogic {
-    func routeTo()
+    func routeToProgram()
 }
 
 // MARK: - Data Passing
