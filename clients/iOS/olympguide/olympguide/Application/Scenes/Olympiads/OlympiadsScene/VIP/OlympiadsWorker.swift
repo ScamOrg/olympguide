@@ -7,7 +7,14 @@
 
 import Foundation
 
-class OlympiadsWorker {
+protocol OlympiadsWorkerLogic {
+    func fetchOlympiads(
+        with params: [Param],
+        completion: @escaping (Result<[OlympiadModel]?, Error>) -> Void
+    )
+}
+
+final class OlympiadsWorker : OlympiadsWorkerLogic {
     
     private let networkService: NetworkServiceProtocol
     
@@ -16,28 +23,21 @@ class OlympiadsWorker {
     }
 
     func fetchOlympiads(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<[OlympiadModel], Error>) -> Void
+        with params: [Param],
+        completion: @escaping (Result<[OlympiadModel]?, Error>) -> Void
     ) {
-        var queryItems = [URLQueryItem]()
-//        if let levels = levels {
-//            for level in levels {
-//                queryItems.append(URLQueryItem(name: "level", value: "\(level)"))
-//            }
-//        }
-//        if let sort = sort {
-//            queryItems.append(URLQueryItem(name: "sort", value: sort))
-//        }
-//        if let search = search {
-//            queryItems.append(URLQueryItem(name: "search", value: search))
-//        }
+        var queryItems: [URLQueryItem] = []
+
+        for param in params {
+            queryItems.append(URLQueryItem(name: param.key, value: param.value))
+        }
         
         networkService.request(
             endpoint: "/olympiads",
             method: .get,
             queryItems: queryItems,
             body: nil
-        ) { (result: Result<[OlympiadModel], NetworkError>) in
+        ) { (result: Result<[OlympiadModel]?, NetworkError>) in
             switch result {
             case .success(let olympiads):
                 completion(.success(olympiads))
