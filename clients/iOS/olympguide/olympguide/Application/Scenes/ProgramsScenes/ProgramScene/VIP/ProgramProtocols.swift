@@ -14,7 +14,6 @@ protocol ProgramBusinessLogic {
 }
 
 // MARK: - Data Store
-// Храним данные, которые могут потребоваться при переходе на другой экран
 protocol ProgramDataStore {
     
 }
