@@ -8,9 +8,8 @@
 import Foundation
 
 protocol FavoriteProgramsWorkerLogic {
-    func fetch(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<ProgramModel, Error>) -> Void
+    func fetchPrograms(
+        completion: @escaping (Result<[ProgramModel], Error>) -> Void
     )
 }
 
@@ -22,18 +21,15 @@ class FavoriteProgramsWorker : FavoriteProgramsWorkerLogic {
         self.networkService = networkService
     }
     
-    func fetch(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<ProgramModel, Error>) -> Void
+    func fetchPrograms(
+        completion: @escaping (Result<[ProgramModel], Error>) -> Void
     ) {
-        var queryItems = [URLQueryItem]()
-        
         networkService.request(
-            endpoint: "",
+            endpoint: "/user/favourite/programs",
             method: .get,
-            queryItems: queryItems,
+            queryItems: nil,
             body: nil
-        ) { (result: Result<ProgramModel, NetworkError>) in
+        ) { (result: Result<[ProgramModel], NetworkError>) in
             switch result {
             case .success(let olympiads):
                 completion(.success(olympiads))
