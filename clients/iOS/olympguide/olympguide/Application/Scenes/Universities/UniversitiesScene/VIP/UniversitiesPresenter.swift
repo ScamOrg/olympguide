@@ -17,7 +17,7 @@ final class UniversitiesPresenter: UniversitiesPresentationLogic {
                 name: university.name,
                 logoURL: university.logo,
                 region: university.region,
-                like: university.like
+                like: university.like ?? false
             )
         }
         
