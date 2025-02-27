@@ -64,8 +64,8 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.universityID = university.universityID
-        self.isFavorite = university.like
-        self.startIsFavorite = university.like
+        self.isFavorite = university.like ?? false
+        self.startIsFavorite = university.like ?? false
         self.university = university
         
         super.init(nibName: nil, bundle: nil)
