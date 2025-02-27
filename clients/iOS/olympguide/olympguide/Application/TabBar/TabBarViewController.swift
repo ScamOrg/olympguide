@@ -129,9 +129,9 @@ final class TabBarViewController: UITabBarController {
         
         if #available(iOS 18.0, *) {
             isTabBarHidden = true
-        } else {
-            // Fallback on earlier versions
-        }
+        } else { }
+        
+        setupDoubleTapRecognizers()
     }
     
     // MARK: - Configuration
@@ -139,7 +139,6 @@ final class TabBarViewController: UITabBarController {
         tabBar.shadowImage = UIImage()
         tabBar.backgroundImage = UIImage()
         tabBar.barTintColor = .white
-//        tabBar.isTranslucent = false
     }
     
     private func setupCustomTabBar() {
@@ -165,6 +164,24 @@ final class TabBarViewController: UITabBarController {
             if button.getTag() == tag {
                 button.fillIcon()
             }
+        }
+    }
+    
+    private func setupDoubleTapRecognizers() {
+        customTabBar.arrangedSubviews.forEach { view in
+            let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
+            doubleTap.numberOfTapsRequired = 2
+            view.addGestureRecognizer(doubleTap)
+        }
+    }
+    
+    @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+        guard let tappedView = sender.view as? TabButton else { return }
+        let tappedTag = tappedView.getTag()
+        
+        if selectedIndex == tappedTag,
+           let navController = viewControllers?[tappedTag] as? UINavigationController {
+            navController.popToRootViewController(animated: true)
         }
     }
 }
