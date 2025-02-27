@@ -110,13 +110,13 @@ class UniversityTableViewCell: UITableViewCell {
         
         regionLabel.pinTop(to: contentView.topAnchor, Constants.Dimensions.logoTopMargin)
         regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        regionLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
+        regionLabel.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         
         nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
         
-        favoriteButton.pinCenterY(to: contentView)
+        favoriteButton.pinTop(to: regionLabel.bottomAnchor, 5)
         favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         favoriteButton.setWidth(Constants.Dimensions.favoriteButtonSize)
         favoriteButton.setHeight(Constants.Dimensions.favoriteButtonSize)
@@ -182,8 +182,7 @@ class UniversityTableViewCell: UITableViewCell {
     }
     
     // MARK: - Objc funcs
-    @objc
-    private func favoriteButtonTapped() {
+    @objc private func favoriteButtonTapped() {
         let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
         let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
