@@ -44,8 +44,6 @@ struct ProgramModel : Codable {
         let university_id: Int
         let name: String
         let logo: String
-        
-        
     }
     
     let programID: Int
