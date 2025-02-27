@@ -33,6 +33,7 @@ func (p *PgProgramRepo) GetProgram(programID string, userID any) (*model.Program
 	var program model.Program
 	err := p.db.Debug().
 		Preload("University").
+		Preload("University.Region").
 		Preload("Field").
 		Preload("OptionalSubjects").
 		Preload("RequiredSubjects").
@@ -95,6 +96,7 @@ func (p *PgProgramRepo) GetLikedPrograms(userID uint) ([]model.Program, error) {
 		Preload("RequiredSubjects").
 		Preload("Field").
 		Preload("University").
+		Preload("University.Region").
 		Joins("LEFT JOIN olympguide.liked_programs lp ON lp.program_id = olympguide.educational_program.program_id AND lp.user_id = ?", userID).
 		Where("lp.user_id IS NOT NULL").
 		Select("olympguide.educational_program.*, TRUE as like").

@@ -166,6 +166,8 @@ func newProgramResponse(program *model.Program) *dto.ProgramResponse {
 		University: dto.UniversityForProgramInfo{
 			UniversityID: program.UniversityID,
 			Name:         program.University.Name,
+			ShortName:    program.University.ShortName,
+			Region:       program.University.Region.Name,
 			Logo:         program.University.Logo,
 		},
 		Link: program.Link,

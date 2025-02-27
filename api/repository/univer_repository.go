@@ -67,7 +67,7 @@ func (u *PgUniverRepo) GetUnivers(search string, regions []string, userID any) (
 
 func (u *PgUniverRepo) GetLikedUnivers(userID uint) ([]model.University, error) {
 	var universities []model.University
-	err := u.db.Debug().
+	err := u.db.Debug().Preload("Region").
 		Joins("LEFT JOIN olympguide.liked_universities lu ON lu.university_id = olympguide.university.university_id AND lu.user_id = ?", userID).
 		Where("lu.user_id IS NOT NULL").
 		Select("olympguide.university.*, TRUE as like").
