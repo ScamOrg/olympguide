@@ -9,10 +9,10 @@ import UIKit
 
 final class FavoriteProgramsRouter: FavoriteProgramsRoutingLogic, FavoriteProgramsDataPassing {
     var dataStore: FavoriteProgramsDataStore?
-    var viewController: UIViewController?
+    weak var viewController: UIViewController?
     
-    func routeTo() {
-        <#code#>
+    func routeToProgram() {
+        
     }
 }
 
