@@ -57,23 +57,45 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     private let tableView = UITableView(frame: .zero, style: .plain)
     
+    init (
+        for program: ProgramModel
+    ) {
+        self.logo = program.university.logo
+        self.isFavorite = program.like
+        self.startIsFavorite = program.like
+        
+        self.university = program.university
+        self.program = GroupOfProgramsModel.ProgramModel(
+            programID: program.programID,
+            name: program.name,
+            field: program.field,
+            budgetPlaces: program.budgetPlaces,
+            paidPlaces: program.paidPlaces,
+            cost: program.cost,
+            requiredSubjects: program.requiredSubjects,
+            optionalSubjects: program.optionalSubjects,
+            like: program.like
+        )
+        
+        let link = program.link
+            .replacingOccurrences(of: "https://www.", with: "")
+            .replacingOccurrences(of: "https://", with: "")
+        self.webSiteButton.setTitle(link, for: .normal)
+
+        super.init(nibName: nil, bundle: nil)
+    }
+    
     init(
         for program: GroupOfProgramsModel.ProgramModel,
         by university: UniversityModel
     ) {
-        self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.isFavorite = university.like ?? false
         self.startIsFavorite = program.like
         self.university = university
-        self.codeLabel.text = program.field
-        self.programNameLabel.text = program.name
         self.program = program
         
         super.init(nibName: nil, bundle: nil)
-        
-        self.universityNameLabel.text = university.name
-        self.regionLabel.text = university.region
     }
     
     @available(*, unavailable)
@@ -93,8 +115,11 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         
         let benefitRequest = Benefits.Load.Request(programID: program.programID)
         interactor?.loadBenefits(with: benefitRequest)
-        let programRequest = Program.Load.Request(programID: program.programID)
-        interactor?.loadProgram(with: programRequest)
+        
+        if webSiteButton.titleLabel?.text == nil {
+            let programRequest = Program.Load.Request(programID: program.programID)
+            interactor?.loadProgram(with: programRequest)
+        }
     }
 }
 
@@ -149,6 +174,7 @@ extension ProgramViewController {
     private func configureRegionLabel() {
         regionLabel.font = Constants.Fonts.regionLabelFont
         regionLabel.textColor = Constants.Colors.regionTextColor
+        regionLabel.text = university.region
         
         informationContainer.addSubview(regionLabel)
         
@@ -157,12 +183,13 @@ extension ProgramViewController {
     }
     
     private func configureUniversityNameLabel() {
-        informationContainer.addSubview(universityNameLabel)
-        
         universityNameLabel.font = Constants.Fonts.nameLabelFont
         universityNameLabel.numberOfLines = 0
         universityNameLabel.lineBreakMode = .byWordWrapping
+        universityNameLabel.text = university.name
         
+        informationContainer.addSubview(universityNameLabel)
+
         universityNameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         universityNameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         universityNameLabel.pinRight(to: informationContainer.trailingAnchor, Constants.Dimensions.interItemSpacing)
@@ -170,6 +197,7 @@ extension ProgramViewController {
     
     private func configureCodeLabel() {
         codeLabel.font = UIFont(name: "MontserratAlternates-Regular", size: 15)
+        codeLabel.text = program.field
         
         informationContainer.addSubview(codeLabel)
         codeLabel.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
@@ -181,6 +209,7 @@ extension ProgramViewController {
         programNameLabel.font = UIFont(name: "MontserratAlternates-Medium", size: 15)
         programNameLabel.numberOfLines = 0
         programNameLabel.lineBreakMode = .byWordWrapping
+        programNameLabel.text = program.name
         
         informationContainer.addSubview(programNameLabel)
         programNameLabel.pinTop(to: codeLabel.bottomAnchor, 5)
@@ -382,7 +411,9 @@ extension ProgramViewController : BenefitsDisplayLogic {
 
 extension ProgramViewController : ProgramDisplayLogic {
     func displayLoadProgram(with viewModel: Program.Load.ViewModel) {
-        let link = viewModel.link.replacingOccurrences(of: "https://www.", with: "").replacingOccurrences(of: "https://", with: "")
+        let link = viewModel.link
+            .replacingOccurrences(of: "https://www.", with: "")
+            .replacingOccurrences(of: "https://", with: "")
         webSiteButton.setTitle(link, for: .normal)
     }
     
