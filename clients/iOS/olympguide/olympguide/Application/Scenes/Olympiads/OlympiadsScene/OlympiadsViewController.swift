@@ -60,8 +60,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setup()
-        
         configureNavigationBar()
         configureRefreshControl()
         configureTableView()
@@ -87,19 +85,6 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
         print("Error: \(message)")
     }
     
-    private func setup() {
-        let viewController = self
-        let interactor = OlympiadsInteractor()
-        let presenter = OlympiadsPresenter()
-        let router = OlympiadsRouter()
-        
-        viewController.interactor = interactor
-        viewController.router = router
-        interactor.presenter = presenter
-        presenter.viewController = viewController
-        router.viewController = viewController
-    }
-    
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.olympiadsTitle
         
@@ -123,8 +108,10 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
         tableView.frame = view.bounds
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
-        tableView.register(OlympiadTableViewCell.self,
-                           forCellReuseIdentifier: "OlympiadTableViewCell")
+        tableView.register(
+            OlympiadTableViewCell.self,
+            forCellReuseIdentifier: OlympiadTableViewCell.identifier
+        )
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = Constants.Colors.tableViewBackground
@@ -133,14 +120,14 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
         tableView.showsVerticalScrollIndicator = false
         
         let headerContainer = UIView()
-        headerContainer.backgroundColor = .clear
+        headerContainer.backgroundColor = .white
         
         headerContainer.addSubview(filterSortView)
         
         filterSortView.pinTop(to: headerContainer.topAnchor, Constants.Dimensions.tableViewTopMargin)
         filterSortView.pinLeft(to: headerContainer.leadingAnchor)
         filterSortView.pinRight(to: headerContainer.trailingAnchor)
-        filterSortView.pinBottom(to: headerContainer.bottomAnchor)
+        filterSortView.pinBottom(to: headerContainer.bottomAnchor, 10)
         
         headerContainer.layoutIfNeeded()
         
@@ -166,30 +153,38 @@ final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, Wi
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
-extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+extension OlympiadsViewController: UITableViewDataSource {
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         return (olympiads.count != 0) ? olympiads.count : 10
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
-            withIdentifier: "OlympiadTableViewCell",
+            withIdentifier: OlympiadTableViewCell.identifier,
             for: indexPath
         ) as! OlympiadTableViewCell
         
         if olympiads.count != 0 {
             let olympiadViewModel = olympiads[indexPath.row]
             cell.configure(with: olympiadViewModel)
-            tableView.isUserInteractionEnabled = true
         } else {
             cell.configureShimmer()
-            tableView.isUserInteractionEnabled = false
         }
         return cell
     }
+}
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+extension OlympiadsViewController: UITableViewDelegate {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard let olympiadModel = interactor?.olympiads[indexPath.row] else { return }
         router?.routeToDetails(for: olympiadModel)
@@ -198,7 +193,6 @@ extension OlympiadsViewController: UITableViewDataSource, UITableViewDelegate {
 
 // MARK: - FilterSortViewDelegate
 extension OlympiadsViewController: FilterSortViewDelegate {
-    
     func filterSortViewDidTapSortButton(_ view: FilterSortView) {
        
     }
