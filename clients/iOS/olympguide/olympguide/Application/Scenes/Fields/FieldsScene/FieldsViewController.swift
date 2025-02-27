@@ -38,7 +38,7 @@ fileprivate enum Constants {
     }
 }
 
-class FieldsViewController: UIViewController, FieldsDisplayLogic, MainVC {
+class FieldsViewController: UIViewController, FieldsDisplayLogic, WithSearchButton {
     
     // MARK: - VIP
     var interactor: (FieldsDataStore & FieldsBusinessLogic)?

@@ -36,7 +36,7 @@ fileprivate enum Constants {
     }
 }
 
-final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, MainVC {
+final class OlympiadsViewController: UIViewController, OlympiadsDisplayLogic, WithSearchButton {
     
     // MARK: - VIP
     var interactor: (OlympiadsDataStore & OlympiadsBusinessLogic)?
