@@ -191,6 +191,8 @@ extension ProfileViewController : UITableViewDelegate {
             router?.routToFavoriteOlympiads()
         case "Избранные ВУЗы":
             router?.routToFavoriteUniversities()
+        case "Избранные программы":
+            router?.routToFavoritePrograms()
         default:
             break
         }

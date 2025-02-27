@@ -20,16 +20,6 @@ enum Programs {
         
         struct ViewModel {
             struct GroupOfProgramsViewModel {
-                struct ProgramViewModel {
-                    let name: String
-                    let code: String
-                    let budgetPlaces: Int
-                    let paidPlaces: Int
-                    let cost: Int
-                    let requiredSubjects: [String]
-                    let optionalSubjects: [String]?
-                }
-                
                 let name: String
                 let code: String
                 var isExpanded: Bool = false
@@ -40,6 +30,16 @@ enum Programs {
             let groupsOfPrograms: [GroupOfProgramsViewModel]
         }
     }
+}
+
+struct ProgramViewModel {
+    let name: String
+    let code: String
+    let budgetPlaces: Int
+    let paidPlaces: Int
+    let cost: Int
+    let requiredSubjects: [String]
+    let optionalSubjects: [String]?
 }
 
 struct GroupOfProgramsModel : Codable {

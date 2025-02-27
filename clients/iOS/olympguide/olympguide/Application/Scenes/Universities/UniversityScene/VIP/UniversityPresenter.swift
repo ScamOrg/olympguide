@@ -43,11 +43,7 @@ extension UniversityPresenter : ProgramsPresentationLogic {
                     name: groupOfPrograms.name,
                     code: groupOfPrograms.code ?? "",
                     programs: groupOfPrograms.programs.map { program in
-                        Programs
-                            .Load
-                            .ViewModel
-                            .GroupOfProgramsViewModel
-                            .ProgramViewModel(
+                        ProgramViewModel(
                             name: program.name,
                             code: program.field,
                             budgetPlaces: program.budgetPlaces,

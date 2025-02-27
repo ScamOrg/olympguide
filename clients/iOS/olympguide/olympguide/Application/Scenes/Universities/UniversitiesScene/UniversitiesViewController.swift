@@ -109,8 +109,10 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         
         tableView.frame = view.bounds
         
-        tableView.register(UniversityTableViewCell.self,
-                           forCellReuseIdentifier: "UniversityTableViewCell")
+        tableView.register(
+            UniversityTableViewCell.self,
+            forCellReuseIdentifier: "UniversityTableViewCell"
+        )
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = Constants.Colors.tableViewBackground
@@ -151,7 +153,6 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
 extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate {
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return (universities.count != 0) ? universities.count : 10
     }

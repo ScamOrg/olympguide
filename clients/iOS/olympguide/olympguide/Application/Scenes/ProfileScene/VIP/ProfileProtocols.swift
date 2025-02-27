@@ -12,5 +12,6 @@ protocol ProfileRoutingLogic {
     func routToAboutUs()
     func routToFavoriteOlympiads()
     func routToFavoriteUniversities()
+    func routToFavoritePrograms()
 }
 

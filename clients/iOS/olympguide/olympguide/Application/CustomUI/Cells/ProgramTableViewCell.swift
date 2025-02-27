@@ -145,7 +145,7 @@ final class ProgramTableViewCell: UITableViewCell {
     }
     
     func configure(
-        with viewModel: Programs.Load.ViewModel.GroupOfProgramsViewModel.ProgramViewModel
+        with viewModel: ProgramViewModel
     ) {
         informationStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let code = viewModel.code
