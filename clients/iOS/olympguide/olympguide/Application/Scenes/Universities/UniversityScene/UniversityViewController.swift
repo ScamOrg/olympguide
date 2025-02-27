@@ -40,32 +40,32 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     
     var router: ProgramsRoutingLogic?
     
-    let informationContainer: UIView = UIView()
-    let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
-    let universityID: Int
-    let startIsFavorite: Bool
-    var isFavorite: Bool
-    let nameLabel: UILabel = UILabel()
-    let regionLabel: UILabel = UILabel()
-    let logo: String
-    let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
-    let emailButton: UIInformationButton = UIInformationButton(type: .email)
-    let university: UniversityModel
-    let programsLabel: UILabel = UILabel()
-    let segmentedControl: UISegmentedControl = UISegmentedControl()
-    let filterSortView: FilterSortView = FilterSortView()
+    private let informationContainer: UIView = UIView()
+    private let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
+    private let universityID: Int
+    private let startIsFavorite: Bool
+    private var isFavorite: Bool
+    private let nameLabel: UILabel = UILabel()
+    private let regionLabel: UILabel = UILabel()
+    private let logo: String
+    private let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
+    private let emailButton: UIInformationButton = UIInformationButton(type: .email)
+    private let university: UniversityModel
+    private let programsLabel: UILabel = UILabel()
+    private let segmentedControl: UISegmentedControl = UISegmentedControl()
+    private let filterSortView: FilterSortView = FilterSortView()
     
     private var groupOfProgramsViewModel : [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
-    
-    let refreshControl: UIRefreshControl = UIRefreshControl()
-    let tableView = UITableView(frame: .zero, style: .plain)
+     
+    private let refreshControl: UIRefreshControl = UIRefreshControl()
+    private let tableView = UITableView(frame: .zero, style: .plain)
     
     init(for university: UniversityModel) {
         self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.universityID = university.universityID
-        self.isFavorite = university.like
-        self.startIsFavorite = university.like
+        self.isFavorite = university.like ?? false
+        self.startIsFavorite = university.like ?? false
         self.university = university
         
         super.init(nibName: nil, bundle: nil)
@@ -187,8 +187,11 @@ extension UniversityViewController {
     private func configureWebSiteButton() {
         informationContainer.addSubview(webSiteButton)
         
-        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
-        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
+        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30)
+//        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
+//        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30, .grOE)
+//        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
+        
         webSiteButton.pinLeft(to: informationContainer.leadingAnchor, 20)
         webSiteButton.pinRight(to: informationContainer.centerXAnchor)
         webSiteButton.addTarget(self, action: #selector(openWebPage), for: .touchUpInside)
@@ -213,9 +216,9 @@ extension UniversityViewController {
         programsLabel.pinTop(to: emailButton.bottomAnchor, 20)
         programsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
         
-        let textSize = text.size(withAttributes: [.font: font])
-        
-        programsLabel.setHeight(textSize.height)
+//        let textSize = text.size(withAttributes: [.font: font])
+//        
+//        programsLabel.setHeight(textSize.height)
     }
     
     private func configureSegmentedControl() {
@@ -264,6 +267,48 @@ extension UniversityViewController {
     
     private func configureFilterSortView() {
         filterSortView.configure(filteringOptions: ["Формат обучения"])
+    }
+    
+    func configureRefreshControl() {
+        refreshControl.tintColor = .systemCyan
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+    
+    private func configureTableView() {
+        view.addSubview(tableView)
+        
+        tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+        
+        tableView.register(
+            ProgramTableViewCell.self,
+            forCellReuseIdentifier: ProgramTableViewCell.identifier
+        )
+        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
+        tableView.refreshControl = refreshControl
+        tableView.showsVerticalScrollIndicator = false
+        
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
+        
+        informationContainer.setNeedsLayout()
+        informationContainer.layoutIfNeeded()
+        
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let fittingSize = informationContainer.systemLayoutSizeFitting(targetSize)
+        informationContainer.frame.size.height = fittingSize.height
+        tableView.tableHeaderView = informationContainer
+        
+        tableView.tableHeaderView = informationContainer
     }
     
     @objc func openWebPage(sender: UIButton) {
@@ -344,48 +389,6 @@ extension UniversityViewController : MFMailComposeViewControllerDelegate{
 
 // MARK: - UITableViewDataSource
 extension UniversityViewController : UITableViewDataSource {
-    func configureRefreshControl() {
-        refreshControl.tintColor = .systemCyan
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-    }
-    
-    private func configureTableView() {
-        view.addSubview(tableView)
-        
-        tableView.frame = view.bounds
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-        
-        tableView.register(
-            ProgramTableViewCell.self,
-            forCellReuseIdentifier: ProgramTableViewCell.identifier
-        )
-        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
-        
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.backgroundColor = .white
-        tableView.separatorStyle = .none
-        tableView.refreshControl = refreshControl
-        tableView.showsVerticalScrollIndicator = false
-        
-        if #available(iOS 15.0, *) {
-            tableView.sectionHeaderTopPadding = 0
-        }
-        
-        informationContainer.setNeedsLayout()
-        informationContainer.layoutIfNeeded()
-        
-        let targetSize = CGSize(
-            width: tableView.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let fittingSize = informationContainer.systemLayoutSizeFitting(targetSize)
-        informationContainer.frame.size.height = fittingSize.height
-        tableView.tableHeaderView = informationContainer
-        
-        tableView.tableHeaderView = informationContainer
-    }
-    
     func numberOfSections(in tableView: UITableView) -> Int {
         return groupOfProgramsViewModel.count
     }
@@ -453,8 +456,7 @@ extension UniversityViewController : UITableViewDataSource {
         tableView.setContentOffset(currentOffset, animated: false)
     }
     
-    @objc
-    private func handleRefresh() {
+    @objc private func handleRefresh() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             var request = Programs.Load.Request(
                 params: [],
