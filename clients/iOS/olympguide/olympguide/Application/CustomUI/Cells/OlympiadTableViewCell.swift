@@ -48,6 +48,7 @@ class OlympiadTableViewCell: UITableViewCell {
     
     private let nameLabel = UILabel()
     private let levelAndProfileLabel = UILabel()
+    private let benefitLabel: UILabel = UILabel()
     
     private let favoriteButton: UIButton = {
         let button = UIButton()
@@ -87,6 +88,7 @@ class OlympiadTableViewCell: UITableViewCell {
         contentView.addSubview(favoriteButton)
         contentView.addSubview(separatorLine)
         contentView.addSubview(shimmerLayer)
+        contentView.addSubview(benefitLabel)
         
 
         // Configure nameLabel
@@ -98,21 +100,29 @@ class OlympiadTableViewCell: UITableViewCell {
         levelAndProfileLabel.font = Constants.Fonts.levelAndProfileLabelFont
         levelAndProfileLabel.textColor = Constants.Colors.levelAndProfileTextColor
         
+        benefitLabel.font = Constants.Fonts.levelAndProfileLabelFont
+        benefitLabel.textColor = Constants.Colors.levelAndProfileTextColor
+        
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         
-        levelAndProfileLabel.pinTop(to: contentView.topAnchor, Constants.Dimensions.logoTopMargin)
+        levelAndProfileLabel.pinTop(to: contentView.topAnchor, 20)
         levelAndProfileLabel.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.interItemSpacing)
         levelAndProfileLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
         
         nameLabel.pinTop(to: levelAndProfileLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.interItemSpacing)
         nameLabel.pinRight(to: favoriteButton.leadingAnchor, Constants.Dimensions.interItemSpacing)
-        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
+//        nameLabel.pinBottom(to: contentView.bottomAnchor, Constants.Dimensions.nameLabelBottomMargin)
         
         favoriteButton.pinCenterY(to: contentView)
         favoriteButton.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.interItemSpacing)
         favoriteButton.setWidth(Constants.Dimensions.favoriteButtonSize)
         favoriteButton.setHeight(Constants.Dimensions.favoriteButtonSize)
+        
+        benefitLabel.pinTop(to: nameLabel.bottomAnchor, 5)
+        benefitLabel.pinLeft(to: contentView.leadingAnchor, 20)
+        benefitLabel.pinRight(to: contentView.trailingAnchor, 20)
+        benefitLabel.pinBottom(to: contentView.bottomAnchor, 20)
         
         separatorLine.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.separatorHorizontalInset)
         separatorLine.pinRight(to: contentView.trailingAnchor, Constants.Dimensions.separatorHorizontalInset)
@@ -131,38 +141,39 @@ class OlympiadTableViewCell: UITableViewCell {
     func configure(with viewModel: Olympiads.Load.ViewModel.OlympiadViewModel) {
         nameLabel.text = viewModel.name
         levelAndProfileLabel.text = "\(viewModel.level) уровень | \(viewModel.profile)"
+        benefitLabel.text = nil
         shimmerLayer.isHidden = true
         shimmerLayer.stopAnimating()
         shimmerLayer.removeAllConstraints()
         isUserInteractionEnabled = true
 
-        showAll()
+        favoriteButton.isHidden = AuthManager.shared.isAuthenticated ? false : true
+    }
+    
+    func configure(with viewModel: Benefits.Load.ViewModel.BenefitViewModel) {
+        nameLabel.text = viewModel.olympiadName
+        let level = "\(String(repeating: "I", count: viewModel.olympiadLevel)) уровень"
+        levelAndProfileLabel.text = "\(level) | \(viewModel.olympiadProfile)"
+        let diploma = viewModel.minDiplomaLevel == 1 ? "Победитель" : "Призёр"
+        let benefit = viewModel.isBVI ? "БВИ" : "100 баллов"
+        benefitLabel.text = "\(viewModel.minClass) класс | \(diploma) | \(benefit)"
+        shimmerLayer.isHidden = true
+        shimmerLayer.stopAnimating()
+        shimmerLayer.removeAllConstraints()
+
+        isUserInteractionEnabled = true
+        
+        favoriteButton.isHidden = true
     }
     
     func configureShimmer() {
         shimmerLayer.isHidden = false
-        hideAll()
         shimmerLayer.startAnimating()
         isUserInteractionEnabled = false
     }
     
-    private func hideAll() {
-        separatorLine.isHidden = true
-        favoriteButton.isHidden = true
-        nameLabel.isHidden = true
-        levelAndProfileLabel.isHidden = true
-    }
-    
-    private func showAll() {
-        separatorLine.isHidden = false
-        favoriteButton.isHidden = false
-        nameLabel.isHidden = false
-        levelAndProfileLabel.isHidden = false
-    }
-    
     // MARK: - Objc funcs
-    @objc
-    private func favoriteButtonTapped() {
+    @objc private func favoriteButtonTapped() {
         let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
         let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)

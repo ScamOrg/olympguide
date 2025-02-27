@@ -116,8 +116,8 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
         animated: Bool
     ) {
         guard let coordinator = navigationController.transitionCoordinator else {
-            self.searchButton.alpha = (viewController is MainVC) ? 1.0 : 0.0
-            self.searchButton.isHidden = (viewController is MainVC) ? false : true
+            self.searchButton.alpha = (viewController is WithSearchButton) ? 1.0 : 0.0
+            self.searchButton.isHidden = (viewController is WithSearchButton) ? false : true
             self.bookMarkButton.alpha = (viewController is WithBookMarkButton) ? 1.0 : 0.0
             self.bookMarkButton.isHidden = (viewController is WithBookMarkButton) ? false : true
             return
@@ -127,15 +127,15 @@ extension NavigationBarViewController: UINavigationControllerDelegate {
         coordinator.animateAlongsideTransition(in: navigationBar, animation: { _ in
             self.searchButton.isHidden = false
             self.bookMarkButton.isHidden = false
-            self.searchButton.alpha = (viewController is MainVC) ? 1.0 : 0.0
+            self.searchButton.alpha = (viewController is WithSearchButton) ? 1.0 : 0.0
             self.bookMarkButton.alpha = (viewController is WithBookMarkButton) ? 1.0 : 0.0
             tabBarVC.customTabBar.alpha = (viewController is NonTabBarVC) ? 0.0 : 1.0
         }, completion: { context in
-            self.searchButton.isHidden = (viewController is MainVC) ? false : true
+            self.searchButton.isHidden = (viewController is WithSearchButton) ? false : true
             self.bookMarkButton.isHidden = (viewController is WithBookMarkButton) ? false : true
             if context.isCancelled,
                let fromVC = context.viewController(forKey: .from) {
-                self.searchButton.alpha = (fromVC is MainVC) ? 1.0 : 0.0
+                self.searchButton.alpha = (fromVC is WithSearchButton) ? 1.0 : 0.0
                 self.bookMarkButton.alpha = (viewController is WithBookMarkButton) ? 1.0 : 0.0
                 tabBarVC.customTabBar.alpha = (viewController is NonTabBarVC) ? 0.0 : 1.0
             }

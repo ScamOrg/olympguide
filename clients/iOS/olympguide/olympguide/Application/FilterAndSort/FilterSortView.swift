@@ -69,8 +69,7 @@ final class FilterSortView: UIView {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Methods
@@ -91,7 +90,7 @@ final class FilterSortView: UIView {
         horizontalStackView.pinHeight(to: horizontalScrollView)
     }
     
-    private func configure(sortingOptions: [String], filteringOptions: [String]) {
+    func configure(sortingOptions: [String], filteringOptions: [String]) {
         horizontalStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         let space = UIView()
@@ -107,7 +106,7 @@ final class FilterSortView: UIView {
         }
     }
     
-    private func configure(filteringOptions: [String]) {
+    func configure(filteringOptions: [String]) {
         let space = UIView()
         space.setWidth(Constants.Dimensions.spaceWidth)
         horizontalStackView.addArrangedSubview(space)

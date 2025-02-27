@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from EducationalProgram import EducationalProgram
-from utils import fetch_html
+from hse_loader.educational_programs_loader.EducationalProgram import EducationalProgram
+from hse_loader.educational_programs_loader.utils import fetch_html
 from clients.get_client import get_faculties
 import logging
 

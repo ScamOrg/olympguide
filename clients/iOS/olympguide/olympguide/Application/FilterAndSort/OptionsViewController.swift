@@ -113,7 +113,6 @@ final class OptionsViewController: UIViewController {
     private var currentToAll: [Int: Int] = [:]
     private var allToCurrent: [Int: Int] = [:]
     
-    private let peak: UIView = UIView()
     private let titleLabel: UILabel = UILabel()
     private let cancelButton: UIButton = UIButton()
     private let saveButton: UIButton = UIButton()
@@ -243,6 +242,7 @@ final class OptionsViewController: UIViewController {
     }
     
     private func configurePeak() {
+        let peak: UIView = UIView()
         peak.backgroundColor = Constants.Colors.peakColor
         peak.layer.cornerRadius = Constants.Dimensions.peakCornerRadius
         
@@ -420,13 +420,11 @@ final class OptionsViewController: UIViewController {
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension OptionsViewController: UITableViewDataSource, UITableViewDelegate {
-    
     private func calculateTableHeight() -> CGFloat {
         return CGFloat(min(currentSelectedIndices.count, Constants.Numbers.rowsLimit)) * Constants.Dimensions.rowHeight
     }
     
     // MARK: UITableViewDataSource
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         currentCount
     }

@@ -9,5 +9,8 @@
 protocol ProfileRoutingLogic {
     func routeToSignIn()
     func routeToSignUp()
+    func routToAboutUs()
+    func routToFavoriteOlympiads()
+    func routToFavoriteUniversities()
 }
 

@@ -38,7 +38,7 @@ fileprivate enum Constants {
     }
 }
 
-class UniversitiesViewController: UIViewController, MainVC {
+class UniversitiesViewController: UIViewController, WithSearchButton {
     
     // MARK: - VIP
     var interactor: (UniversitiesDataStore & UniversitiesBusinessLogic)?
@@ -63,8 +63,6 @@ class UniversitiesViewController: UIViewController, MainVC {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setup()
-        
         configureNavigationBar()
         configureRefreshControl()
         configureFilterSortView()
@@ -82,19 +80,6 @@ class UniversitiesViewController: UIViewController, MainVC {
     // MARK: - Methods
     func displayError(message: String) {
         print("Error: \(message)")
-    }
-    
-    private func setup() {
-        let viewController = self
-        let interactor = UniversitiesInteractor()
-        let presenter = UniversitiesPresenter()
-        let router = UniversitiesRouter()
-        
-        viewController.interactor = interactor
-        viewController.router = router
-        interactor.presenter = presenter
-        presenter.viewController = viewController
-        router.viewController = viewController
     }
     
     private func configureNavigationBar() {

@@ -41,7 +41,15 @@ fileprivate enum Constants {
 
 class ProfileViewController: UIViewController {
     var router: ProfileRoutingLogic?
-    
+    let authLabels: [String] = [
+        "Личные данные",
+        "Мои дипломы",
+        "Избранные ВУЗы",
+        "Избранные программы",
+        "Избранные олимпиады",
+        "Тема приложения",
+        "О нас"
+    ]
     private let tableView = UITableView(frame: .zero, style: .plain)
     private var authCancellable: AnyCancellable?
     
@@ -78,13 +86,15 @@ class ProfileViewController: UIViewController {
         tableView.separatorStyle = .none
         tableView.frame = view.bounds
         
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+        
         tableView.dataSource = self
         tableView.delegate = self
         
-        let headerContainer = UIView()
-        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 10)
-        
-        tableView.tableHeaderView = headerContainer
+//        let headerContainer = UIView()
+//        headerContainer.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 10)
+//        
+//        tableView.tableHeaderView = headerContainer
     }
     
     // MARK: - Actions
@@ -109,7 +119,7 @@ extension ProfileViewController : UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if AuthManager.shared.isAuthenticated {
-            return 9
+            return authLabels.count + 2
         } else {
             return 5
         }
@@ -143,28 +153,16 @@ extension ProfileViewController : UITableViewDataSource {
                 return cell
             }
         } else {
-            if indexPath.row <= 7 {
+            if indexPath.row <= authLabels.count {
                 let cell = ProfileTableViewCell()
                 switch indexPath.row {
                 case 0:
                     cell.configure(title: "Регион", detail: "Москва")
-                case 1:
-                    cell.configure(title: "Личные данные")
-                case 2:
-                    cell.configure(title: "Мои дипломы")
-                case 3:
-                    cell.configure(title: "Избранные ВУЗы")
-                case 4:
-                    cell.configure(title: "Избранные олимпиады")
-                case 5:
-                    cell.configure(title: "Настройка уведомлений")
-                case 6:
-                    cell.configure(title: "Тема приложения")
-                case 7:
-                    cell.configure(title: "О нас")
-                    cell.hideSeparator(true)
                 default:
-                    break
+                    cell.configure(title: authLabels[indexPath.row - 1])
+                }
+                if indexPath.row == authLabels.count {
+                    cell.hideSeparator(true)
                 }
                 return cell
             }
@@ -182,5 +180,20 @@ extension ProfileViewController : UITableViewDataSource {
 extension ProfileViewController : UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        guard
+            let cell = tableView.cellForRow(at: indexPath) as? ProfileTableViewCell
+        else { return }
+        
+        switch cell.label.text {
+        case "О нас":
+            router?.routToAboutUs()
+        case "Избранные олимпиады":
+            router?.routToFavoriteOlympiads()
+        case "Избранные ВУЗы":
+            router?.routToFavoriteUniversities()
+        default:
+            break
+        }
+
     }
 }

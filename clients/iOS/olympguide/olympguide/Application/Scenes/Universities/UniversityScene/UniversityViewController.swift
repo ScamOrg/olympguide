@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftUI
 import SafariServices
 import MessageUI
 
@@ -35,31 +34,40 @@ fileprivate enum Constants {
 
 protocol WithBookMarkButton { }
 
+// MARK: - UniversityViewController
 final class UniversityViewController: UIViewController, WithBookMarkButton {
-    var interactor: UniversityInteractor?
-    var router: UniversityRouter?
+    var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic)?
     
-    let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
-    let universityID: Int
-    let startIsFavorite: Bool
-    var isFavorite: Bool
-    let nameLabel: UILabel = UILabel()
-    let regionLabel: UILabel = UILabel()
-    let logo: String
-    let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
-    let emailButton: UIInformationButton = UIInformationButton(type: .email)
-    let university: UniversityModel
+    var router: ProgramsRoutingLogic?
     
-    let tableView = UITableView(frame: .zero, style: .plain)
+    private let informationContainer: UIView = UIView()
+    private let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
+    private let universityID: Int
+    private let startIsFavorite: Bool
+    private var isFavorite: Bool
+    private let nameLabel: UILabel = UILabel()
+    private let regionLabel: UILabel = UILabel()
+    private let logo: String
+    private let webSiteButton: UIInformationButton = UIInformationButton(type: .web)
+    private let emailButton: UIInformationButton = UIInformationButton(type: .email)
+    private let university: UniversityModel
+    private let programsLabel: UILabel = UILabel()
+    private let segmentedControl: UISegmentedControl = UISegmentedControl()
+    private let filterSortView: FilterSortView = FilterSortView()
     
+    private var groupOfProgramsViewModel : [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
+     
+    private let refreshControl: UIRefreshControl = UIRefreshControl()
+    private let tableView = UITableView(frame: .zero, style: .plain)
     
     init(for university: UniversityModel) {
         self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.universityID = university.universityID
-        self.isFavorite = university.like
-        self.startIsFavorite = university.like
+        self.isFavorite = university.like ?? false
+        self.startIsFavorite = university.like ?? false
         self.university = university
+        
         super.init(nibName: nil, bundle: nil)
         
         self.nameLabel.text = university.name
@@ -85,10 +93,11 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         }
         
         interactor?.loadUniversity(with: University.Load.Request(universityID: universityID))
-        
-        navigationItem.largeTitleDisplayMode = .never
-        let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
+        let request = Programs.Load.Request(
+            params: [],
+            university: university
+        )
+        interactor?.loadPrograms(with: request)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -102,7 +111,10 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         }
         
     }
-    
+}
+
+// MARK: - UI Configuration
+extension UniversityViewController {
     private func configureUI() {
         view.backgroundColor = .white
         configureNavigationBar()
@@ -111,6 +123,11 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         configureNameLabel()
         configureWebSiteButton()
         configureEmailButton()
+        configureProgramsLabel()
+        configureSearchButton()
+        configureSegmentedControl()
+        
+        configureRefreshControl()
         configureTableView()
         
         logoImageView.startShimmer()
@@ -119,6 +136,10 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     }
     
     private func configureNavigationBar() {
+        navigationItem.largeTitleDisplayMode = .never
+        let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
+        
         if let navigationController = navigationController as? NavigationBarViewController {
             let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
             navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
@@ -131,28 +152,28 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     }
     
     private func configureLogoImageView() {
-        view.addSubview(logoImageView)
+        informationContainer.addSubview(logoImageView)
         
         logoImageView.contentMode = .scaleAspectFit
         
         regionLabel.font = Constants.Fonts.regionLabelFont
         regionLabel.textColor = Constants.Colors.regionTextColor
         
-        logoImageView.pinLeft(to: view.leadingAnchor, Constants.Dimensions.logoLeftMargin)
-        logoImageView.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
+        logoImageView.pinLeft(to: informationContainer.leadingAnchor, Constants.Dimensions.logoLeftMargin)
+        logoImageView.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
         logoImageView.setWidth(Constants.Dimensions.logoSize)
         logoImageView.setHeight(Constants.Dimensions.logoSize)
     }
     
     private func configureRegionLabel() {
-        view.addSubview(regionLabel)
+        informationContainer.addSubview(regionLabel)
         
-        regionLabel.pinTop(to: view.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
+        regionLabel.pinTop(to: informationContainer.safeAreaLayoutGuide.topAnchor, Constants.Dimensions.logoTopMargin)
         regionLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
     }
     
     private func configureNameLabel() {
-        view.addSubview(nameLabel)
+        informationContainer.addSubview(nameLabel)
         
         nameLabel.font = Constants.Fonts.nameLabelFont
         nameLabel.numberOfLines = 0
@@ -160,26 +181,134 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         
         nameLabel.pinTop(to: regionLabel.bottomAnchor, 5)
         nameLabel.pinLeft(to: logoImageView.trailingAnchor, Constants.Dimensions.interItemSpacing)
-        nameLabel.pinRight(to: view.trailingAnchor, Constants.Dimensions.interItemSpacing)
+        nameLabel.pinRight(to: informationContainer.trailingAnchor, Constants.Dimensions.interItemSpacing)
     }
     
     private func configureWebSiteButton() {
-        view.addSubview(webSiteButton)
+        informationContainer.addSubview(webSiteButton)
         
-        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
-        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
-        webSiteButton.pinLeft(to: view.leadingAnchor, 20)
-        webSiteButton.pinRight(to: view.centerXAnchor)
+        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30)
+//        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
+//        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30, .grOE)
+//        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
+        
+        webSiteButton.pinLeft(to: informationContainer.leadingAnchor, 20)
+        webSiteButton.pinRight(to: informationContainer.centerXAnchor)
         webSiteButton.addTarget(self, action: #selector(openWebPage), for: .touchUpInside)
     }
     
     private func configureEmailButton() {
-        view.addSubview(emailButton)
+        informationContainer.addSubview(emailButton)
         
         emailButton.pinTop(to: webSiteButton.bottomAnchor, 20)
-        emailButton.pinLeft(to: view.leadingAnchor, 20)
-        emailButton.pinRight(to: view.centerXAnchor)
+        emailButton.pinLeft(to: informationContainer.leadingAnchor, 20)
+        emailButton.pinRight(to: informationContainer.centerXAnchor)
         emailButton.addTarget(self, action: #selector(openMailCompose), for: .touchUpInside)
+    }
+    
+    private func configureProgramsLabel() {
+        let text = "Программы"
+        let font = UIFont(name: "MontserratAlternates-SemiBold", size: 20)!
+        programsLabel.text = text
+        programsLabel.font = font
+        
+        informationContainer.addSubview(programsLabel)
+        programsLabel.pinTop(to: emailButton.bottomAnchor, 20)
+        programsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
+        
+//        let textSize = text.size(withAttributes: [.font: font])
+//        
+//        programsLabel.setHeight(textSize.height)
+    }
+    
+    private func configureSegmentedControl() {
+        segmentedControl.insertSegment(withTitle: "По направлениям", at: 0, animated: false)
+        segmentedControl.insertSegment(withTitle: "По факультетам", at: 1, animated: false)
+        segmentedControl.selectedSegmentIndex = 0
+        
+        let customFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
+        let customAttributes: [NSAttributedString.Key: Any] = [.font: customFont]
+
+        segmentedControl.setTitleTextAttributes(customAttributes, for: .normal)
+        segmentedControl.setTitleTextAttributes(customAttributes, for: .selected)
+        
+        
+        informationContainer.addSubview(segmentedControl)
+        
+        segmentedControl.pinTop(to: programsLabel.bottomAnchor, 13)
+        segmentedControl.pinLeft(to: informationContainer.leadingAnchor, 20)
+        segmentedControl.pinRight(to: informationContainer.trailingAnchor, 20)
+        segmentedControl.pinBottom(to: informationContainer.bottomAnchor, 17)
+        segmentedControl.setHeight(35)
+        
+        segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+    }
+    
+    private func configureSearchButton() {
+        let searchButton = UIClosureButton()
+        searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        searchButton.tintColor = .black
+        searchButton.contentHorizontalAlignment = .fill
+        searchButton.contentVerticalAlignment = .fill
+        searchButton.imageView?.contentMode = .scaleAspectFit
+        
+        searchButton.action = { [weak self] in
+            self?.router?.routeToSearch()
+        }
+        
+        informationContainer.addSubview(searchButton)
+        
+        searchButton.pinRight(to: informationContainer.trailingAnchor, 20)
+        searchButton.pinCenterY(to: programsLabel.centerYAnchor)
+        
+        searchButton.setWidth(28)
+        searchButton.setHeight(28)
+    }
+    
+    private func configureFilterSortView() {
+        filterSortView.configure(filteringOptions: ["Формат обучения"])
+    }
+    
+    func configureRefreshControl() {
+        refreshControl.tintColor = .systemCyan
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+    
+    private func configureTableView() {
+        view.addSubview(tableView)
+        
+        tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+        
+        tableView.register(
+            ProgramTableViewCell.self,
+            forCellReuseIdentifier: ProgramTableViewCell.identifier
+        )
+        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: "ReusableHeader")
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
+        tableView.refreshControl = refreshControl
+        tableView.showsVerticalScrollIndicator = false
+        
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
+        
+        informationContainer.setNeedsLayout()
+        informationContainer.layoutIfNeeded()
+        
+        let targetSize = CGSize(
+            width: tableView.bounds.width,
+            height: UIView.layoutFittingCompressedSize.height
+        )
+        let fittingSize = informationContainer.systemLayoutSizeFitting(targetSize)
+        informationContainer.frame.size.height = fittingSize.height
+        tableView.tableHeaderView = informationContainer
+        
+        tableView.tableHeaderView = informationContainer
     }
     
     @objc func openWebPage(sender: UIButton) {
@@ -188,8 +317,21 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         safariVC.modalPresentationStyle = .pageSheet
         present(safariVC, animated: true, completion: nil)
     }
+    
+    @objc func segmentChanged() {
+        var request = Programs.Load.Request(
+            params: [],
+            university: university
+        )
+        if segmentedControl.selectedSegmentIndex == 1 {
+            request.groups = .faculties
+        }
+        
+        interactor?.loadPrograms(with: request)
+    }
 }
 
+// MARK: - UniversityDisplayLogic
 extension UniversityViewController : UniversityDisplayLogic {
     func displayToggleFavoriteResult(with viewModel: University.Favorite.ViewModel) {
         DispatchQueue.main.async { [weak self] in
@@ -205,6 +347,18 @@ extension UniversityViewController : UniversityDisplayLogic {
     }
 }
 
+// MARK: - ProgramsDisplayLogic
+extension UniversityViewController : ProgramsDisplayLogic {
+    func displayLoadProgramsResult(with viewModel: Programs.Load.ViewModel) {
+        groupOfProgramsViewModel = viewModel.groupsOfPrograms
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
+        }
+    }
+}
+
+// MARK: - MFMailComposeViewControllerDelegate
 extension UniversityViewController : MFMailComposeViewControllerDelegate{
     @objc func openMailCompose(sender: UIButton) {
         guard MFMailComposeViewController.canSendMail() else {
@@ -224,96 +378,108 @@ extension UniversityViewController : MFMailComposeViewControllerDelegate{
         present(mailVC, animated: true, completion: nil)
     }
     
-    // MARK: - MFMailComposeViewControllerDelegate
-    func mailComposeController(_ controller: MFMailComposeViewController,
-                               didFinishWith result: MFMailComposeResult,
-                               error: Error?) {
+    func mailComposeController(
+        _ controller: MFMailComposeViewController,
+        didFinishWith result: MFMailComposeResult,
+        error: Error?
+    ) {
         controller.dismiss(animated: true, completion: nil)
     }
 }
 
+// MARK: - UITableViewDataSource
 extension UniversityViewController : UITableViewDataSource {
-    private func configureTableView() {
-        view.addSubview(tableView)
-        
-        tableView.separatorStyle = .none
-        
-        tableView.pinTop(to: emailButton.bottomAnchor, 12)
-        tableView.pinLeft(to: view.leadingAnchor)
-        tableView.pinRight(to: view.trailingAnchor)
-        tableView.pinBottom(to: view.bottomAnchor)
-
-        tableView.dataSource = self
-        tableView.delegate = self
-        
-        
-    }
-    
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return groupOfProgramsViewModel.count
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
+        return groupOfProgramsViewModel[section].isExpanded ? groupOfProgramsViewModel[section].programs.count : 0
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = ProfileTableViewCell()
-        switch indexPath.row {
-        case 0:
-            cell.configure(title: "Направления")
-        case 1:
-            cell.configure(title: "Факультеты")
-            cell.hideSeparator(true)
-        default:
-            break
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: ProgramTableViewCell.identifier,
+            for: indexPath
+        ) as! ProgramTableViewCell
+        
+        let fieldViewModel = groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
+        cell.configure(with: fieldViewModel)
+        
+        let totalRows = tableView.numberOfRows(inSection: indexPath.section)
+        let isLastCell = indexPath.row == totalRows - 1
+        
+        if isLastCell {
+            cell.hideSeparator()
         }
+        
         return cell
     }
-}
-
-extension UniversityViewController : UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        switch indexPath.row {
-        case 0:
-            router?.routeToProgramsByFields(for: university)
-        case 1:
-            router?.routeToProgramsByFaculties(for: university)
-        default:
-            break
+    
+    func tableView(
+        _ tableView: UITableView,
+        viewForHeaderInSection section: Int
+    ) -> UIView? {
+        let headerButton = FieldsTableButton(name: groupOfProgramsViewModel[section].name, code: groupOfProgramsViewModel[section].code)
+        headerButton.tag = section
+        headerButton.addTarget(self, action: #selector(toggleSection), for: .touchUpInside)
+        
+        if groupOfProgramsViewModel[section].isExpanded {
+            headerButton.backgroundView.backgroundColor = UIColor(hex: "#E0E8FE")
+        }
+        return headerButton
+    }
+    
+    @objc
+    func toggleSection(_ sender: UIButton) {
+        let section = sender.tag
+        
+        var currentOffset = tableView.contentOffset
+        let headerRectBefore = tableView.rectForHeader(inSection: section)
+        
+        groupOfProgramsViewModel[section].isExpanded.toggle()
+        
+        UIView.performWithoutAnimation {
+            tableView.reloadSections(IndexSet(integer: section), with: .none)
+            tableView.layoutIfNeeded()
+        }
+        let headerRectAfter = tableView.rectForHeader(inSection: section)
+        
+        let deltaY = headerRectAfter.origin.y - headerRectBefore.origin.y
+        currentOffset.y += deltaY
+        tableView.setContentOffset(currentOffset, animated: false)
+    }
+    
+    @objc private func handleRefresh() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            var request = Programs.Load.Request(
+                params: [],
+                university: self?.university
+            )
+            if self?.segmentedControl.selectedSegmentIndex == 1 {
+                request.groups = .faculties
+            }
+            
+            self?.interactor?.loadPrograms(with: request)
+            self?.refreshControl.endRefreshing()
         }
     }
 }
 
-import SwiftUI
-
-
-struct UniversityViewControllerWrapper: UIViewControllerRepresentable {
-    
-    func makeUIViewController(context: Context) -> UINavigationController {
-        let sampleUniversity = UniversityModel(
-            email: nil,
-            site: nil,
-            description: nil,
-            phone: nil,
-            universityID: 1,
-            name: "Национальный исследовательский университет «Высшая школа экономики»",
-            shortName: "ВШЭ",
-            logo: "https://drive.google.com/uc?export=download&id=1UIXzJTDYv2ys_Bq5n_EPiQrRBhfujq1k",
-            region: "Москва и Московскя область",
-            like: true
-        )
-        
-        let universityVC = UniversityViewController(for: sampleUniversity)
-        
-        let navigationController = NavigationBarViewController(rootViewController: universityVC)
-        return navigationController
+// MARK: - UITableViewDelegate
+extension UniversityViewController : UITableViewDelegate {
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        router?.routeToProgram(with: indexPath)
     }
-    
-    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
-//#Preview {
-//    UniversityViewControllerWrapper()
-//}

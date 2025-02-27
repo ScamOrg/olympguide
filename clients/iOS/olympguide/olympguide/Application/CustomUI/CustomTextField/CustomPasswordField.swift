@@ -42,13 +42,6 @@ class CustomPasswordField: CustomTextField, HighlightableField {
         setActionButtonTarget(self, #selector(showPassword), for: .touchDown)
     }
     
-//    override func textFieldDidChange(_ textField: UITextField) {
-//        if (savedText != nil) {
-//            setTextFieldText(savedText)
-//            savedText = nil
-//        }
-//        super.textFieldDidChange(textField)
-//    }
     let visiblePassword = UILabel()
     
     func configureVisiblePasswordField() {

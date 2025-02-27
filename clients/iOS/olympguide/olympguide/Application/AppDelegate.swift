@@ -14,6 +14,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        let deviceIdentifier = getDeviceIdentifier()
+        
         if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 20) {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: customFont,
@@ -28,6 +30,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .foregroundColor: UIColor.black
             ]
             UINavigationBar.appearance().largeTitleTextAttributes = attributes
+        }
+        
+        if isMiniScreen(identifier: deviceIdentifier) {
+            if let customFont = UIFont(name: "MontserratAlternates-Bold", size: 24) {
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: customFont,
+                    .foregroundColor: UIColor.black
+                ]
+                UINavigationBar.appearance().largeTitleTextAttributes = attributes
+            }
+            
+            if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 18) {
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: customFont,
+                    .foregroundColor: UIColor.black
+                ]
+                UINavigationBar.appearance().titleTextAttributes = attributes
+            }
         }
         
         if let customFont = UIFont(name: "MontserratAlternates-Medium", size: 17) {
@@ -57,6 +77,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         return .portrait // Используйте .landscape или другие варианты, если нужно
+    }
+    
+    func getDeviceIdentifier() -> String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let mirror = Mirror(reflecting: systemInfo.machine)
+        let identifier = mirror.children.reduce("") { identifier, element in
+            guard let value = element.value as? Int8, value != 0 else { return identifier }
+            return identifier + String(UnicodeScalar(UInt8(value)))
+        }
+        
+        return identifier
+    }
+    
+    func isMiniScreen(identifier: String) -> Bool {
+        switch identifier {
+        case "iPhone13,1", "iPhone14,4", "iPhone14,6", "iPhone10,1", "iPhone10,4":
+            return true
+        default:
+            return false
+        }
     }
 }
 

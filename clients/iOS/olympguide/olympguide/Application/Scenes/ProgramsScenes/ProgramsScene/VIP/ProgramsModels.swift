@@ -9,7 +9,8 @@ enum Programs {
     enum Load {
         struct Request {
             let params: [Param]
-            let universityID: Int
+            let university: UniversityModel?
+            var groups: Groups = .fields
         }
         
         struct Response {

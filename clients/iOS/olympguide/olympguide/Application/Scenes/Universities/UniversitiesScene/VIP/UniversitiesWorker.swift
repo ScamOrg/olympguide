@@ -7,8 +7,14 @@
 
 import Foundation
 
-class UniversitiesWorker {
-    
+protocol UniversitiesWorkerLogic {
+    func fetchUniversities(
+        with params: [Param],
+        completion: @escaping (Result<[UniversityModel]?, Error>) -> Void
+    )
+}
+
+final class UniversitiesWorker : UniversitiesWorkerLogic {
     private let networkService: NetworkServiceProtocol
     
     init(networkService: NetworkServiceProtocol = NetworkService()) {
@@ -16,28 +22,21 @@ class UniversitiesWorker {
     }
 
     func fetchUniversities(
-        with params: Dictionary<String, Set<String>>,
-        completion: @escaping (Result<[UniversityModel], Error>) -> Void
+        with params: [Param],
+        completion: @escaping (Result<[UniversityModel]?, Error>) -> Void
     ) {
         var queryItems = [URLQueryItem]()
-//        if let levels = levels {
-//            for level in levels {
-//                queryItems.append(URLQueryItem(name: "level", value: "\(level)"))
-//            }
-//        }
-//        if let sort = sort {
-//            queryItems.append(URLQueryItem(name: "sort", value: sort))
-//        }
-//        if let search = search {
-//            queryItems.append(URLQueryItem(name: "search", value: search))
-//        }
+        
+        for param in params {
+            queryItems.append(URLQueryItem(name: param.key, value: param.value))
+        }
         
         networkService.request(
             endpoint: "/universities",
             method: .get,
             queryItems: queryItems,
             body: nil
-        ) { (result: Result<[UniversityModel], NetworkError>) in
+        ) { (result: Result<[UniversityModel]?, NetworkError>) in
             switch result {
             case .success(let universities):
                 completion(.success(universities))

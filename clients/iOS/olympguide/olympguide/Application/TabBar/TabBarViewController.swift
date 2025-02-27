@@ -43,8 +43,8 @@ final class TabBarViewController: UITabBarController {
     let interactor = UniversitiesInteractor()
     let router = UniversitiesRouter()
     
-    private let universitiesVC = UniversitiesViewController()
-    private let olympiadsVC = OlympiadsViewController()
+    private let universitiesVC = UniversitiesAssembly.build()
+    private let olympiadsVC = OlympiadsAssembly.build()
     private let fieldsVC = FieldsAssembly.build()
     private let profileVC = ProfileAssembly.build()
     
@@ -126,7 +126,12 @@ final class TabBarViewController: UITabBarController {
         configureTabBar()
         setupCustomTabBar()
         setupShadow()
-        isTabBarHidden = true
+        
+        if #available(iOS 18.0, *) {
+            isTabBarHidden = true
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     // MARK: - Configuration
