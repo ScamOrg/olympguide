@@ -27,7 +27,7 @@ protocol FavoriteProgramsDisplayLogic: AnyObject {
 
 // MARK: - Routing Logic
 protocol FavoriteProgramsRoutingLogic {
-    func routeToProgram()
+    func routeToProgram(with index: Int)
 }
 
 // MARK: - Data Passing
