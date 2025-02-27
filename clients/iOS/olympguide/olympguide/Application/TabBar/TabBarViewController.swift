@@ -171,6 +171,9 @@ final class TabBarViewController: UITabBarController {
         customTabBar.arrangedSubviews.forEach { view in
             let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
             doubleTap.numberOfTapsRequired = 2
+            doubleTap.cancelsTouchesInView = false
+            doubleTap.delaysTouchesBegan = false
+            doubleTap.delaysTouchesEnded = false
             view.addGestureRecognizer(doubleTap)
         }
     }
