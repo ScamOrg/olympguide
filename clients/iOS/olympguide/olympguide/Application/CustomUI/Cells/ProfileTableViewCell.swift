@@ -11,7 +11,7 @@ class ProfileTableViewCell: UITableViewCell {
     
     static let reuseIdentifier = "ProfileTableViewCell"
     
-    private let label = UILabel()
+    let label = UILabel()
     private let detailLabel = UILabel()
     private let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
     private let separatorLine = UIView()
