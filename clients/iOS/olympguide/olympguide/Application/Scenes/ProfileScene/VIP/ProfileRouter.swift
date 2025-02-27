@@ -16,9 +16,24 @@ final class ProfileRouter: ProfileRoutingLogic {
     }
     
     func routeToSignUp() {
-        let enterEmailVC = EnterEmailAssembly.build()
-//        let enterEmailVC = PersonalDataAssembly.build(email: "")  
+//        let enterEmailVC = EnterEmailAssembly.build()
+        let enterEmailVC = PersonalDataAssembly.build(email: "")
         viewController?.navigationController?.pushViewController(enterEmailVC, animated: true)
+    }
+    
+    func routToAboutUs() {
+        let aboutUsVC = AboutUsViewController()
+        viewController?.navigationController?.pushViewController(aboutUsVC, animated: true)
+    }
+    
+    func routToFavoriteOlympiads() {
+        let favoriteOlympiadsVC = FavoriteOlympiadsAssembly.build()
+        viewController?.navigationController?.pushViewController(favoriteOlympiadsVC, animated: true)
+    }
+    
+    func routToFavoriteUniversities() {
+        let favoriteUniversitiesVC = FavoriteUniversitiesAssembly.build()
+        viewController?.navigationController?.pushViewController(favoriteUniversitiesVC, animated: true)
     }
 }
 
