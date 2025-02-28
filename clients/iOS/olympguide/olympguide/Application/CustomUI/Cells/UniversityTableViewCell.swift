@@ -42,6 +42,7 @@ fileprivate enum Constants {
 }
 
 class UniversityTableViewCell: UITableViewCell {
+    var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
     
     // MARK: - Variables
     static let identifier = Constants.Identifier.cellIdentifier
@@ -101,7 +102,7 @@ class UniversityTableViewCell: UITableViewCell {
         regionLabel.font = Constants.Fonts.regionLabelFont
         regionLabel.textColor = Constants.Colors.regionTextColor
         
-        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
+        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
         
         logoImageView.pinLeft(to: contentView.leadingAnchor, Constants.Dimensions.logoLeftMargin)
         logoImageView.pinTop(to: contentView.topAnchor, Constants.Dimensions.logoTopMargin)
@@ -154,7 +155,7 @@ class UniversityTableViewCell: UITableViewCell {
         shimmerLayer.stopAnimating()
         shimmerLayer.removeAllConstraints()
         isUserInteractionEnabled = true
-
+        favoriteButton.tag = viewModel.universityID
         showAll()
     }
     
@@ -182,9 +183,10 @@ class UniversityTableViewCell: UITableViewCell {
     }
     
     // MARK: - Objc funcs
-    @objc private func favoriteButtonTapped() {
+    @objc private func favoriteButtonTapped(_ sender: UIButton) {
         let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: Constants.Images.bookmarkFill)
         let newImageName = isFavorite ? Constants.Images.bookmark : Constants.Images.bookmarkFill
         favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        favoriteButtonTapped?(sender, !isFavorite)
     }
 }
