@@ -8,6 +8,7 @@
 import UIKit
 import SafariServices
 import MessageUI
+import Combine
 
 fileprivate enum Constants {
     enum Dimensions {
@@ -37,8 +38,9 @@ protocol WithBookMarkButton { }
 // MARK: - UniversityViewController
 final class UniversityViewController: UIViewController, WithBookMarkButton {
     var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic)?
-    
     var router: ProgramsRoutingLogic?
+    
+    private var cancellables = Set<AnyCancellable>()
     
     private let informationContainer: UIView = UIView()
     private let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
@@ -64,8 +66,11 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         self.logoImageView.contentMode = .scaleAspectFit
         self.logo = university.logo
         self.universityID = university.universityID
-        self.isFavorite = university.like ?? false
-        self.startIsFavorite = university.like ?? false
+        self.isFavorite = FavoritesManager.shared.isUniversityFavorited(
+            universityID: universityID,
+            serverValue: university.like ?? false
+        )
+        self.startIsFavorite = isFavorite
         self.university = university
         
         super.init(nibName: nil, bundle: nil)
@@ -99,18 +104,6 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
         )
         interactor?.loadPrograms(with: request)
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        if startIsFavorite != isFavorite {
-            let request = University.Favorite.Request(
-                universityID: universityID,
-                isFavorite: isFavorite
-            )
-            interactor?.toggleFavorite(with: request)
-        }
-        
-    }
 }
 
 // MARK: - UI Configuration
@@ -140,15 +133,32 @@ extension UniversityViewController {
         let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
         
-        if let navigationController = navigationController as? NavigationBarViewController {
-            let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
-            navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
-            navigationController.bookMarkButtonPressed = {[weak self] sender in
-                self?.isFavorite.toggle()
-                let newImageName = self?.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
-                sender.setImage(UIImage(systemName: newImageName), for: .normal)
+        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
+        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        navigationController.bookMarkButtonPressed = {[weak self] sender in
+            guard let self = self else { return }
+            self.isFavorite.toggle()
+            let newImageName = self.isFavorite ? "bookmark.fill" :  "bookmark"
+            sender.setImage(UIImage(systemName: newImageName), for: .normal)
+            
+            if self.isFavorite {
+                FavoritesManager.shared.addUniversityToFavorites(model: university)
+            } else {
+                FavoritesManager.shared.removeUniversityFromFavorites(universityID: self.universityID)
             }
+            
+            FavoritesBatcher.shared.addUniversityChange(
+                universityID: self.universityID,
+                isFavorite: isFavorite
+            )
         }
+    }
+    
+    private func reloadFavoriteButton() {
+        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
+        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
     }
     
     private func configureLogoImageView() {
@@ -404,10 +414,12 @@ extension UniversityViewController : UITableViewDataSource {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
+        guard let cell = tableView.dequeueReusableCell(
             withIdentifier: ProgramTableViewCell.identifier,
             for: indexPath
-        ) as! ProgramTableViewCell
+        ) as? ProgramTableViewCell else {
+            fatalError("Could not dequeue cell")
+        }
         
         let fieldViewModel = groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
         cell.configure(with: fieldViewModel)
@@ -482,4 +494,32 @@ extension UniversityViewController : UITableViewDelegate {
         router?.routeToProgram(with: indexPath)
     }
 }
+
+// MARK: - Combine
+extension UniversityViewController {
+    private func setupBindings() {
+        FavoritesManager.shared.universityEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let updatedUniversity):
+                    if self.university.universityID == updatedUniversity.universityID {
+                        self.isFavorite = true
+                    }
+                case .removed(let universityID):
+                    if self.university.universityID == universityID {
+                        self.isFavorite = false
+                    }
+                case .error(let universityID):
+                    if self.university.universityID == universityID {
+                        self.isFavorite = self.startIsFavorite
+                    }
+                }
+                self.reloadFavoriteButton()
+            }
+            .store(in: &cancellables)
+    }
+}
+
 
