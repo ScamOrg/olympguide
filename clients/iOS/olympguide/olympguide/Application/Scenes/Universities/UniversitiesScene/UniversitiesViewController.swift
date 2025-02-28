@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -59,6 +60,7 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     }()
     
     private var universities: [Universities.Load.ViewModel.UniversityViewModel] = []
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -67,15 +69,11 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
         configureRefreshControl()
         configureFilterSortView()
         configureTableView()
-        
+        setupBindings()
         interactor?.loadUniversities(
             Universities.Load.Request(params: Dictionary<String, Set<String>>())
         )
-        
-        let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
     }
-    
     
     // MARK: - Methods
     func displayError(message: String) {
@@ -83,12 +81,19 @@ class UniversitiesViewController: UIViewController, WithSearchButton {
     }
     
     private func configureNavigationBar() {
+        let backItem = UIBarButtonItem(
+            title: Constants.Strings.backButtonTitle,
+            style: .plain,
+            target: nil,
+            action: nil
+        )
+        navigationItem.backBarButtonItem = backItem
+        
         navigationItem.title = Constants.Strings.universitiesTitle
         
-        if let navigationController = self.navigationController as? NavigationBarViewController {
-            navigationController.searchButtonPressed = { [weak self] sender in
-                self?.router?.routeToSearch()
-            }
+        guard let navigationController = self.navigationController as? NavigationBarViewController else {return}
+        navigationController.searchButtonPressed = { [weak self] sender in
+            self?.router?.routeToSearch()
         }
     }
     
@@ -158,17 +163,38 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
+        guard let cell = tableView.dequeueReusableCell(
             withIdentifier: "UniversityTableViewCell",
             for: indexPath
-        ) as! UniversityTableViewCell
+        ) as? UniversityTableViewCell
+        else {
+            fatalError("Could not dequeue cell")
+        }
         
         if universities.count != 0 {
             let universityViewModel = universities[indexPath.row]
             cell.configure(with: universityViewModel)
+            cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
+                guard let self = self else { return }
+                if isFavorite {
+                    self.universities[indexPath.row].like = true
+                    let viewModel = self.universities[indexPath.row]
+                    FavoritesManager.shared.addUniversityToFavorites(viewModel: viewModel)
+                    
+                } else {
+                    FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
+                    self.universities[indexPath.row].like = false
+                }
+                
+                FavoritesBatcher.shared.addUniversityChange(
+                    universityID: sender.tag,
+                    isFavorite: isFavorite
+                )
+            }
         } else {
             cell.configureShimmer()
         }
+        
         return cell
     }
     
@@ -192,9 +218,62 @@ extension UniversitiesViewController: FilterSortViewDelegate {
 extension UniversitiesViewController: UniversitiesDisplayLogic {
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
         universities = viewModel.universities
+        for i in 0..<universities.count {
+            let universityID = universities[i].universityID
+            let like = universities[i].like
+            universities[i].like = isFavorite(univesityID: universityID, serverValue: like)
+        }
         DispatchQueue.main.async {
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+}
+
+
+// MARK: - Combine
+extension UniversitiesViewController {
+    private func setupBindings() {
+        FavoritesManager.shared.universityEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let updatedUniversity):
+                    if let index = self.universities.firstIndex(where: {
+                        $0.universityID == updatedUniversity.universityID
+                    }) {
+                        self.universities[index].like = true
+                        self.tableView.reloadRows(
+                            at: [IndexPath(row: index, section: 0)],
+                            with: .automatic
+                        )
+                    }
+                case .removed(let universityID):
+                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        self.universities[index].like = false
+                        self.tableView.reloadRows(
+                            at: [IndexPath(row: index, section: 0)],
+                            with: .automatic
+                        )
+                    }
+                case .error(let universityID):
+                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        self.tableView.reloadRows(
+                            at: [IndexPath(row: index, section: 0)],
+                            with: .automatic
+                        )
+                        self.universities[index].like = self.interactor?.universities[index].like ?? false
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
+        FavoritesManager.shared.isUniversityFavorited(
+            universityID: univesityID,
+            serverValue: serverValue
+        )
     }
 }

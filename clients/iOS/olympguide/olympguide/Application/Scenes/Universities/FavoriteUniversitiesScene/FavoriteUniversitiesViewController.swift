@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 // MARK: - Constants
 fileprivate enum Constants {
@@ -50,6 +51,7 @@ class FavoriteUniversitiesViewController: UIViewController {
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     
     private var universities: [Universities.Load.ViewModel.UniversityViewModel] = []
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -64,10 +66,23 @@ class FavoriteUniversitiesViewController: UIViewController {
         
         let backItem = UIBarButtonItem(title: Constants.Strings.backButtonTitle, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
+        setupBindings()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        universities = universities.map { university in
+            var modifiedUniversity = university
+            modifiedUniversity.like = isFavorite(
+                univesityID: university.universityID,
+                serverValue: university.like
+            )
+            return modifiedUniversity
+        }.filter { $0.like }
+        
+        tableView.reloadData()
+    }
     
-
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.universitiesTitle
         
@@ -90,8 +105,10 @@ class FavoriteUniversitiesViewController: UIViewController {
         
         tableView.frame = view.bounds
         
-        tableView.register(UniversityTableViewCell.self,
-                           forCellReuseIdentifier: "UniversityTableViewCell")
+        tableView.register(
+            UniversityTableViewCell.self,
+            forCellReuseIdentifier: "UniversityTableViewCell"
+        )
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = Constants.Colors.tableViewBackground
@@ -111,24 +128,45 @@ class FavoriteUniversitiesViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource & UITableViewDelegate
+// MARK: - UITableViewDataSource
 extension FavoriteUniversitiesViewController : UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return universities.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: "UniversityTableViewCell",
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: UniversityTableViewCell.identifier,
             for: indexPath
-        ) as! UniversityTableViewCell
+        ) as? UniversityTableViewCell else {
+            fatalError()
+        }
         
         let universityViewModel = universities[indexPath.row]
         cell.configure(with: universityViewModel)
+        
+        cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
+            guard let self = self else { return }
+            if isFavorite {
+                self.universities[indexPath.row].like = true
+                let viewModel = self.universities[indexPath.row]
+                FavoritesManager.shared.addUniversityToFavorites(viewModel: viewModel)
+            } else {
+                FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
+                self.universities[indexPath.row].like = false
+            }
+            
+            FavoritesBatcher.shared.addUniversityChange(
+                universityID: sender.tag,
+                isFavorite: isFavorite
+            )
+        }
+        
         return cell
     }
 }
 
+// MARK: - UITableViewDelegate
 extension FavoriteUniversitiesViewController : UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -137,13 +175,21 @@ extension FavoriteUniversitiesViewController : UITableViewDelegate {
     }
 }
 
+// MARK: - UniversitiesDisplayLogic
 extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
     func displayError(message: String) {
         
     }
     
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
-        universities = viewModel.universities
+        universities = viewModel.universities.map { university in
+            var modifiedUniversity = university
+            modifiedUniversity.like = isFavorite(
+                univesityID: university.universityID,
+                serverValue: university.like
+            )
+            return modifiedUniversity
+        }.filter { $0.like }
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -162,6 +208,52 @@ extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+}
+
+// MARK: - Combine
+extension FavoriteUniversitiesViewController {
+    private func setupBindings() {
+        FavoritesManager.shared.universityEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let university):
+                    if !self.universities.contains(where: { $0.universityID == university.universityID }) {
+                        self.universities.append(university)
+                        let newIndex = IndexPath(row: self.universities.count - 1, section: 0)
+                        self.tableView.insertRows(at: [newIndex], with: .automatic)
+                        self.tableView.backgroundView = nil
+                    }
+                case .removed(let universityID):
+                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        self.universities.remove(at: index)
+                        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+                        if self.universities.isEmpty {
+                            let emptyLabel = UILabel(frame: self.tableView.bounds)
+                            emptyLabel.text = "Избранных ВУЗов пока нет"
+                            emptyLabel.textAlignment = .center
+                            emptyLabel.textColor = .black
+                            emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+                            self.tableView.backgroundView = emptyLabel
+                        }
+                    }
+                case .error(let universityID):
+                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        self.universities.remove(at: index)
+                        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
+        FavoritesManager.shared.isUniversityFavorited(
+            universityID: univesityID,
+            serverValue: serverValue
+        )
     }
 }
 
