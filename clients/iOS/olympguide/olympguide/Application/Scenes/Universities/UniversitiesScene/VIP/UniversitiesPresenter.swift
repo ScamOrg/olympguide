@@ -14,6 +14,7 @@ final class UniversitiesPresenter: UniversitiesPresentationLogic {
     func presentUniversities(response: Universities.Load.Response) {
         let viewModels = response.universities.map { university in
             Universities.Load.ViewModel.UniversityViewModel(
+                universityID: university.universityID,
                 name: university.name,
                 logoURL: university.logo,
                 region: university.region,
