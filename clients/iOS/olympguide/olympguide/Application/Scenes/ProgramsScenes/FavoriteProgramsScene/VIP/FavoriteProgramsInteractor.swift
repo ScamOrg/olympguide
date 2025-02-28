@@ -22,5 +22,18 @@ final class FavoriteProgramsInteractor: FavoriteProgramsBusinessLogic, FavoriteP
             }
         }
     }
+    func batchError(programID: Int) {
+        if let program = removePrograms[programID] {
+            let insertIndex = programs.firstIndex { $0.programID > program.programID } ?? self.programs.count
+            programs.insert(program, at: insertIndex)
+        } else {
+            if let index = programs.firstIndex(where: { $0.programID == programID }) {
+                programs.remove(at: index)
+            }
+        }
+        
+        let response = FavoritePrograms.Load.Response(programs: programs)
+        presenter?.presentLoadPrograms(with: response)
+    }
 }
 
