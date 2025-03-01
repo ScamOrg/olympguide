@@ -8,7 +8,7 @@
 import Foundation
 
 final class UniversityInteractor: UniversityDataStore, ProgramsDataStore {
-    var groupsOfPrograms: [GroupOfProgramsModel]?
+    var groupsOfPrograms: [GroupOfProgramsModel] = []
     var university: UniversityModel?
     
     var universityID: Int?
@@ -82,5 +82,13 @@ extension UniversityInteractor : ProgramsBusinessLogic {
                 self?.presenter?.presentLoadPrograms(with: response)
             }
         }
+    }
+    
+    func restoreFavorite(at indexPath: IndexPath) -> Bool {
+        groupsOfPrograms[indexPath.section].programs[indexPath.row].like 
+    }
+    
+    func setFavorite(at indexPath: IndexPath, isFavorite: Bool) {
+        groupsOfPrograms[indexPath.section].programs[indexPath.row].like  = isFavorite
     }
 }
