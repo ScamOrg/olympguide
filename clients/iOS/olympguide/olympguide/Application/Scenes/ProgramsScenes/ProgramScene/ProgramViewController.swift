@@ -7,6 +7,7 @@
 
 import UIKit
 import SafariServices
+import Combine
 
 fileprivate enum Constants {
     enum Dimensions {
@@ -35,8 +36,10 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     var interactor: (ProgramBusinessLogic & BenefitsBusinessLogic)?
     var router: (ProgramRoutingLogic & BenefitsRoutingLogic)?
     
+    private var cancellables = Set<AnyCancellable>()
+    
     let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
-    let startIsFavorite: Bool
+    var startIsFavorite: Bool
     var isFavorite: Bool
     let universityNameLabel: UILabel = UILabel()
     let regionLabel: UILabel = UILabel()
@@ -46,6 +49,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     let programNameLabel = UILabel()
     let program: GroupOfProgramsModel.ProgramModel
     var benefits: [Benefits.Load.ViewModel.BenefitViewModel] = []
+    var link: String? = nil
     
     private let informationContainer: UIView = UIView()
     private let budgtetLabel: UIInformationLabel = UIInformationLabel()
@@ -77,11 +81,13 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
             like: program.like
         )
         
-        let link = program.link
-            .replacingOccurrences(of: "https://www.", with: "")
-            .replacingOccurrences(of: "https://", with: "")
-        self.webSiteButton.setTitle(link, for: .normal)
-
+        if var link = program.link {
+            link = link.replacingOccurrences(of: "https://www.", with: "")
+                .replacingOccurrences(of: "https://", with: "")
+            self.webSiteButton.setTitle(link, for: .normal)
+            self.link = link
+        }
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -90,7 +96,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         by university: UniversityModel
     ) {
         self.logo = university.logo
-        self.isFavorite = university.like ?? false
+        self.isFavorite = program.like
         self.startIsFavorite = program.like
         self.university = university
         self.program = program
@@ -106,6 +112,7 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        setupBindings()
         
         ImageLoader.shared.loadImage(from: logo) { [weak self] (image: UIImage?) in
             guard let self = self, let image = image else { return }
@@ -119,6 +126,40 @@ final class ProgramViewController : UIViewController, WithBookMarkButton {
         if webSiteButton.titleLabel?.text == nil {
             let programRequest = Program.Load.Request(programID: program.programID)
             interactor?.loadProgram(with: programRequest)
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
+        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        navigationController.bookMarkButtonPressed = {[weak self] sender in
+            self?.isFavorite.toggle()
+            let newImageName = self?.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
+            sender.setImage(UIImage(systemName: newImageName), for: .normal)
+            
+            guard let self = self else { return }
+            
+            if self.isFavorite {
+                let model = ProgramModel(
+                    programID: program.programID,
+                    name: program.name,
+                    field: program.field,
+                    budgetPlaces: program.budgetPlaces,
+                    paidPlaces: program.paidPlaces,
+                    cost: program.cost,
+                    requiredSubjects: program.requiredSubjects,
+                    optionalSubjects: program.optionalSubjects ?? [],
+                    like: true,
+                    university: university,
+                    link: self.link
+                )
+                
+                FavoritesManager.shared.addProgramToFavorites(viewModel: model)
+            } else {
+                FavoritesManager.shared.removeProgramFromFavorites(programID: program.programID)
+            }
         }
     }
 }
@@ -142,6 +183,8 @@ extension ProgramViewController {
         configureRefreshControl()
         configureTableView()
         
+        reloadFavoriteButton()
+        
         logoImageView.startShimmer()
     }
     
@@ -149,15 +192,6 @@ extension ProgramViewController {
         navigationItem.largeTitleDisplayMode = .never
         let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
-        
-        guard let navigationController = navigationController as? NavigationBarViewController else { return }
-        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
-        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
-        navigationController.bookMarkButtonPressed = {[weak self] sender in
-            self?.isFavorite.toggle()
-            let newImageName = self?.isFavorite ?? false ? "bookmark.fill" :  "bookmark"
-            sender.setImage(UIImage(systemName: newImageName), for: .normal)
-        }
     }
     
     private func configureLogoImageView() {
@@ -378,7 +412,6 @@ extension ProgramViewController : UITableViewDelegate {
     }
     
     // MARK: - UITableViewDelegate
-
     func tableView(
       _ tableView: UITableView,
       contextMenuConfigurationForRowAt indexPath: IndexPath,
@@ -409,15 +442,54 @@ extension ProgramViewController : BenefitsDisplayLogic {
     }
 }
 
+// MARK: - ProgramDisplayLogic
 extension ProgramViewController : ProgramDisplayLogic {
     func displayLoadProgram(with viewModel: Program.Load.ViewModel) {
         let link = viewModel.link
             .replacingOccurrences(of: "https://www.", with: "")
             .replacingOccurrences(of: "https://", with: "")
         webSiteButton.setTitle(link, for: .normal)
+        self.link = link
     }
     
     func displayToggleFavoriteResult(viewModel: Program.Favorite.ViewModel) {
         
     }
 }
+
+// MARK: - Combine
+extension ProgramViewController {
+    private func setupBindings() {
+        FavoritesManager.shared.programEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case.added(let program):
+                    if program.programID == self.program.programID {
+                        self.isFavorite = true
+                    }
+                case .removed(let programID):
+                    if programID == self.program.programID {
+                        self.isFavorite = false
+                    }
+                case .error(let programID):
+                    if programID == self.program.programID {
+                        self.isFavorite = self.startIsFavorite
+                    }
+                case .access(let programID, let isFavorite):
+                    if programID == self.program.programID {
+                        self.startIsFavorite = isFavorite
+                    }
+                }
+                reloadFavoriteButton()
+            }.store(in: &cancellables)
+    }
+    
+    private func reloadFavoriteButton() {
+        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
+        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
+    }
+}
+
