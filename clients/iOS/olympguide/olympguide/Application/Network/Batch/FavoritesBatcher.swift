@@ -10,7 +10,8 @@ import UIKit
 final class FavoritesBatcher {
     static let shared = FavoritesBatcher()
     
-    private let universitiesBatch = FavoriteBatch<Int>(
+    private let universitiesBatch = FavoriteBatch(
+        subject: .University,
         endpointFormatter: { id, isFavorite in
             return "/user/favourite/university/\(id)"
         },
@@ -19,7 +20,8 @@ final class FavoritesBatcher {
         }
     )
     
-    private let programsBatch = FavoriteBatch<Int>(
+    private let programsBatch = FavoriteBatch(
+        subject: .Program,
         endpointFormatter: { id, isFavorite in
             return "/user/favourite/program/\(id)"
         },
@@ -28,7 +30,8 @@ final class FavoritesBatcher {
         }
     )
     
-    private let olympiadsBatch = FavoriteBatch<Int>(
+    private let olympiadsBatch = FavoriteBatch(
+        subject: .Olympiad,
         endpointFormatter: { id, isFavorite in
             return "/user/favourite/olympiad/\(id)"
         },
