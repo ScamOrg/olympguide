@@ -174,22 +174,22 @@ extension UniversitiesViewController: UITableViewDataSource, UITableViewDelegate
         if universities.count != 0 {
             let universityViewModel = universities[indexPath.row]
             cell.configure(with: universityViewModel)
-            cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
+            cell.favoriteButtonTapped = {
+                [weak self] sender,
+                isFavorite in
                 guard let self = self else { return }
                 if isFavorite {
                     self.universities[indexPath.row].like = true
-                    let viewModel = self.universities[indexPath.row]
-                    FavoritesManager.shared.addUniversityToFavorites(viewModel: viewModel)
+                    guard
+                        let model = self.interactor?.universityModel(at: indexPath.row)
+                    else { return }
+                    
+                    FavoritesManager.shared.addUniversityToFavorites(model: model)
                     
                 } else {
-                    FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
                     self.universities[indexPath.row].like = false
+                    FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
                 }
-                
-                FavoritesBatcher.shared.addUniversityChange(
-                    universityID: sender.tag,
-                    isFavorite: isFavorite
-                )
             }
         } else {
             cell.configureShimmer()
@@ -243,6 +243,7 @@ extension UniversitiesViewController {
                     if let index = self.universities.firstIndex(where: {
                         $0.universityID == updatedUniversity.universityID
                     }) {
+                        if self.universities[index].like == true { break }
                         self.universities[index].like = true
                         self.tableView.reloadRows(
                             at: [IndexPath(row: index, section: 0)],
@@ -251,6 +252,7 @@ extension UniversitiesViewController {
                     }
                 case .removed(let universityID):
                     if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        if self.universities[index].like == false { break }
                         self.universities[index].like = false
                         self.tableView.reloadRows(
                             at: [IndexPath(row: index, section: 0)],
@@ -259,11 +261,16 @@ extension UniversitiesViewController {
                     }
                 case .error(let universityID):
                     if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        if self.universities[index].like == self.interactor?.universities[index].like { break }
+                        self.universities[index].like = self.interactor?.universities[index].like ?? false
                         self.tableView.reloadRows(
                             at: [IndexPath(row: index, section: 0)],
                             with: .automatic
                         )
-                        self.universities[index].like = self.interactor?.universities[index].like ?? false
+                    }
+                case .access(let universityID, let isFavorite):
+                    if let index = self.interactor?.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        self.universities[index].like = isFavorite
                     }
                 }
             }
