@@ -22,9 +22,9 @@ extension ProgramPresenter : ProgramPresentationLogic {
             return
         }
         
-        guard let program = response.program else { return }
+        guard let link = response.program?.link else { return }
         
-        let viewModel = Program.Load.ViewModel(link: program.link)
+        let viewModel = Program.Load.ViewModel(link: link)
         viewController?.displayLoadProgram(with: viewModel)
     }
 }
