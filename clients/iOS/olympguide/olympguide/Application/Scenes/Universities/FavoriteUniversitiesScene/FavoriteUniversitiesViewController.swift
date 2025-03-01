@@ -176,14 +176,7 @@ extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
     }
     
     func displayUniversities(viewModel: Universities.Load.ViewModel) {
-        universities = viewModel.universities.map { university in
-            var modifiedUniversity = university
-            modifiedUniversity.like = isFavorite(
-                univesityID: university.universityID,
-                serverValue: university.like
-            )
-            return modifiedUniversity
-        }.filter { $0.like }
+        universities = viewModel.universities
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
