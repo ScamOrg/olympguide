@@ -8,6 +8,10 @@
 // MARK: - Business Logic
 protocol FavoriteProgramsBusinessLogic {
     func loadPrograms(with request: FavoritePrograms.Load.Request)
+    func handleBatchError(programID: Int)
+    func handleBatchSuccess(programID: Int, isFavorite: Bool)
+    func dislikeProgram(at index: Int)
+    func likeProgram(_ program: ProgramModel, at insertIndex: Int)
 }
 
 // MARK: - Data Store
