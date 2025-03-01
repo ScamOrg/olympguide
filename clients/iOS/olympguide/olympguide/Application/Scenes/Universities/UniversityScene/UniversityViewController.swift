@@ -37,7 +37,7 @@ protocol WithBookMarkButton { }
 
 // MARK: - UniversityViewController
 final class UniversityViewController: UIViewController, WithBookMarkButton {
-    var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic)?
+    var interactor: (UniversityBusinessLogic & ProgramsBusinessLogic & ProgramsDataStore)?
     var router: ProgramsRoutingLogic?
     
     private var cancellables = Set<AnyCancellable>()
@@ -45,7 +45,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     private let informationContainer: UIView = UIView()
     private let logoImageView: UIImageViewWithShimmer = UIImageViewWithShimmer(frame: .zero)
     private let universityID: Int
-    private let startIsFavorite: Bool
+    private var startIsFavorite: Bool
     private var isFavorite: Bool
     private let nameLabel: UILabel = UILabel()
     private let regionLabel: UILabel = UILabel()
@@ -58,7 +58,7 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
     private let filterSortView: FilterSortView = FilterSortView()
     
     private var groupOfProgramsViewModel : [Programs.Load.ViewModel.GroupOfProgramsViewModel] = []
-     
+    
     private let refreshControl: UIRefreshControl = UIRefreshControl()
     private let tableView = UITableView(frame: .zero, style: .plain)
     
@@ -102,7 +102,29 @@ final class UniversityViewController: UIViewController, WithBookMarkButton {
             params: [],
             university: university
         )
+        
+        setupUniversityBindings()
+        setupProgramsBindings()
         interactor?.loadPrograms(with: request)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        guard let navigationController = navigationController as? NavigationBarViewController else { return }
+        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
+        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        navigationController.bookMarkButtonPressed = {[weak self] sender in
+            guard let self = self else { return }
+            self.isFavorite.toggle()
+            let newImageName = self.isFavorite ? "bookmark.fill" :  "bookmark"
+            sender.setImage(UIImage(systemName: newImageName), for: .normal)
+            
+            if self.isFavorite {
+                FavoritesManager.shared.addUniversityToFavorites(model: university)
+            } else {
+                FavoritesManager.shared.removeUniversityFromFavorites(universityID: self.universityID)
+            }
+        }
     }
 }
 
@@ -132,27 +154,6 @@ extension UniversityViewController {
         navigationItem.largeTitleDisplayMode = .never
         let backItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem = backItem
-        
-        guard let navigationController = navigationController as? NavigationBarViewController else { return }
-        let newImageName = isFavorite ? "bookmark.fill" :  "bookmark"
-        navigationController.bookMarkButton.setImage(UIImage(systemName: newImageName), for: .normal)
-        navigationController.bookMarkButtonPressed = {[weak self] sender in
-            guard let self = self else { return }
-            self.isFavorite.toggle()
-            let newImageName = self.isFavorite ? "bookmark.fill" :  "bookmark"
-            sender.setImage(UIImage(systemName: newImageName), for: .normal)
-            
-            if self.isFavorite {
-                FavoritesManager.shared.addUniversityToFavorites(model: university)
-            } else {
-                FavoritesManager.shared.removeUniversityFromFavorites(universityID: self.universityID)
-            }
-            
-            FavoritesBatcher.shared.addUniversityChange(
-                universityID: self.universityID,
-                isFavorite: isFavorite
-            )
-        }
     }
     
     private func reloadFavoriteButton() {
@@ -198,9 +199,9 @@ extension UniversityViewController {
         informationContainer.addSubview(webSiteButton)
         
         webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30)
-//        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
-//        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30, .grOE)
-//        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
+        //        webSiteButton.pinTop(to: logoImageView.bottomAnchor, 30, .grOE)
+        //        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30, .grOE)
+        //        webSiteButton.pinTop(to: nameLabel.bottomAnchor, 30)
         
         webSiteButton.pinLeft(to: informationContainer.leadingAnchor, 20)
         webSiteButton.pinRight(to: informationContainer.centerXAnchor)
@@ -226,9 +227,9 @@ extension UniversityViewController {
         programsLabel.pinTop(to: emailButton.bottomAnchor, 20)
         programsLabel.pinLeft(to: informationContainer.leadingAnchor, 20)
         
-//        let textSize = text.size(withAttributes: [.font: font])
-//        
-//        programsLabel.setHeight(textSize.height)
+        //        let textSize = text.size(withAttributes: [.font: font])
+        //
+        //        programsLabel.setHeight(textSize.height)
     }
     
     private func configureSegmentedControl() {
@@ -238,7 +239,7 @@ extension UniversityViewController {
         
         let customFont = UIFont(name: "MontserratAlternates-Medium", size: 15)!
         let customAttributes: [NSAttributedString.Key: Any] = [.font: customFont]
-
+        
         segmentedControl.setTitleTextAttributes(customAttributes, for: .normal)
         segmentedControl.setTitleTextAttributes(customAttributes, for: .selected)
         
@@ -431,6 +432,31 @@ extension UniversityViewController : UITableViewDataSource {
             cell.hideSeparator()
         }
         
+        cell.favoriteButtonTapped = {[weak self] sender, isFavorite in
+            guard let self = self else { return }
+            self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = isFavorite
+            let viewModel = self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row]
+            if isFavorite {
+                let model = ProgramModel(
+                    programID: viewModel.programID,
+                    name: viewModel.name,
+                    field: viewModel.code,
+                    budgetPlaces: viewModel.budgetPlaces,
+                    paidPlaces: viewModel.paidPlaces,
+                    cost: viewModel.cost,
+                    requiredSubjects: viewModel.requiredSubjects,
+                    optionalSubjects: viewModel.optionalSubjects ?? [],
+                    like: viewModel.like,
+                    university: self.university,
+                    link: nil
+                )
+                FavoritesManager.shared.addProgramToFavorites(viewModel: model)
+            } else {
+                self.groupOfProgramsViewModel[indexPath.section].programs[indexPath.row].like = false
+                FavoritesManager.shared.removeProgramFromFavorites(programID: viewModel.programID)
+            }
+        }
+        
         return cell
     }
     
@@ -497,7 +523,7 @@ extension UniversityViewController : UITableViewDelegate {
 
 // MARK: - Combine
 extension UniversityViewController {
-    private func setupBindings() {
+    private func setupUniversityBindings() {
         FavoritesManager.shared.universityEventSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
@@ -515,8 +541,86 @@ extension UniversityViewController {
                     if self.university.universityID == universityID {
                         self.isFavorite = self.startIsFavorite
                     }
+                case .access(let universityID, let isFavorite):
+                    if self.university.universityID == universityID {
+                        self.startIsFavorite = isFavorite
+                    }
                 }
                 self.reloadFavoriteButton()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func setupProgramsBindings() {
+        FavoritesManager.shared.programEventSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .added(let program):
+                    if let groupIndex = groupOfProgramsViewModel.firstIndex(where: { group in
+                        group.programs.contains(where: { $0.programID == program.programID })
+                    }) {
+                        if let programIndex = groupOfProgramsViewModel[groupIndex].programs.firstIndex(
+                            where: {
+                                $0.programID == program.programID
+                            }) {
+                            if groupOfProgramsViewModel[groupIndex].programs[programIndex].like != true {
+                                groupOfProgramsViewModel[groupIndex].programs[programIndex].like = true
+                                self.tableView.reloadRows(
+                                    at: [IndexPath(row: programIndex, section: groupIndex)],
+                                    with: .automatic
+                                )
+                            }
+                        }
+                    }
+                case .removed(let programID):
+                    if let groupIndex = groupOfProgramsViewModel.firstIndex(where: { group in
+                        group.programs.contains(where: { $0.programID == programID })
+                    }) {
+                        if let programIndex = groupOfProgramsViewModel[groupIndex].programs.firstIndex(
+                            where: {
+                                $0.programID == programID
+                            }) {
+                            if groupOfProgramsViewModel[groupIndex].programs[programIndex].like != false {
+                                groupOfProgramsViewModel[groupIndex].programs[programIndex].like = false
+                                self.tableView.reloadRows(
+                                    at: [IndexPath(row: programIndex, section: groupIndex)],
+                                    with: .automatic
+                                )
+                            }
+                        }
+                    }
+                case .error(let programID):
+                    if let groupIndex = groupOfProgramsViewModel.firstIndex(where: { group in
+                        group.programs.contains(where: { $0.programID == programID })
+                    }) {
+                        if let programIndex = groupOfProgramsViewModel[groupIndex].programs.firstIndex(
+                            where: {
+                                $0.programID == programID
+                            }) {
+                            groupOfProgramsViewModel[groupIndex].programs[programIndex].like = interactor?.restoreFavorite(at: IndexPath(row: programIndex, section: groupIndex)) ?? false
+                            self.tableView.reloadRows(
+                                at: [IndexPath(row: programIndex, section: groupIndex)],
+                                with: .automatic
+                            )
+                        }
+                    }
+                case .access(let programID, let isFavorite):
+                    if let groupIndex = groupOfProgramsViewModel.firstIndex(where: { group in
+                        group.programs.contains(where: { $0.programID == programID })
+                    }) {
+                        if let programIndex = groupOfProgramsViewModel[groupIndex].programs.firstIndex(
+                            where: {
+                                $0.programID == programID
+                            }) {
+                            
+                            let indexPath = IndexPath(row: programIndex, section: groupIndex)
+                            
+                            interactor?.setFavorite(at: indexPath, isFavorite: isFavorite)
+                        }
+                    }
+                }
             }
             .store(in: &cancellables)
     }
