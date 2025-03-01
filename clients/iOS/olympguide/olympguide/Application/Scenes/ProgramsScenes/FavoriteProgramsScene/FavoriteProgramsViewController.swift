@@ -148,28 +148,12 @@ extension FavoriteProgramsViewController : UITableViewDelegate {
 extension FavoriteProgramsViewController : FavoriteProgramsDisplayLogic {
     func displayLoadProgramsResult(with viewModel: FavoritePrograms.Load.ViewModel) {
         
-        programs = viewModel.programs.map { program in
-            var modifiedPrograms = program
-            modifiedPrograms.like = isFavorite(
-                programID: program.programID,
-                serverValue: program.like
-            )
-            return modifiedPrograms
-        }.filter { $0.like }
+        programs = viewModel.programs
                 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            if self.programs.isEmpty {
-                let emptyLabel = UILabel(frame: self.tableView.bounds)
-                emptyLabel.text = "Избранных программ пока нет"
-                emptyLabel.textAlignment = .center
-                emptyLabel.textColor = .black
-                emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
-                self.tableView.backgroundView = emptyLabel
-            } else {
-                self.tableView.backgroundView = nil
-            }
+            self.tableView.backgroundView = getEmptyLabel()
             
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
