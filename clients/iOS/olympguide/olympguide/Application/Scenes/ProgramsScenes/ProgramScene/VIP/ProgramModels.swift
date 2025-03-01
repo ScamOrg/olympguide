@@ -50,7 +50,7 @@ struct ProgramModel : Codable {
     let optionalSubjects: [String]
     let like: Bool
     let university: UniversityModel
-    let link: String
+    let link: String?
     
     enum CodingKeys: String, CodingKey {
         case programID = "program_id"

@@ -48,6 +48,8 @@ final class ProgramTableViewCell: UITableViewCell {
     private let subjectsStack: SubjectsStack = SubjectsStack()
     private let separatorLine: UIView = UIView()
     
+    var favoriteButtonTapped: ((_: UIButton, _: Bool) -> Void)?
+    
     // MARK: - Lifecycle
     override init(
         style: UITableViewCell.CellStyle,
@@ -64,7 +66,7 @@ final class ProgramTableViewCell: UITableViewCell {
     
     private func configureUI() {
         configureInformationStack()
-//        configureFavoriteButton()
+        configureFavoriteButton()
         configureBudgetLabel()
         configurePaidLabel()
         configureCostLabel()
@@ -193,6 +195,18 @@ final class ProgramTableViewCell: UITableViewCell {
             requiredSubjects: viewModel.requiredSubjects,
             optionalSubjects: viewModel.optionalSubjects ?? []
         )
+        
+        let isFavorite = viewModel.like
+        let newImageName = isFavorite ? "bookmark.fill" : "bookmark"
+        
+        favoriteButton.tag = viewModel.programID
+        
+        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        
+        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped(_:)), for: .touchUpInside)
+        
+        favoriteButton.isHidden = !AuthManager.shared.isAuthenticated
+        
         separatorLine.isHidden = false
     }
     
@@ -205,5 +219,13 @@ final class ProgramTableViewCell: UITableViewCell {
     
     func hideSeparator() {
         separatorLine.isHidden = true
+    }
+    
+    // MARK: - Objc funcs
+    @objc private func favoriteButtonTapped(_ sender: UIButton) {
+        let isFavorite = favoriteButton.image(for: .normal) == UIImage(systemName: "bookmark.fill")
+        let newImageName = isFavorite ? "bookmark" : "bookmark.fill"
+        favoriteButton.setImage(UIImage(systemName: newImageName), for: .normal)
+        favoriteButtonTapped?(sender, !isFavorite)
     }
 }

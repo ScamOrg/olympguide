@@ -10,11 +10,13 @@ import Foundation
 // MARK: - Business Logic
 protocol ProgramsBusinessLogic {
     func loadPrograms(with request: Programs.Load.Request)
+    func restoreFavorite(at indexPath: IndexPath) -> Bool
+    func setFavorite(at indexPath: IndexPath, isFavorite: Bool)
 }
 
 // MARK: - Data Store
 protocol ProgramsDataStore {
-    var groupsOfPrograms: [GroupOfProgramsModel]? { get }
+    var groupsOfPrograms: [GroupOfProgramsModel] { get }
     var university: UniversityModel? { get }
 }
 

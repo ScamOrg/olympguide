@@ -24,7 +24,7 @@ enum Programs {
                 let code: String
                 var isExpanded: Bool = false
                 
-                let programs: [ProgramViewModel]
+                var programs: [ProgramViewModel]
             }
             
             let groupsOfPrograms: [GroupOfProgramsViewModel]
@@ -33,11 +33,13 @@ enum Programs {
 }
 
 struct ProgramViewModel {
+    let programID: Int
     let name: String
     let code: String
     let budgetPlaces: Int
     let paidPlaces: Int
     let cost: Int
+    var like: Bool
     let requiredSubjects: [String]
     let optionalSubjects: [String]?
 }
@@ -52,7 +54,7 @@ struct GroupOfProgramsModel : Codable {
         let cost: Int
         let requiredSubjects: [String]
         let optionalSubjects: [String]?
-        let like: Bool
+        var like: Bool
         
         enum CodingKeys: String, CodingKey {
             case programID = "program_id"
@@ -68,7 +70,7 @@ struct GroupOfProgramsModel : Codable {
     let groupID: Int?
     let name: String
     let code: String?
-    let programs: [ProgramModel]
+    var programs: [ProgramModel]
     
     enum CodingKeys: String, CodingKey {
         case facultyID = "faculty_id"

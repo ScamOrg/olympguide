@@ -9,6 +9,11 @@ import UIKit
 
 protocol UniversitiesBusinessLogic {
     func loadUniversities(_ request: Universities.Load.Request)
+    func handleBatchError(universityID: Int)
+    func handleBatchSuccess(universityID: Int, isFavorite: Bool)
+    func dislikeUniversity(at index: Int)
+    func likeUniversity(_ university: UniversityModel, at insertIndex: Int)
+    func universityModel(at index: Int) -> UniversityModel
 }
 
 protocol UniversitiesPresentationLogic {

@@ -69,19 +69,20 @@ class FavoriteUniversitiesViewController: UIViewController {
         setupBindings()
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        universities = universities.map { university in
-            var modifiedUniversity = university
-            modifiedUniversity.like = isFavorite(
-                univesityID: university.universityID,
-                serverValue: university.like
-            )
-            return modifiedUniversity
-        }.filter { $0.like }
-        
-        tableView.reloadData()
-    }
+//    override func viewDidDisappear(_ animated: Bool) {
+//        super.viewDidDisappear(animated)
+//        universities = universities.map { university in
+//            var modifiedUniversity = university
+//            modifiedUniversity.like = isFavorite(
+//                univesityID: university.universityID,
+//                serverValue: university.like
+//            )
+//            return modifiedUniversity
+//        }.filter { $0.like }
+//        
+//        tableView.reloadData()
+//        tableView.backgroundView = getEmptyLabel()
+//    }
     
     private func configureNavigationBar() {
         navigationItem.title = Constants.Strings.universitiesTitle
@@ -104,6 +105,7 @@ class FavoriteUniversitiesViewController: UIViewController {
         view.addSubview(tableView)
         
         tableView.frame = view.bounds
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
         tableView.register(
             UniversityTableViewCell.self,
@@ -147,19 +149,11 @@ extension FavoriteUniversitiesViewController : UITableViewDataSource {
         
         cell.favoriteButtonTapped = { [weak self] sender, isFavorite in
             guard let self = self else { return }
-            if isFavorite {
-                self.universities[indexPath.row].like = true
-                let viewModel = self.universities[indexPath.row]
-                FavoritesManager.shared.addUniversityToFavorites(viewModel: viewModel)
-            } else {
+            
+            if !isFavorite {
                 FavoritesManager.shared.removeUniversityFromFavorites(universityID: sender.tag)
                 self.universities[indexPath.row].like = false
             }
-            
-            FavoritesBatcher.shared.addUniversityChange(
-                universityID: sender.tag,
-                isFavorite: isFavorite
-            )
         }
         
         return cell
@@ -194,20 +188,23 @@ extension FavoriteUniversitiesViewController: UniversitiesDisplayLogic {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            if self.universities.isEmpty {
-                let emptyLabel = UILabel(frame: self.tableView.bounds)
-                emptyLabel.text = "Избранных ВУЗов пока нет"
-                emptyLabel.textAlignment = .center
-                emptyLabel.textColor = .black
-                emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
-                self.tableView.backgroundView = emptyLabel
-            } else {
-                self.tableView.backgroundView = nil
-            }
+            self.tableView.backgroundView = getEmptyLabel()
             
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
+    }
+    
+    func getEmptyLabel() -> UILabel? {
+        guard universities.isEmpty else { return nil }
+        
+        let emptyLabel = UILabel(frame: self.tableView.bounds)
+        emptyLabel.text = "Избранных ВУЗов пока нет"
+        emptyLabel.textAlignment = .center
+        emptyLabel.textColor = .black
+        emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
+        
+        return emptyLabel
     }
 }
 
@@ -221,29 +218,35 @@ extension FavoriteUniversitiesViewController {
                 switch event {
                 case .added(let university):
                     if !self.universities.contains(where: { $0.universityID == university.universityID }) {
-                        self.universities.append(university)
+                        let viewModel = Universities.Load.ViewModel.UniversityViewModel(
+                            universityID: university.universityID,
+                            name: university.name,
+                            logoURL: university.logo,
+                            region: university.region,
+                            like: university.like ?? false
+                        )
+                        
+                        let insertIndex = self.universities.firstIndex {$0.universityID > university.universityID} ?? self.universities.count
+                        
+                        self.interactor?.likeUniversity(university, at: insertIndex)
+                        self.universities.insert(viewModel, at: insertIndex)
+                        
                         let newIndex = IndexPath(row: self.universities.count - 1, section: 0)
                         self.tableView.insertRows(at: [newIndex], with: .automatic)
                         self.tableView.backgroundView = nil
                     }
                 case .removed(let universityID):
                     if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
+                        if !self.universities[index].like { break }
                         self.universities.remove(at: index)
+                        self.interactor?.dislikeUniversity(at: index)
                         self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-                        if self.universities.isEmpty {
-                            let emptyLabel = UILabel(frame: self.tableView.bounds)
-                            emptyLabel.text = "Избранных ВУЗов пока нет"
-                            emptyLabel.textAlignment = .center
-                            emptyLabel.textColor = .black
-                            emptyLabel.font = UIFont(name: "MontserratAlternates-SemiBold", size: 18)
-                            self.tableView.backgroundView = emptyLabel
-                        }
+                        self.tableView.backgroundView = self.getEmptyLabel()
                     }
                 case .error(let universityID):
-                    if let index = self.universities.firstIndex(where: { $0.universityID == universityID }) {
-                        self.universities.remove(at: index)
-                        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-                    }
+                    interactor?.handleBatchError(universityID: universityID)
+                case .access(let universityID, let isFavorite):
+                    interactor?.handleBatchSuccess(universityID: universityID, isFavorite: isFavorite)
                 }
             }
             .store(in: &cancellables)

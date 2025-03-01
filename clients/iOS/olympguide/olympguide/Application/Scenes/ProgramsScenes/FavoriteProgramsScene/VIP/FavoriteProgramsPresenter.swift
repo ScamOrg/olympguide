@@ -19,11 +19,13 @@ final class FavoriteProgramsPresenter : FavoriteProgramsPresentationLogic {
         
         let viewPrograms  = programs.map { program in
             ProgramViewModel(
+                programID: program.programID,
                 name: program.name,
                 code: program.field,
                 budgetPlaces: program.budgetPlaces,
                 paidPlaces: program.paidPlaces,
                 cost: program.cost,
+                like: program.like,
                 requiredSubjects: program.requiredSubjects,
                 optionalSubjects: program.optionalSubjects
             )
