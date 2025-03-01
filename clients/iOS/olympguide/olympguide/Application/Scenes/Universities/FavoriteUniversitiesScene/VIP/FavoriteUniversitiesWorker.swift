@@ -32,10 +32,28 @@ final class FavoriteUniversitiesWorker : UniversitiesWorkerLogic {
         ) { (result: Result<[UniversityModel]?, NetworkError>) in
             switch result {
             case .success(let universities):
+                if let universities = universities {
+                    let resultUniversities = universities.map { university in
+                        var modifiedUniversity = university
+                        modifiedUniversity.like = isFavorite(
+                            univesityID: university.universityID,
+                            serverValue: university.like ?? false
+                        )
+                        return modifiedUniversity
+                    }.filter { $0.like ?? false }
+                }
                 completion(.success(universities))
             case .failure(let error):
                 completion(.failure(error))
             }
+        }
+        
+        
+        func isFavorite(univesityID: Int, serverValue: Bool) -> Bool {
+            FavoritesManager.shared.isUniversityFavorited(
+                universityID: univesityID,
+                serverValue: serverValue
+            )
         }
     }
 }

@@ -48,7 +48,7 @@ struct ProgramModel : Codable {
     let cost: Int
     let requiredSubjects: [String]
     let optionalSubjects: [String]
-    let like: Bool
+    var like: Bool
     let university: UniversityModel
     let link: String?
     
